@@ -36,30 +36,41 @@ async function initRedis() {
 
 initRedis();
 
-// ==================== POSTGRESQL LISTENER FOR AUTO-TRANSFORM ====================
+// ==================== POSTGRESQL LISTENER FOR AUTO-TRANSFORM & TRANSLATE ====================
+
+const ALL_LANGUAGES = ['fr', 'en', 'es', 'de', 'it', 'pt', 'nl', 'pl'];
 
 let autoTransformEnabled = true;
+let autoTranslateEnabled = true;
 let transformQueue = [];
+let translationQueue = [];
 let isProcessingQueue = false;
+let isProcessingTranslations = false;
 
 async function initPgListener() {
   const client = await pgPool.connect();
 
   client.on('notification', async (msg) => {
-    if (!autoTransformEnabled) return;
-
     try {
       const payload = JSON.parse(msg.payload);
       console.log(`[PG NOTIFY] ${msg.channel}:`, payload);
 
-      if (msg.channel === 'new_article' || msg.channel === 'transform_article') {
-        // Add to queue
+      if ((msg.channel === 'new_article' || msg.channel === 'transform_article') && autoTransformEnabled) {
         transformQueue.push(payload.id);
-        console.log(`[QUEUE] Article ${payload.id} added. Queue size: ${transformQueue.length}`);
-
-        // Start processing if not already running
+        console.log(`[TRANSFORM QUEUE] Article ${payload.id} added. Queue size: ${transformQueue.length}`);
         if (!isProcessingQueue) {
           processTransformQueue();
+        }
+      }
+
+      if (msg.channel === 'translate_article' && autoTranslateEnabled) {
+        // Add to translation queue with target languages
+        const sourceLang = payload.language || 'en';
+        const targetLangs = ALL_LANGUAGES.filter(l => l !== sourceLang);
+        translationQueue.push({ articleId: payload.id, targetLangs });
+        console.log(`[TRANSLATE QUEUE] Article ${payload.id} added for ${targetLangs.length} languages`);
+        if (!isProcessingTranslations) {
+          processTranslationQueue();
         }
       }
     } catch (e) {
@@ -69,7 +80,8 @@ async function initPgListener() {
 
   await client.query('LISTEN new_article');
   await client.query('LISTEN transform_article');
-  console.log('[PG LISTENER] Listening for new_article and transform_article notifications');
+  await client.query('LISTEN translate_article');
+  console.log('[PG LISTENER] Listening for new_article, transform_article, and translate_article notifications');
 }
 
 async function processTransformQueue() {
@@ -129,6 +141,148 @@ async function processTransformQueue() {
 
   isProcessingQueue = false;
   console.log('[QUEUE] Queue processing completed');
+}
+
+// Process translation queue
+async function processTranslationQueue() {
+  if (isProcessingTranslations || translationQueue.length === 0) return;
+
+  isProcessingTranslations = true;
+  console.log(`[TRANSLATE] Starting to process ${translationQueue.length} translation jobs`);
+
+  while (translationQueue.length > 0) {
+    const job = translationQueue.shift();
+    const { articleId, targetLangs } = job;
+
+    try {
+      // Get the source article
+      const result = await pgPool.query(
+        'SELECT * FROM articles WHERE id = $1 AND status = $2',
+        [articleId, 'transformed']
+      );
+
+      if (result.rows.length === 0) {
+        console.log(`[TRANSLATE] Article ${articleId} not found or not transformed, skipping`);
+        continue;
+      }
+
+      const sourceArticle = result.rows[0];
+      console.log(`[TRANSLATE] Translating article ${articleId} to ${targetLangs.length} languages`);
+
+      for (const targetLang of targetLangs) {
+        try {
+          // Check if translation already exists
+          const existingResult = await pgPool.query(
+            'SELECT id FROM articles WHERE parent_article_id = $1 AND language = $2',
+            [articleId, targetLang]
+          );
+
+          if (existingResult.rows.length > 0) {
+            console.log(`[TRANSLATE] ${targetLang.toUpperCase()} already exists, skipping`);
+            continue;
+          }
+
+          console.log(`[TRANSLATE] Translating to ${targetLang.toUpperCase()}...`);
+
+          // Translate using OVH AI
+          const translated = await translateWithDeepSeek(sourceArticle, targetLang);
+
+          // Insert as child article
+          await pgPool.query(`
+            INSERT INTO articles (
+              provider_id, source_url, language, original_title, original_content,
+              transformed_title, transformed_content, ovh_links, disclaimer,
+              status, parent_article_id, word_count
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+          `, [
+            sourceArticle.provider_id,
+            sourceArticle.source_url,
+            targetLang,
+            sourceArticle.original_title,
+            sourceArticle.original_content,
+            translated.title,
+            translated.content,
+            JSON.stringify(translated.ovhLinks || sourceArticle.ovh_links || []),
+            translated.disclaimer || sourceArticle.disclaimer,
+            'translated',
+            articleId,
+            translated.content ? translated.content.split(/\s+/).length : 0
+          ]);
+
+          console.log(`[TRANSLATE] ${targetLang.toUpperCase()} translation saved`);
+
+          // Delay between translations
+          await new Promise(r => setTimeout(r, 1500));
+
+        } catch (langError) {
+          console.error(`[TRANSLATE] Error translating to ${targetLang}:`, langError.message);
+        }
+      }
+
+    } catch (error) {
+      console.error(`[TRANSLATE] Error processing article ${articleId}:`, error.message);
+    }
+  }
+
+  isProcessingTranslations = false;
+  console.log('[TRANSLATE] Translation queue processing completed');
+}
+
+// Translate article using DeepSeek
+async function translateWithDeepSeek(article, targetLang) {
+  const langNames = {
+    fr: 'French', en: 'English', es: 'Spanish', de: 'German',
+    it: 'Italian', pt: 'Portuguese', nl: 'Dutch', pl: 'Polish'
+  };
+
+  const targetLangName = langNames[targetLang] || targetLang;
+  const content = article.transformed_content || article.original_content;
+  const title = article.transformed_title || article.original_title;
+
+  const prompt = `Translate the following article to ${targetLangName}.
+Keep the same structure and formatting. Maintain technical accuracy.
+Do not add any commentary, just provide the translation.
+
+Title: ${title}
+
+Content:
+${content.substring(0, 15000)}
+
+Respond with:
+TITLE: [translated title]
+CONTENT:
+[translated content]`;
+
+  try {
+    const response = await ovhAI.chat.completions.create({
+      model: 'deepseek-r1-distill-llama-70b',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 8000,
+      temperature: 0.3
+    });
+
+    const result = response.choices[0]?.message?.content || '';
+
+    // Parse response
+    const titleMatch = result.match(/TITLE:\s*(.+?)(?:\n|CONTENT:)/s);
+    const contentMatch = result.match(/CONTENT:\s*([\s\S]+)/);
+
+    return {
+      title: titleMatch ? titleMatch[1].trim() : `[${targetLang.toUpperCase()}] ${title}`,
+      content: contentMatch ? contentMatch[1].trim() : content,
+      ovhLinks: article.ovh_links,
+      disclaimer: article.disclaimer
+    };
+  } catch (error) {
+    console.error(`[TRANSLATE] AI error for ${targetLang}:`, error.message);
+    // Fallback: return original with language prefix
+    return {
+      title: `[${targetLang.toUpperCase()}] ${title}`,
+      content: `[Translation pending]\n\n${content}`,
+      ovhLinks: article.ovh_links,
+      disclaimer: article.disclaimer
+    };
+  }
 }
 
 // Initialize listener after a short delay to ensure pool is ready
@@ -589,6 +743,99 @@ app.post('/api/transform/auto/process-all', async (req, res) => {
     res.json({
       message: `${ids.length} articles added to transform queue`,
       queueSize: transformQueue.length
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== TRANSLATION API ====================
+
+// Auto-translate queue status and control
+app.get('/api/translate/auto', (req, res) => {
+  res.json({
+    enabled: autoTranslateEnabled,
+    queueSize: translationQueue.length,
+    isProcessing: isProcessingTranslations,
+    queue: translationQueue.slice(0, 10)
+  });
+});
+
+app.post('/api/translate/auto', (req, res) => {
+  const { enabled } = req.body;
+  if (typeof enabled === 'boolean') {
+    autoTranslateEnabled = enabled;
+    console.log(`[AUTO-TRANSLATE] ${enabled ? 'Enabled' : 'Disabled'}`);
+  }
+  res.json({ enabled: autoTranslateEnabled });
+});
+
+// Manually trigger translation for all transformed articles without translations
+app.post('/api/translate/auto/process-all', async (req, res) => {
+  try {
+    // Get all transformed articles that don't have any child translations
+    const result = await pgPool.query(`
+      SELECT a.id, a.language
+      FROM articles a
+      WHERE a.status = 'transformed'
+        AND a.parent_article_id IS NULL
+        AND NOT EXISTS (
+          SELECT 1 FROM articles t WHERE t.parent_article_id = a.id
+        )
+      ORDER BY a.created_at ASC
+    `);
+
+    let totalJobs = 0;
+    for (const row of result.rows) {
+      const sourceLang = row.language || 'en';
+      const targetLangs = ALL_LANGUAGES.filter(l => l !== sourceLang);
+      translationQueue.push({ articleId: row.id, targetLangs });
+      totalJobs++;
+    }
+
+    console.log(`[AUTO-TRANSLATE] Added ${totalJobs} articles to translation queue`);
+
+    if (!isProcessingTranslations && translationQueue.length > 0) {
+      processTranslationQueue();
+    }
+
+    res.json({
+      message: `${totalJobs} articles added to translation queue`,
+      queueSize: translationQueue.length
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Translate a specific article to all languages
+app.post('/api/translate/:id', async (req, res) => {
+  const { id } = req.params;
+  const { targetLangs } = req.body;
+
+  try {
+    const result = await pgPool.query(
+      'SELECT * FROM articles WHERE id = $1 AND status = $2',
+      [id, 'transformed']
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Article not found or not transformed' });
+    }
+
+    const article = result.rows[0];
+    const sourceLang = article.language || 'en';
+    const langs = targetLangs || ALL_LANGUAGES.filter(l => l !== sourceLang);
+
+    translationQueue.push({ articleId: parseInt(id), targetLangs: langs });
+
+    if (!isProcessingTranslations) {
+      processTranslationQueue();
+    }
+
+    res.json({
+      message: `Article ${id} added to translation queue for ${langs.length} languages`,
+      targetLangs: langs
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
