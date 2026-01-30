@@ -1,728 +1,771 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+
+const API_URL = window.location.hostname === 'localhost'
+  ? 'http://localhost:3001'
+  : `http://${window.location.hostname}:3001`;
+
+const LANGUAGES = [
+  { code: 'fr', name: 'Francais', flag: 'FR' },
+  { code: 'en', name: 'English', flag: 'EN' },
+  { code: 'es', name: 'Espanol', flag: 'ES' },
+  { code: 'de', name: 'Deutsch', flag: 'DE' },
+  { code: 'it', name: 'Italiano', flag: 'IT' },
+  { code: 'pt', name: 'Portugues', flag: 'PT' },
+  { code: 'nl', name: 'Nederlands', flag: 'NL' },
+  { code: 'pl', name: 'Polski', flag: 'PL' }
+];
+
+// Simple markdown to HTML renderer
+const renderMarkdown = (text) => {
+  if (!text) return '';
+
+  let html = text
+    // Escape HTML first
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    // Headers
+    .replace(/^### (.+)$/gm, '<h4 style="font-size:15px;font-weight:600;margin:16px 0 8px;color:#00185e">$1</h4>')
+    .replace(/^## (.+)$/gm, '<h3 style="font-size:16px;font-weight:600;margin:20px 0 10px;color:#00185e">$1</h3>')
+    .replace(/^# (.+)$/gm, '<h2 style="font-size:18px;font-weight:600;margin:24px 0 12px;color:#00185e">$1</h2>')
+    .replace(/^=+$/gm, '') // Remove === underlines
+    .replace(/^-+$/gm, '') // Remove --- underlines
+    // Bold and italic
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    // Links - show text only, not the URL
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '<span style="color:#0050d7">$1</span>')
+    // Bullet lists
+    .replace(/^\* (.+)$/gm, '<li style="margin-left:20px;margin-bottom:4px">$1</li>')
+    .replace(/^- (.+)$/gm, '<li style="margin-left:20px;margin-bottom:4px">$1</li>')
+    // Code blocks
+    .replace(/```[\s\S]*?```/g, (match) => {
+      const code = match.replace(/```\w*\n?/g, '').replace(/```/g, '');
+      return `<pre style="background:#f5f5f5;padding:12px;border-radius:4px;overflow-x:auto;font-size:12px">${code}</pre>`;
+    })
+    // Inline code
+    .replace(/`([^`]+)`/g, '<code style="background:#f5f5f5;padding:2px 6px;border-radius:3px;font-size:12px">$1</code>')
+    // Paragraphs (double newlines)
+    .replace(/\n\n+/g, '</p><p style="margin-bottom:12px">')
+    // Single newlines to breaks
+    .replace(/\n/g, '<br/>');
+
+  return `<p style="margin-bottom:12px">${html}</p>`;
+};
 
 const ContentPipeline = () => {
-  const [activeTab, setActiveTab] = useState('scrape');
-  const [scrapedArticles, setScrapedArticles] = useState([]);
-  const [transformedArticles, setTransformedArticles] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [activeSection, setActiveSection] = useState('sources');
+  const [providers, setProviders] = useState([]);
+  const [articles, setArticles] = useState([]);
+  const [articleCounts, setArticleCounts] = useState({});
+  const [selectedArticle, setSelectedArticle] = useState(null);
+  const [selectedLanguage, setSelectedLanguage] = useState('fr');
   const [selectedArticles, setSelectedArticles] = useState(new Set());
-  const [logs, setLogs] = useState([]);
-  const [sourceUrl, setSourceUrl] = useState('https://www.hostinger.fr/tutoriels/');
-  const [transformConfig, setTransformConfig] = useState({
-    brandReplacements: true,
-    addOvhLinks: true,
-    adaptTone: true,
-    addDisclaimer: true
-  });
+  const [stats, setStats] = useState(null);
 
-  // Simulated article data for demonstration
-  const mockArticles = [
-    { id: 1, title: "Comment créer un site WordPress en 2024", category: "WordPress", url: "/tutoriels/creer-site-wordpress", wordCount: 2450, lastUpdated: "2024-01-15" },
-    { id: 2, title: "Guide complet : Hébergement web pour débutants", category: "Hébergement", url: "/tutoriels/hebergement-web-debutants", wordCount: 3200, lastUpdated: "2024-01-12" },
-    { id: 3, title: "Comment configurer un VPS Linux", category: "VPS", url: "/tutoriels/configurer-vps-linux", wordCount: 1890, lastUpdated: "2024-01-10" },
-    { id: 4, title: "SSL/TLS : Sécuriser votre site web", category: "Sécurité", url: "/tutoriels/ssl-tls-securite", wordCount: 2100, lastUpdated: "2024-01-08" },
-    { id: 5, title: "Optimiser les performances de votre serveur", category: "Performance", url: "/tutoriels/optimiser-serveur", wordCount: 2780, lastUpdated: "2024-01-05" },
-    { id: 6, title: "Migration de site : Guide étape par étape", category: "Migration", url: "/tutoriels/migration-site", wordCount: 1950, lastUpdated: "2024-01-03" },
-    { id: 7, title: "Docker : Déployer vos applications", category: "DevOps", url: "/tutoriels/docker-deploiement", wordCount: 3400, lastUpdated: "2023-12-28" },
-    { id: 8, title: "Base de données MySQL : Les fondamentaux", category: "Database", url: "/tutoriels/mysql-fondamentaux", wordCount: 2650, lastUpdated: "2023-12-22" },
-  ];
+  // Scraping state
+  const [selectedProvider, setSelectedProvider] = useState(null);
+  const [selectedScrapeLanguage, setSelectedScrapeLanguage] = useState('fr');
+  const [isLoading, setIsLoading] = useState(false);
+  const [logs, setLogs] = useState([]);
+  const [progress, setProgress] = useState({ current: 0, total: 0 });
+
+  const pollingRef = useRef(null);
+
+  // Fetch providers
+  useEffect(() => {
+    fetchProviders();
+    fetchStats();
+  }, []);
+
+  // Fetch articles when language changes
+  useEffect(() => {
+    if (activeSection === 'library') {
+      fetchArticles();
+    }
+  }, [activeSection, selectedLanguage]);
+
+  const fetchProviders = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/providers`);
+      const data = await res.json();
+      setProviders(data);
+    } catch (e) {
+      console.error('Error fetching providers:', e);
+    }
+  };
+
+  const fetchArticles = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/articles?language=${selectedLanguage}&limit=100`);
+      const data = await res.json();
+      setArticles(data.articles || []);
+      setArticleCounts(data.counts || {});
+    } catch (e) {
+      console.error('Error fetching articles:', e);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/stats`);
+      const data = await res.json();
+      setStats(data);
+    } catch (e) {
+      console.error('Error fetching stats:', e);
+    }
+  };
+
+  const fetchArticleDetail = async (id) => {
+    try {
+      const res = await fetch(`${API_URL}/api/articles/${id}`);
+      const data = await res.json();
+      setSelectedArticle(data);
+      setActiveSection('studio');
+    } catch (e) {
+      console.error('Error fetching article:', e);
+    }
+  };
 
   const addLog = (message, type = 'info') => {
     const timestamp = new Date().toLocaleTimeString('fr-FR');
     setLogs(prev => [...prev, { timestamp, message, type }]);
   };
 
-  const handleScrape = async () => {
-    setIsLoading(true);
-    setLogs([]);
-    addLog('Initialisation du scraping...', 'info');
-    
-    await new Promise(r => setTimeout(r, 800));
-    addLog(`Connexion à ${sourceUrl}`, 'info');
-    
-    await new Promise(r => setTimeout(r, 600));
-    addLog('Analyse de la structure du sitemap...', 'info');
-    
-    await new Promise(r => setTimeout(r, 1000));
-    addLog(`${mockArticles.length} articles détectés`, 'success');
-    
-    for (let i = 0; i < mockArticles.length; i++) {
-      await new Promise(r => setTimeout(r, 300));
-      addLog(`Extraction: ${mockArticles[i].title}`, 'info');
-    }
-    
-    addLog('Scraping terminé avec succès!', 'success');
-    setScrapedArticles(mockArticles);
-    setIsLoading(false);
-  };
+  // Start scraping
+  const startScraping = async () => {
+    if (!selectedProvider) return;
 
-  const handleTransform = async () => {
-    if (selectedArticles.size === 0) {
-      addLog('Veuillez sélectionner au moins un article', 'error');
+    const providerData = providers.find(p => p.id === selectedProvider);
+    const baseUrls = providerData?.base_urls || {};
+    const url = baseUrls[selectedScrapeLanguage];
+
+    if (!url) {
+      addLog(`Pas d'URL pour ${selectedScrapeLanguage}`, 'error');
       return;
     }
-    
+
     setIsLoading(true);
-    addLog('Démarrage de la transformation...', 'info');
-    
-    const selected = scrapedArticles.filter(a => selectedArticles.has(a.id));
-    const transformed = [];
-    
-    for (const article of selected) {
-      await new Promise(r => setTimeout(r, 500));
-      
-      let newTitle = article.title;
-      if (transformConfig.brandReplacements) {
-        newTitle = newTitle.replace(/Hostinger/gi, 'OVHcloud');
-        addLog(`Remplacement marque: ${article.title}`, 'info');
-      }
-      
-      transformed.push({
-        ...article,
-        originalTitle: article.title,
-        title: newTitle,
-        status: 'transformed',
-        ovhLinks: transformConfig.addOvhLinks ? ['docs.ovh.com', 'help.ovhcloud.com'] : [],
-        hasDisclaimer: transformConfig.addDisclaimer
+    setLogs([]);
+    addLog(`Demarrage collecte ${providerData.name} (${selectedScrapeLanguage.toUpperCase()})`, 'info');
+
+    try {
+      const res = await fetch(`${API_URL}/api/scrape`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          providerId: selectedProvider,
+          language: selectedScrapeLanguage,
+          url: url
+        })
       });
+
+      if (res.ok) {
+        pollingRef.current = setInterval(pollProgress, 2000);
+      } else {
+        const error = await res.json();
+        addLog(`Erreur: ${error.error}`, 'error');
+        setIsLoading(false);
+      }
+    } catch (e) {
+      addLog(`Erreur: ${e.message}`, 'error');
+      setIsLoading(false);
     }
-    
-    addLog(`${transformed.length} articles transformés`, 'success');
-    setTransformedArticles(transformed);
-    setActiveTab('export');
-    setIsLoading(false);
   };
 
-  const toggleArticle = (id) => {
-    const newSelected = new Set(selectedArticles);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
+  const pollProgress = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/scrape/progress`);
+      const data = await res.json();
+
+      if (data.logs) setLogs(data.logs);
+      setProgress({ current: data.current, total: data.total });
+
+      if (data.status === 'completed' || data.status === 'error') {
+        clearInterval(pollingRef.current);
+        setIsLoading(false);
+        fetchProviders();
+        fetchStats();
+      }
+    } catch (e) {
+      console.error('Polling error:', e);
     }
-    setSelectedArticles(newSelected);
   };
 
-  const selectAll = () => {
-    if (selectedArticles.size === scrapedArticles.length) {
+  // Transform articles
+  const transformSelected = async () => {
+    if (selectedArticles.size === 0) return;
+
+    setIsLoading(true);
+    addLog(`Transformation de ${selectedArticles.size} articles...`, 'info');
+
+    try {
+      const res = await fetch(`${API_URL}/api/transform`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ articleIds: Array.from(selectedArticles) })
+      });
+
+      if (res.ok) {
+        pollingRef.current = setInterval(pollTransformProgress, 1500);
+      }
+    } catch (e) {
+      addLog(`Erreur: ${e.message}`, 'error');
+      setIsLoading(false);
+    }
+  };
+
+  const pollTransformProgress = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/transform/progress`);
+      const data = await res.json();
+
+      if (data.logs) setLogs(data.logs);
+
+      if (data.status === 'completed' || data.status === 'error') {
+        clearInterval(pollingRef.current);
+        setIsLoading(false);
+        fetchArticles();
+        setSelectedArticles(new Set());
+      }
+    } catch (e) {
+      console.error('Polling error:', e);
+    }
+  };
+
+  // Translate article
+  const translateArticle = async (targetLang) => {
+    if (!selectedArticle) return;
+
+    addLog(`Traduction vers ${targetLang.toUpperCase()}...`, 'info');
+
+    try {
+      await fetch(`${API_URL}/api/translate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          articleId: selectedArticle.id,
+          targetLanguage: targetLang
+        })
+      });
+      addLog(`Traduction ${targetLang.toUpperCase()} lancee`, 'success');
+    } catch (e) {
+      addLog(`Erreur: ${e.message}`, 'error');
+    }
+  };
+
+  const toggleArticleSelection = (id) => {
+    const newSet = new Set(selectedArticles);
+    if (newSet.has(id)) newSet.delete(id);
+    else newSet.add(id);
+    setSelectedArticles(newSet);
+  };
+
+  const selectAllArticles = () => {
+    if (selectedArticles.size === articles.length) {
       setSelectedArticles(new Set());
     } else {
-      setSelectedArticles(new Set(scrapedArticles.map(a => a.id)));
+      setSelectedArticles(new Set(articles.map(a => a.id)));
     }
   };
 
-  const categoryColors = {
-    'WordPress': '#21759b',
-    'Hébergement': '#0050d8',
-    'VPS': '#ff6b35',
-    'Sécurité': '#10b981',
-    'Performance': '#8b5cf6',
-    'Migration': '#ec4899',
-    'DevOps': '#06b6d4',
-    'Database': '#f59e0b'
+  // Styles
+  const styles = {
+    container: {
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #00185e 0%, #0050d7 100%)',
+      fontFamily: "'Source Sans Pro', sans-serif",
+      color: '#fff',
+      padding: '24px'
+    },
+    header: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '24px',
+      paddingBottom: '16px',
+      borderBottom: '1px solid rgba(255,255,255,0.2)'
+    },
+    logo: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px'
+    },
+    logoIcon: {
+      width: '40px',
+      height: '40px',
+      background: '#bef1ff',
+      borderRadius: '8px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: '#00185e',
+      fontWeight: 'bold',
+      fontSize: '20px'
+    },
+    nav: {
+      display: 'flex',
+      gap: '4px',
+      background: 'rgba(255,255,255,0.1)',
+      padding: '4px',
+      borderRadius: '8px'
+    },
+    navBtn: (active) => ({
+      padding: '10px 20px',
+      border: 'none',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      fontSize: '14px',
+      fontWeight: '600',
+      background: active ? '#fff' : 'transparent',
+      color: active ? '#0050d7' : 'rgba(255,255,255,0.7)',
+      transition: 'all 0.2s'
+    }),
+    mainContent: {
+      display: 'flex',
+      gap: '24px'
+    },
+    leftPanel: {
+      flex: 1
+    },
+    rightPanel: {
+      width: '300px',
+      background: '#00185e',
+      borderRadius: '8px',
+      border: '1px solid rgba(255,255,255,0.2)',
+      padding: '16px',
+      maxHeight: '600px',
+      overflow: 'auto'
+    },
+    card: {
+      background: '#fff',
+      borderRadius: '8px',
+      padding: '20px',
+      marginBottom: '16px',
+      boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
+    },
+    cardTitle: {
+      fontSize: '16px',
+      fontWeight: '700',
+      color: '#00185e',
+      marginBottom: '16px'
+    },
+    providerCard: (active) => ({
+      padding: '16px',
+      background: active ? '#0050d7' : '#f8f9fa',
+      border: active ? 'none' : '1px solid #ececec',
+      borderRadius: '8px',
+      cursor: 'pointer',
+      marginBottom: '8px',
+      color: active ? '#fff' : '#00185e'
+    }),
+    input: {
+      width: '100%',
+      padding: '10px 14px',
+      border: '1px solid #ccc',
+      borderRadius: '6px',
+      fontSize: '14px',
+      marginBottom: '8px'
+    },
+    btn: (variant = 'primary', disabled = false) => ({
+      padding: '10px 20px',
+      border: 'none',
+      borderRadius: '6px',
+      cursor: disabled ? 'not-allowed' : 'pointer',
+      fontSize: '14px',
+      fontWeight: '600',
+      background: disabled ? '#ccc' : variant === 'primary' ? '#0050d7' : variant === 'success' ? '#268403' : '#fff',
+      color: variant === 'outline' ? '#4d5592' : '#fff',
+      border: variant === 'outline' ? '1px solid #ccc' : 'none'
+    }),
+    langTabs: {
+      display: 'flex',
+      gap: '4px',
+      marginBottom: '16px',
+      flexWrap: 'wrap'
+    },
+    langTab: (active, count) => ({
+      padding: '8px 16px',
+      border: 'none',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      fontSize: '13px',
+      fontWeight: '600',
+      background: active ? '#0050d7' : '#f0f0f0',
+      color: active ? '#fff' : '#00185e',
+      opacity: count > 0 || active ? 1 : 0.5
+    }),
+    articleRow: (selected) => ({
+      padding: '12px 16px',
+      borderBottom: '1px solid #ececec',
+      background: selected ? '#bef1ff' : '#fff',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px'
+    }),
+    checkbox: (checked) => ({
+      width: '20px',
+      height: '20px',
+      borderRadius: '4px',
+      border: checked ? '2px solid #0050d7' : '2px solid #ccc',
+      background: checked ? '#0050d7' : '#fff',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: '#fff',
+      fontSize: '12px',
+      flexShrink: 0
+    }),
+    badge: (color) => ({
+      padding: '2px 8px',
+      background: color,
+      color: '#fff',
+      borderRadius: '4px',
+      fontSize: '11px',
+      fontWeight: '600'
+    }),
+    log: (type) => ({
+      padding: '6px 8px',
+      marginBottom: '4px',
+      borderRadius: '4px',
+      fontSize: '12px',
+      fontFamily: 'monospace',
+      background: type === 'error' ? 'rgba(255,100,100,0.2)' : type === 'success' ? 'rgba(100,255,100,0.2)' : 'rgba(255,255,255,0.05)',
+      color: type === 'error' ? '#ff6b6b' : type === 'success' ? '#7cfc00' : '#bef1ff'
+    }),
+    studioPanel: {
+      flex: 1,
+      background: '#fff',
+      borderRadius: '8px',
+      overflow: 'hidden'
+    },
+    studioHeader: {
+      padding: '16px 20px',
+      borderBottom: '1px solid #ececec',
+      background: '#f8f9fa'
+    },
+    studioContent: {
+      display: 'flex',
+      height: '500px'
+    },
+    studioColumn: {
+      flex: 1,
+      padding: '16px',
+      overflow: 'auto',
+      borderRight: '1px solid #ececec'
+    }
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0a0a0f 0%, #13131a 50%, #0f0f15 100%)',
-      fontFamily: "'IBM Plex Sans', -apple-system, sans-serif",
-      color: '#e4e4e7',
-      padding: '32px'
-    }}>
+    <div style={styles.container}>
       {/* Header */}
-      <div style={{
-        marginBottom: '40px',
-        borderBottom: '1px solid rgba(255,255,255,0.08)',
-        paddingBottom: '24px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '8px' }}>
-          <div style={{
-            width: '48px',
-            height: '48px',
-            background: 'linear-gradient(135deg, #0050d8, #00d4aa)',
-            borderRadius: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '24px'
-          }}>
-            📡
-          </div>
+      <div style={styles.header}>
+        <div style={styles.logo}>
+          <div style={styles.logoIcon}>CI</div>
           <div>
-            <h1 style={{
-              fontSize: '28px',
-              fontWeight: '600',
-              margin: 0,
-              background: 'linear-gradient(90deg, #fff, #a1a1aa)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
-            }}>
-              Content Intelligence Pipeline
-            </h1>
-            <p style={{ margin: '4px 0 0', color: '#71717a', fontSize: '14px' }}>
-              Scraping • Transformation • Export — Outil interne OVHcloud
-            </p>
+            <div style={{ fontSize: '18px', fontWeight: '700' }}>Content Intelligence Pipeline</div>
+            <div style={{ fontSize: '12px', color: '#bef1ff' }}>OVHcloud Internal Tool</div>
           </div>
         </div>
-      </div>
-
-      {/* Tabs */}
-      <div style={{
-        display: 'flex',
-        gap: '4px',
-        marginBottom: '32px',
-        background: 'rgba(255,255,255,0.03)',
-        padding: '6px',
-        borderRadius: '12px',
-        width: 'fit-content'
-      }}>
-        {[
-          { id: 'scrape', label: '1. Scraping', icon: '🔍' },
-          { id: 'transform', label: '2. Transformation', icon: '⚙️' },
-          { id: 'export', label: '3. Export', icon: '📤' }
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            style={{
-              padding: '12px 24px',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: '500',
-              transition: 'all 0.2s',
-              background: activeTab === tab.id 
-                ? 'linear-gradient(135deg, #0050d8, #0040b0)'
-                : 'transparent',
-              color: activeTab === tab.id ? '#fff' : '#71717a'
-            }}
-          >
-            {tab.icon} {tab.label}
+        <nav style={styles.nav}>
+          <button style={styles.navBtn(activeSection === 'sources')} onClick={() => setActiveSection('sources')}>
+            Sources
           </button>
-        ))}
+          <button style={styles.navBtn(activeSection === 'library')} onClick={() => setActiveSection('library')}>
+            Bibliotheque
+          </button>
+          <button style={styles.navBtn(activeSection === 'studio')} onClick={() => setActiveSection('studio')}>
+            Studio
+          </button>
+        </nav>
       </div>
 
-      <div style={{ display: 'flex', gap: '32px' }}>
-        {/* Main Content */}
-        <div style={{ flex: 1 }}>
-          {/* Scrape Tab */}
-          {activeTab === 'scrape' && (
-            <div>
-              <div style={{
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.06)',
-                borderRadius: '16px',
-                padding: '24px',
-                marginBottom: '24px'
-              }}>
-                <h3 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: '500' }}>
-                  Source à scraper
-                </h3>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <input
-                    type="text"
-                    value={sourceUrl}
-                    onChange={(e) => setSourceUrl(e.target.value)}
-                    style={{
-                      flex: 1,
-                      padding: '14px 18px',
-                      background: 'rgba(0,0,0,0.3)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '10px',
-                      color: '#fff',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
-                    placeholder="URL de la base de tutoriels"
-                  />
-                  <button
-                    onClick={handleScrape}
-                    disabled={isLoading}
-                    style={{
-                      padding: '14px 28px',
-                      background: isLoading 
-                        ? 'rgba(255,255,255,0.1)'
-                        : 'linear-gradient(135deg, #0050d8, #00d4aa)',
-                      border: 'none',
-                      borderRadius: '10px',
-                      color: '#fff',
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      cursor: isLoading ? 'not-allowed' : 'pointer',
-                      transition: 'all 0.2s',
-                      minWidth: '160px'
-                    }}
-                  >
-                    {isLoading ? '⏳ Scraping...' : '🚀 Lancer le scraping'}
-                  </button>
+      {/* Stats Bar */}
+      {stats && (
+        <div style={{ display: 'flex', gap: '16px', marginBottom: '20px' }}>
+          <div style={{ background: 'rgba(255,255,255,0.1)', padding: '12px 20px', borderRadius: '8px' }}>
+            <div style={{ fontSize: '24px', fontWeight: '700' }}>{stats.total}</div>
+            <div style={{ fontSize: '12px', color: '#bef1ff' }}>Articles total</div>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.1)', padding: '12px 20px', borderRadius: '8px' }}>
+            <div style={{ fontSize: '24px', fontWeight: '700' }}>{stats.transformed}</div>
+            <div style={{ fontSize: '12px', color: '#bef1ff' }}>Transformes</div>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.1)', padding: '12px 20px', borderRadius: '8px' }}>
+            <div style={{ fontSize: '24px', fontWeight: '700' }}>{stats.totalWords?.toLocaleString()}</div>
+            <div style={{ fontSize: '12px', color: '#bef1ff' }}>Mots total</div>
+          </div>
+          {stats.byLanguage?.slice(0, 4).map(l => (
+            <div key={l.language} style={{ background: 'rgba(255,255,255,0.1)', padding: '12px 20px', borderRadius: '8px' }}>
+              <div style={{ fontSize: '24px', fontWeight: '700' }}>{l.count}</div>
+              <div style={{ fontSize: '12px', color: '#bef1ff' }}>{l.language.toUpperCase()}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={styles.mainContent}>
+        <div style={styles.leftPanel}>
+
+          {/* ========== SOURCES SECTION ========== */}
+          {activeSection === 'sources' && (
+            <>
+              {/* Providers */}
+              <div style={styles.card}>
+                <h3 style={styles.cardTitle}>Sources de contenu</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+                  {providers.map(provider => (
+                    <div
+                      key={provider.id}
+                      style={styles.providerCard(selectedProvider === provider.id)}
+                      onClick={() => setSelectedProvider(provider.id)}
+                    >
+                      <div style={{ fontWeight: '600', marginBottom: '4px' }}>{provider.name}</div>
+                      <div style={{ fontSize: '12px', opacity: 0.8 }}>
+                        {Object.keys(provider.base_urls || {}).map(l => l.toUpperCase()).join(' - ')}
+                      </div>
+                      <div style={{ fontSize: '12px', marginTop: '4px' }}>
+                        {provider.articles_count || 0} articles
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {scrapedArticles.length > 0 && (
-                <div style={{
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                  borderRadius: '16px',
-                  overflow: 'hidden'
-                }}>
-                  <div style={{
-                    padding: '20px 24px',
-                    borderBottom: '1px solid rgba(255,255,255,0.06)',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                  }}>
-                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '500' }}>
-                      Articles collectés ({scrapedArticles.length})
-                    </h3>
-                    <button
-                      onClick={selectAll}
-                      style={{
-                        padding: '8px 16px',
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px',
-                        color: '#a1a1aa',
-                        fontSize: '13px',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {selectedArticles.size === scrapedArticles.length ? 'Tout désélectionner' : 'Tout sélectionner'}
-                    </button>
-                  </div>
-                  
-                  <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                    {scrapedArticles.map(article => (
-                      <div
-                        key={article.id}
-                        onClick={() => toggleArticle(article.id)}
-                        style={{
-                          padding: '16px 24px',
-                          borderBottom: '1px solid rgba(255,255,255,0.04)',
-                          cursor: 'pointer',
-                          transition: 'all 0.15s',
-                          background: selectedArticles.has(article.id) 
-                            ? 'rgba(0,80,216,0.15)'
-                            : 'transparent',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '16px'
-                        }}
-                      >
-                        <div style={{
-                          width: '22px',
-                          height: '22px',
-                          borderRadius: '6px',
-                          border: selectedArticles.has(article.id)
-                            ? '2px solid #0050d8'
-                            : '2px solid rgba(255,255,255,0.2)',
-                          background: selectedArticles.has(article.id)
-                            ? '#0050d8'
-                            : 'transparent',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: '#fff',
-                          fontSize: '14px',
-                          flexShrink: 0
-                        }}>
-                          {selectedArticles.has(article.id) && '✓'}
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ 
-                            fontSize: '14px', 
-                            fontWeight: '500',
-                            marginBottom: '6px',
-                            color: '#f4f4f5'
-                          }}>
-                            {article.title}
-                          </div>
-                          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                            <span style={{
-                              padding: '3px 10px',
-                              background: categoryColors[article.category] || '#666',
-                              borderRadius: '4px',
-                              fontSize: '11px',
-                              fontWeight: '600',
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.5px'
-                            }}>
-                              {article.category}
-                            </span>
-                            <span style={{ color: '#52525b', fontSize: '12px' }}>
-                              {article.wordCount.toLocaleString()} mots
-                            </span>
-                            <span style={{ color: '#52525b', fontSize: '12px' }}>
-                              {article.lastUpdated}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {selectedArticles.size > 0 && (
-                    <div style={{
-                      padding: '16px 24px',
-                      background: 'rgba(0,80,216,0.1)',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
-                    }}>
-                      <span style={{ color: '#a1a1aa', fontSize: '14px' }}>
-                        {selectedArticles.size} article(s) sélectionné(s)
-                      </span>
-                      <button
-                        onClick={() => setActiveTab('transform')}
-                        style={{
-                          padding: '10px 20px',
-                          background: 'linear-gradient(135deg, #0050d8, #0040b0)',
-                          border: 'none',
-                          borderRadius: '8px',
-                          color: '#fff',
-                          fontSize: '14px',
-                          fontWeight: '500',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        Continuer vers Transformation →
-                      </button>
+              {/* New Collection */}
+              {selectedProvider && (
+                <div style={styles.card}>
+                  <h3 style={styles.cardTitle}>Nouvelle collecte</h3>
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ fontSize: '13px', color: '#808080', marginBottom: '8px' }}>Langue a collecter:</div>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      {LANGUAGES.map(lang => {
+                        const provider = providers.find(p => p.id === selectedProvider);
+                        const hasUrl = provider?.base_urls?.[lang.code];
+                        return (
+                          <button
+                            key={lang.code}
+                            onClick={() => hasUrl && setSelectedScrapeLanguage(lang.code)}
+                            disabled={!hasUrl}
+                            style={{
+                              ...styles.btn(selectedScrapeLanguage === lang.code ? 'primary' : 'outline', !hasUrl),
+                              opacity: hasUrl ? 1 : 0.4
+                            }}
+                          >
+                            {lang.flag}
+                          </button>
+                        );
+                      })}
                     </div>
+                  </div>
+                  <button
+                    onClick={startScraping}
+                    disabled={isLoading}
+                    style={{ ...styles.btn('success', isLoading), width: '100%' }}
+                  >
+                    {isLoading ? `Collecte en cours... ${progress.current}/${progress.total}` : 'Lancer la collecte'}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* ========== LIBRARY SECTION ========== */}
+          {activeSection === 'library' && (
+            <div style={styles.card}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <h3 style={{ ...styles.cardTitle, marginBottom: 0 }}>Bibliotheque ({articles.length})</h3>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button onClick={selectAllArticles} style={styles.btn('outline')}>
+                    {selectedArticles.size === articles.length ? 'Deselectionner' : 'Tout selectionner'}
+                  </button>
+                  {selectedArticles.size > 0 && (
+                    <button onClick={transformSelected} disabled={isLoading} style={styles.btn('success', isLoading)}>
+                      Transformer ({selectedArticles.size})
+                    </button>
                   )}
                 </div>
-              )}
-            </div>
-          )}
-
-          {/* Transform Tab */}
-          {activeTab === 'transform' && (
-            <div>
-              <div style={{
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.06)',
-                borderRadius: '16px',
-                padding: '24px',
-                marginBottom: '24px'
-              }}>
-                <h3 style={{ margin: '0 0 20px', fontSize: '16px', fontWeight: '500' }}>
-                  Configuration de transformation
-                </h3>
-                
-                <div style={{ display: 'grid', gap: '16px' }}>
-                  {[
-                    { key: 'brandReplacements', label: 'Remplacements de marque', desc: 'Hostinger → OVHcloud, etc.' },
-                    { key: 'addOvhLinks', label: 'Ajouter liens OVHcloud', desc: 'Insérer liens vers docs.ovh.com' },
-                    { key: 'adaptTone', label: 'Adapter le ton éditorial', desc: 'Aligner avec la charte OVHcloud' },
-                    { key: 'addDisclaimer', label: 'Ajouter disclaimer', desc: 'Mention légale en bas d\'article' }
-                  ].map(option => (
-                    <label
-                      key={option.key}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '16px',
-                        padding: '16px',
-                        background: 'rgba(0,0,0,0.2)',
-                        borderRadius: '10px',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={transformConfig[option.key]}
-                        onChange={(e) => setTransformConfig({
-                          ...transformConfig,
-                          [option.key]: e.target.checked
-                        })}
-                        style={{ 
-                          width: '20px', 
-                          height: '20px',
-                          accentColor: '#0050d8'
-                        }}
-                      />
-                      <div>
-                        <div style={{ fontSize: '14px', fontWeight: '500', color: '#f4f4f5' }}>
-                          {option.label}
-                        </div>
-                        <div style={{ fontSize: '12px', color: '#71717a', marginTop: '2px' }}>
-                          {option.desc}
-                        </div>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-                
-                <button
-                  onClick={handleTransform}
-                  disabled={isLoading || selectedArticles.size === 0}
-                  style={{
-                    marginTop: '24px',
-                    padding: '14px 28px',
-                    background: (isLoading || selectedArticles.size === 0)
-                      ? 'rgba(255,255,255,0.1)'
-                      : 'linear-gradient(135deg, #0050d8, #00d4aa)',
-                    border: 'none',
-                    borderRadius: '10px',
-                    color: '#fff',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    cursor: (isLoading || selectedArticles.size === 0) ? 'not-allowed' : 'pointer',
-                    width: '100%'
-                  }}
-                >
-                  {isLoading ? '⏳ Transformation en cours...' : `🔄 Transformer ${selectedArticles.size} article(s)`}
-                </button>
               </div>
 
-              {selectedArticles.size === 0 && (
-                <div style={{
-                  padding: '40px',
-                  textAlign: 'center',
-                  color: '#71717a'
-                }}>
-                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>📋</div>
-                  <p>Aucun article sélectionné</p>
+              {/* Language Tabs */}
+              <div style={styles.langTabs}>
+                {LANGUAGES.map(lang => (
                   <button
-                    onClick={() => setActiveTab('scrape')}
-                    style={{
-                      marginTop: '12px',
-                      padding: '10px 20px',
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '8px',
-                      color: '#a1a1aa',
-                      cursor: 'pointer'
-                    }}
+                    key={lang.code}
+                    onClick={() => setSelectedLanguage(lang.code)}
+                    style={styles.langTab(selectedLanguage === lang.code, articleCounts[lang.code] || 0)}
                   >
-                    ← Retour au scraping
+                    {lang.flag} ({articleCounts[lang.code] || 0})
                   </button>
-                </div>
-              )}
+                ))}
+              </div>
+
+              {/* Articles List */}
+              <div style={{ maxHeight: '450px', overflow: 'auto', border: '1px solid #ececec', borderRadius: '8px' }}>
+                {articles.length === 0 ? (
+                  <div style={{ padding: '40px', textAlign: 'center', color: '#808080' }}>
+                    Aucun article pour cette langue
+                  </div>
+                ) : (
+                  articles.map(article => (
+                    <div
+                      key={article.id}
+                      style={styles.articleRow(selectedArticles.has(article.id))}
+                    >
+                      <div
+                        style={styles.checkbox(selectedArticles.has(article.id))}
+                        onClick={() => toggleArticleSelection(article.id)}
+                      >
+                        {selectedArticles.has(article.id) && '✓'}
+                      </div>
+                      <div style={{ flex: 1 }} onClick={() => fetchArticleDetail(article.id)}>
+                        <div style={{ fontWeight: '600', color: '#00185e', marginBottom: '4px' }}>
+                          {article.transformed_title || article.original_title}
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <span style={styles.badge('#4d5592')}>{article.provider_name}</span>
+                          <span style={styles.badge(article.status === 'transformed' ? '#268403' : '#808080')}>
+                            {article.status}
+                          </span>
+                          <span style={{ fontSize: '12px', color: '#808080' }}>
+                            {article.word_count?.toLocaleString()} mots
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           )}
 
-          {/* Export Tab */}
-          {activeTab === 'export' && (
-            <div>
-              {transformedArticles.length > 0 ? (
-                <div style={{
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                  borderRadius: '16px',
-                  overflow: 'hidden'
-                }}>
-                  <div style={{
-                    padding: '20px 24px',
-                    borderBottom: '1px solid rgba(255,255,255,0.06)',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                  }}>
-                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '500' }}>
-                      Articles prêts à exporter ({transformedArticles.length})
-                    </h3>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button style={{
-                        padding: '10px 16px',
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px',
-                        color: '#a1a1aa',
-                        fontSize: '13px',
-                        cursor: 'pointer'
-                      }}>
-                        📄 Export JSON
-                      </button>
-                      <button style={{
-                        padding: '10px 16px',
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px',
-                        color: '#a1a1aa',
-                        fontSize: '13px',
-                        cursor: 'pointer'
-                      }}>
-                        📊 Export CSV
-                      </button>
-                      <button style={{
-                        padding: '10px 16px',
-                        background: 'linear-gradient(135deg, #0050d8, #0040b0)',
-                        border: 'none',
-                        borderRadius: '8px',
-                        color: '#fff',
-                        fontSize: '13px',
-                        fontWeight: '500',
-                        cursor: 'pointer'
-                      }}>
-                        🚀 Push vers CMS
-                      </button>
-                    </div>
-                  </div>
-                  
-                  {transformedArticles.map(article => (
-                    <div
-                      key={article.id}
-                      style={{
-                        padding: '20px 24px',
-                        borderBottom: '1px solid rgba(255,255,255,0.04)'
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                        <div>
-                          <div style={{ 
-                            fontSize: '14px', 
-                            fontWeight: '500',
-                            marginBottom: '4px',
-                            color: '#f4f4f5'
-                          }}>
-                            {article.title}
-                          </div>
-                          <div style={{ 
-                            fontSize: '12px', 
-                            color: '#52525b',
-                            textDecoration: 'line-through',
-                            marginBottom: '8px'
-                          }}>
-                            Original: {article.originalTitle}
-                          </div>
-                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                            <span style={{
-                              padding: '3px 10px',
-                              background: 'rgba(16,185,129,0.2)',
-                              color: '#10b981',
-                              borderRadius: '4px',
-                              fontSize: '11px',
-                              fontWeight: '500'
-                            }}>
-                              ✓ Marque adaptée
-                            </span>
-                            {article.ovhLinks.length > 0 && (
-                              <span style={{
-                                padding: '3px 10px',
-                                background: 'rgba(0,80,216,0.2)',
-                                color: '#60a5fa',
-                                borderRadius: '4px',
-                                fontSize: '11px',
-                                fontWeight: '500'
-                              }}>
-                                ✓ {article.ovhLinks.length} liens OVH
-                              </span>
-                            )}
-                            {article.hasDisclaimer && (
-                              <span style={{
-                                padding: '3px 10px',
-                                background: 'rgba(139,92,246,0.2)',
-                                color: '#a78bfa',
-                                borderRadius: '4px',
-                                fontSize: '11px',
-                                fontWeight: '500'
-                              }}>
-                                ✓ Disclaimer
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <button style={{
-                          padding: '8px 14px',
-                          background: 'transparent',
-                          border: '1px solid rgba(255,255,255,0.1)',
-                          borderRadius: '6px',
-                          color: '#71717a',
-                          fontSize: '12px',
-                          cursor: 'pointer'
-                        }}>
-                          👁️ Preview
-                        </button>
+          {/* ========== STUDIO SECTION ========== */}
+          {activeSection === 'studio' && (
+            selectedArticle ? (
+              <div style={styles.studioPanel}>
+                <div style={styles.studioHeader}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ fontWeight: '700', color: '#00185e', fontSize: '16px' }}>
+                        {selectedArticle.transformed_title || selectedArticle.original_title}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#808080', marginTop: '4px' }}>
+                        {selectedArticle.provider_name} - {selectedArticle.language?.toUpperCase()} - {selectedArticle.word_count} mots
                       </div>
                     </div>
-                  ))}
+                    <button onClick={() => setActiveSection('library')} style={styles.btn('outline')}>
+                      Retour
+                    </button>
+                  </div>
                 </div>
-              ) : (
-                <div style={{
-                  padding: '60px',
-                  textAlign: 'center',
-                  color: '#71717a'
-                }}>
-                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>📤</div>
-                  <p>Aucun article transformé</p>
-                  <p style={{ fontSize: '13px', marginTop: '8px' }}>
-                    Complétez d'abord les étapes de scraping et transformation
-                  </p>
+
+                <div style={styles.studioContent}>
+                  {/* Original */}
+                  <div style={styles.studioColumn}>
+                    <div style={{ fontWeight: '600', color: '#00185e', marginBottom: '12px', fontSize: '14px' }}>
+                      ORIGINAL ({selectedArticle.provider_name})
+                    </div>
+                    <div
+                      style={{ fontSize: '13px', color: '#333', lineHeight: 1.6 }}
+                      dangerouslySetInnerHTML={{
+                        __html: renderMarkdown(selectedArticle.original_content?.substring(0, 5000))
+                      }}
+                    />
+                    {selectedArticle.original_content?.length > 5000 && (
+                      <div style={{ color: '#808080', fontStyle: 'italic', marginTop: '8px' }}>
+                        ... (contenu tronque)
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Transformed */}
+                  <div style={{ ...styles.studioColumn, borderRight: 'none', background: '#f8fff8' }}>
+                    <div style={{ fontWeight: '600', color: '#268403', marginBottom: '12px', fontSize: '14px' }}>
+                      TRANSFORME (OVHcloud)
+                    </div>
+                    {selectedArticle.transformed_content ? (
+                      <>
+                        <div
+                          style={{ fontSize: '13px', color: '#333', lineHeight: 1.6 }}
+                          dangerouslySetInnerHTML={{
+                            __html: renderMarkdown(selectedArticle.transformed_content?.substring(0, 5000))
+                          }}
+                        />
+                        {selectedArticle.transformed_content?.length > 5000 && (
+                          <div style={{ color: '#808080', fontStyle: 'italic', marginTop: '8px' }}>
+                            ... (contenu tronque)
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div style={{ color: '#808080', fontStyle: 'italic' }}>
+                        Pas encore transforme
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
-            </div>
+
+                {/* Translations */}
+                <div style={{ padding: '16px 20px', borderTop: '1px solid #ececec', background: '#f8f9fa' }}>
+                  <div style={{ fontWeight: '600', color: '#00185e', marginBottom: '12px', fontSize: '14px' }}>
+                    VERSIONS LINGUISTIQUES
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {LANGUAGES.map(lang => {
+                      const hasTranslation = selectedArticle.translations?.some(t => t.language === lang.code);
+                      const isCurrent = selectedArticle.language === lang.code;
+                      return (
+                        <button
+                          key={lang.code}
+                          onClick={() => !hasTranslation && !isCurrent && translateArticle(lang.code)}
+                          disabled={hasTranslation || isCurrent}
+                          style={{
+                            padding: '8px 16px',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: hasTranslation || isCurrent ? 'default' : 'pointer',
+                            background: isCurrent ? '#0050d7' : hasTranslation ? '#268403' : '#e0e0e0',
+                            color: isCurrent || hasTranslation ? '#fff' : '#333',
+                            fontSize: '13px',
+                            fontWeight: '600'
+                          }}
+                        >
+                          {lang.flag} {hasTranslation && '✓'}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div style={styles.card}>
+                <div style={{ padding: '60px', textAlign: 'center', color: '#808080' }}>
+                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>Studio</div>
+                  <p>Selectionnez un article dans la Bibliotheque pour le visualiser</p>
+                </div>
+              </div>
+            )
           )}
         </div>
 
         {/* Logs Panel */}
-        <div style={{
-          width: '320px',
-          background: 'rgba(0,0,0,0.3)',
-          border: '1px solid rgba(255,255,255,0.06)',
-          borderRadius: '16px',
-          overflow: 'hidden',
-          height: 'fit-content',
-          maxHeight: '600px'
-        }}>
-          <div style={{
-            padding: '16px 20px',
-            borderBottom: '1px solid rgba(255,255,255,0.06)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
-            <h3 style={{ margin: 0, fontSize: '14px', fontWeight: '500', color: '#a1a1aa' }}>
-              📋 Logs d'exécution
-            </h3>
-            <button
-              onClick={() => setLogs([])}
-              style={{
-                padding: '4px 10px',
-                background: 'transparent',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '4px',
-                color: '#52525b',
-                fontSize: '11px',
-                cursor: 'pointer'
-              }}
-            >
+        <div style={styles.rightPanel}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <div style={{ fontWeight: '600', color: '#bef1ff' }}>Logs</div>
+            <button onClick={() => setLogs([])} style={{ ...styles.btn('outline'), padding: '4px 8px', fontSize: '11px' }}>
               Clear
             </button>
           </div>
-          <div style={{
-            padding: '12px',
-            maxHeight: '500px',
-            overflowY: 'auto',
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: '12px'
-          }}>
+          <div style={{ maxHeight: '500px', overflow: 'auto' }}>
             {logs.length === 0 ? (
-              <div style={{ color: '#52525b', padding: '20px', textAlign: 'center' }}>
-                En attente d'actions...
+              <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textAlign: 'center', padding: '20px' }}>
+                En attente...
               </div>
             ) : (
               logs.map((log, i) => (
-                <div
-                  key={i}
-                  style={{
-                    padding: '6px 8px',
-                    marginBottom: '4px',
-                    borderRadius: '4px',
-                    background: log.type === 'error' 
-                      ? 'rgba(239,68,68,0.1)'
-                      : log.type === 'success'
-                        ? 'rgba(16,185,129,0.1)'
-                        : 'rgba(255,255,255,0.02)',
-                    color: log.type === 'error'
-                      ? '#f87171'
-                      : log.type === 'success'
-                        ? '#34d399'
-                        : '#a1a1aa'
-                  }}
-                >
-                  <span style={{ color: '#52525b' }}>[{log.timestamp}]</span> {log.message}
+                <div key={i} style={styles.log(log.type)}>
+                  <span style={{ opacity: 0.6 }}>[{log.timestamp}]</span> {log.message}
                 </div>
               ))
             )}
@@ -731,23 +774,9 @@ const ContentPipeline = () => {
       </div>
 
       {/* Footer */}
-      <div style={{
-        marginTop: '40px',
-        padding: '20px 0',
-        borderTop: '1px solid rgba(255,255,255,0.06)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        color: '#52525b',
-        fontSize: '12px'
-      }}>
-        <div>
-          Content Intelligence Pipeline v1.0 — Outil interne OVHcloud
-        </div>
-        <div style={{ display: 'flex', gap: '20px' }}>
-          <span>⚠️ Usage interne uniquement</span>
-          <span>📧 Contact: product-team@ovhcloud.com</span>
-        </div>
+      <div style={{ marginTop: '24px', padding: '16px 0', borderTop: '1px solid rgba(255,255,255,0.2)', fontSize: '12px', color: '#bef1ff', display: 'flex', justifyContent: 'space-between' }}>
+        <span>Content Intelligence Pipeline v2.0</span>
+        <span>OVHcloud Internal Tool</span>
       </div>
     </div>
   );

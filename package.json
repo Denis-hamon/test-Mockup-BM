@@ -9,8 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@mendable/firecrawl-js": "^1.21.1",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "openai": "^6.17.0",
+    "pg": "^8.18.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "redis": "^5.10.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
