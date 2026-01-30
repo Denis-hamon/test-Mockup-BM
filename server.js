@@ -255,33 +255,62 @@ CONTENT:
 
   try {
     const response = await ovhAI.chat.completions.create({
-      model: 'deepseek-r1-distill-llama-70b',
+      model: 'DeepSeek-R1-Distill-Llama-70B',
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 8000,
       temperature: 0.3
     });
 
-    const result = response.choices[0]?.message?.content || '';
+    let result = response.choices[0]?.message?.content || '';
 
-    // Parse response
-    const titleMatch = result.match(/TITLE:\s*(.+?)(?:\n|CONTENT:)/s);
-    const contentMatch = result.match(/CONTENT:\s*([\s\S]+)/);
+    // Remove DeepSeek <think> tags
+    result = result.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
+    // Try multiple parsing strategies
+    let translatedTitle = null;
+    let translatedContent = null;
+
+    // Strategy 1: TITLE: and CONTENT: format
+    const titleMatch = result.match(/TITLE:\s*(.+?)(?:\n|CONTENT:)/si);
+    const contentMatch = result.match(/CONTENT:\s*([\s\S]+)/i);
+
+    if (titleMatch && contentMatch) {
+      translatedTitle = titleMatch[1].trim();
+      translatedContent = contentMatch[1].trim();
+    }
+
+    // Strategy 2: First line is title, rest is content
+    if (!translatedTitle || !translatedContent) {
+      const lines = result.split('\n').filter(l => l.trim());
+      if (lines.length >= 2) {
+        translatedTitle = lines[0].replace(/^#+\s*/, '').trim();
+        translatedContent = lines.slice(1).join('\n').trim();
+      }
+    }
+
+    // Strategy 3: Use entire response as content with modified title
+    if (!translatedContent || translatedContent.length < 50) {
+      translatedContent = result;
+      if (!translatedTitle) {
+        translatedTitle = `${title} (${targetLangName})`;
+      }
+    }
+
+    // Final validation
+    if (!translatedContent || translatedContent.length < 50) {
+      throw new Error('Invalid translation response - content too short');
+    }
 
     return {
-      title: titleMatch ? titleMatch[1].trim() : `[${targetLang.toUpperCase()}] ${title}`,
-      content: contentMatch ? contentMatch[1].trim() : content,
+      title: translatedTitle || `${title} (${targetLangName})`,
+      content: translatedContent,
       ovhLinks: article.ovh_links,
       disclaimer: article.disclaimer
     };
   } catch (error) {
     console.error(`[TRANSLATE] AI error for ${targetLang}:`, error.message);
-    // Fallback: return original with language prefix
-    return {
-      title: `[${targetLang.toUpperCase()}] ${title}`,
-      content: `[Translation pending]\n\n${content}`,
-      ovhLinks: article.ovh_links,
-      disclaimer: article.disclaimer
-    };
+    // Don't save failed translations - throw to skip
+    throw error;
   }
 }
 
@@ -992,7 +1021,7 @@ Reponds UNIQUEMENT en JSON valide:
 
   try {
     const completion = await ovhAI.chat.completions.create({
-      model: 'deepseek-r1-distill-llama-70b',
+      model: 'DeepSeek-R1-Distill-Llama-70B',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `Titre: ${article.original_title}\n\nContenu:\n${cleanedContent.substring(0, 8000)}` }
@@ -1100,7 +1129,7 @@ Reponds UNIQUEMENT en JSON:
     const titleToTranslate = article.transformed_title || article.original_title;
 
     const completion = await ovhAI.chat.completions.create({
-      model: 'deepseek-r1-distill-llama-70b',
+      model: 'DeepSeek-R1-Distill-Llama-70B',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `Titre: ${titleToTranslate}\n\nContenu:\n${contentToTranslate?.substring(0, 8000)}` }
