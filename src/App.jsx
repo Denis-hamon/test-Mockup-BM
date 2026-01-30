@@ -58,8 +58,13 @@ const ContentPipeline = () => {
   const [providers, setProviders] = useState([]);
   const [articles, setArticles] = useState([]);
   const [articleCounts, setArticleCounts] = useState({});
+  const [statusCounts, setStatusCounts] = useState({});
+  const [totalArticles, setTotalArticles] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [articlesPerPage] = useState(50);
   const [selectedArticle, setSelectedArticle] = useState(null);
-  const [selectedLanguage, setSelectedLanguage] = useState('fr');
+  const [selectedLanguage, setSelectedLanguage] = useState(null); // null = all languages
+  const [selectedStatus, setSelectedStatus] = useState(null); // null = all statuses
   const [selectedArticles, setSelectedArticles] = useState(new Set());
   const [stats, setStats] = useState(null);
 
@@ -78,12 +83,12 @@ const ContentPipeline = () => {
     fetchStats();
   }, []);
 
-  // Fetch articles when language changes
+  // Fetch articles when filters change
   useEffect(() => {
     if (activeSection === 'library') {
       fetchArticles();
     }
-  }, [activeSection, selectedLanguage]);
+  }, [activeSection, selectedLanguage, selectedStatus, currentPage]);
 
   const fetchProviders = async () => {
     try {
@@ -97,10 +102,17 @@ const ContentPipeline = () => {
 
   const fetchArticles = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/articles?language=${selectedLanguage}&limit=100`);
+      const offset = (currentPage - 1) * articlesPerPage;
+      let url = `${API_URL}/api/articles?limit=${articlesPerPage}&offset=${offset}`;
+      if (selectedLanguage) url += `&language=${selectedLanguage}`;
+      if (selectedStatus) url += `&status=${selectedStatus}`;
+
+      const res = await fetch(url);
       const data = await res.json();
       setArticles(data.articles || []);
       setArticleCounts(data.counts || {});
+      setStatusCounts(data.statusCounts || {});
+      setTotalArticles(data.total || 0);
     } catch (e) {
       console.error('Error fetching articles:', e);
     }
@@ -575,7 +587,9 @@ const ContentPipeline = () => {
           {activeSection === 'library' && (
             <div style={styles.card}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h3 style={{ ...styles.cardTitle, marginBottom: 0 }}>Bibliotheque ({articles.length})</h3>
+                <h3 style={{ ...styles.cardTitle, marginBottom: 0 }}>
+                  Bibliotheque ({totalArticles} articles)
+                </h3>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button onClick={selectAllArticles} style={styles.btn('outline')}>
                     {selectedArticles.size === articles.length ? 'Deselectionner' : 'Tout selectionner'}
@@ -588,24 +602,91 @@ const ContentPipeline = () => {
                 </div>
               </div>
 
-              {/* Language Tabs */}
-              <div style={styles.langTabs}>
-                {LANGUAGES.map(lang => (
-                  <button
-                    key={lang.code}
-                    onClick={() => setSelectedLanguage(lang.code)}
-                    style={styles.langTab(selectedLanguage === lang.code, articleCounts[lang.code] || 0)}
-                  >
-                    {lang.flag} ({articleCounts[lang.code] || 0})
-                  </button>
-                ))}
+              {/* Filters Row */}
+              <div style={{ display: 'flex', gap: '16px', marginBottom: '16px', flexWrap: 'wrap' }}>
+                {/* Language Filter */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '13px', color: '#808080' }}>Langue:</span>
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    <button
+                      onClick={() => { setSelectedLanguage(null); setCurrentPage(1); }}
+                      style={{
+                        padding: '4px 10px',
+                        fontSize: '12px',
+                        border: selectedLanguage === null ? '2px solid #0050d7' : '1px solid #ddd',
+                        borderRadius: '4px',
+                        background: selectedLanguage === null ? '#e6f0ff' : 'white',
+                        color: selectedLanguage === null ? '#0050d7' : '#333',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Tous ({Object.values(articleCounts).reduce((a, b) => a + b, 0)})
+                    </button>
+                    {LANGUAGES.map(lang => (
+                      <button
+                        key={lang.code}
+                        onClick={() => { setSelectedLanguage(lang.code); setCurrentPage(1); }}
+                        style={{
+                          padding: '4px 10px',
+                          fontSize: '12px',
+                          border: selectedLanguage === lang.code ? '2px solid #0050d7' : '1px solid #ddd',
+                          borderRadius: '4px',
+                          background: selectedLanguage === lang.code ? '#e6f0ff' : 'white',
+                          color: selectedLanguage === lang.code ? '#0050d7' : '#333',
+                          cursor: 'pointer',
+                          opacity: (articleCounts[lang.code] || 0) === 0 ? 0.5 : 1
+                        }}
+                      >
+                        {lang.flag} ({articleCounts[lang.code] || 0})
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Status Filter */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '13px', color: '#808080' }}>Status:</span>
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    <button
+                      onClick={() => { setSelectedStatus(null); setCurrentPage(1); }}
+                      style={{
+                        padding: '4px 10px',
+                        fontSize: '12px',
+                        border: selectedStatus === null ? '2px solid #0050d7' : '1px solid #ddd',
+                        borderRadius: '4px',
+                        background: selectedStatus === null ? '#e6f0ff' : 'white',
+                        color: selectedStatus === null ? '#0050d7' : '#333',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Tous
+                    </button>
+                    {Object.entries(statusCounts).map(([status, count]) => (
+                      <button
+                        key={status}
+                        onClick={() => { setSelectedStatus(status); setCurrentPage(1); }}
+                        style={{
+                          padding: '4px 10px',
+                          fontSize: '12px',
+                          border: selectedStatus === status ? '2px solid #0050d7' : '1px solid #ddd',
+                          borderRadius: '4px',
+                          background: selectedStatus === status ? '#e6f0ff' : 'white',
+                          color: selectedStatus === status ? '#0050d7' : '#333',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {status} ({count})
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               {/* Articles List */}
-              <div style={{ maxHeight: '450px', overflow: 'auto', border: '1px solid #ececec', borderRadius: '8px' }}>
+              <div style={{ maxHeight: '400px', overflow: 'auto', border: '1px solid #ececec', borderRadius: '8px' }}>
                 {articles.length === 0 ? (
                   <div style={{ padding: '40px', textAlign: 'center', color: '#808080' }}>
-                    Aucun article pour cette langue
+                    Aucun article
                   </div>
                 ) : (
                   articles.map(article => (
@@ -625,6 +706,9 @@ const ContentPipeline = () => {
                         </div>
                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                           <span style={styles.badge('#4d5592')}>{article.provider_name}</span>
+                          <span style={{ ...styles.badge(article.language === 'en' ? '#0050d7' : '#e67e22'), fontSize: '10px' }}>
+                            {article.language?.toUpperCase()}
+                          </span>
                           <span style={styles.badge(article.status === 'transformed' ? '#268403' : '#808080')}>
                             {article.status}
                           </span>
@@ -637,6 +721,43 @@ const ContentPipeline = () => {
                   ))
                 )}
               </div>
+
+              {/* Pagination */}
+              {totalArticles > articlesPerPage && (
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', marginTop: '16px' }}>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    style={{
+                      padding: '6px 12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      background: currentPage === 1 ? '#f5f5f5' : 'white',
+                      cursor: currentPage === 1 ? 'default' : 'pointer',
+                      opacity: currentPage === 1 ? 0.5 : 1
+                    }}
+                  >
+                    Precedent
+                  </button>
+                  <span style={{ fontSize: '13px', color: '#333' }}>
+                    Page {currentPage} / {Math.ceil(totalArticles / articlesPerPage)}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(Math.ceil(totalArticles / articlesPerPage), p + 1))}
+                    disabled={currentPage >= Math.ceil(totalArticles / articlesPerPage)}
+                    style={{
+                      padding: '6px 12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      background: currentPage >= Math.ceil(totalArticles / articlesPerPage) ? '#f5f5f5' : 'white',
+                      cursor: currentPage >= Math.ceil(totalArticles / articlesPerPage) ? 'default' : 'pointer',
+                      opacity: currentPage >= Math.ceil(totalArticles / articlesPerPage) ? 0.5 : 1
+                    }}
+                  >
+                    Suivant
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

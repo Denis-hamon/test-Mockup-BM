@@ -36,6 +36,106 @@ async function initRedis() {
 
 initRedis();
 
+// ==================== POSTGRESQL LISTENER FOR AUTO-TRANSFORM ====================
+
+let autoTransformEnabled = true;
+let transformQueue = [];
+let isProcessingQueue = false;
+
+async function initPgListener() {
+  const client = await pgPool.connect();
+
+  client.on('notification', async (msg) => {
+    if (!autoTransformEnabled) return;
+
+    try {
+      const payload = JSON.parse(msg.payload);
+      console.log(`[PG NOTIFY] ${msg.channel}:`, payload);
+
+      if (msg.channel === 'new_article' || msg.channel === 'transform_article') {
+        // Add to queue
+        transformQueue.push(payload.id);
+        console.log(`[QUEUE] Article ${payload.id} added. Queue size: ${transformQueue.length}`);
+
+        // Start processing if not already running
+        if (!isProcessingQueue) {
+          processTransformQueue();
+        }
+      }
+    } catch (e) {
+      console.error('[PG NOTIFY] Error parsing payload:', e.message);
+    }
+  });
+
+  await client.query('LISTEN new_article');
+  await client.query('LISTEN transform_article');
+  console.log('[PG LISTENER] Listening for new_article and transform_article notifications');
+}
+
+async function processTransformQueue() {
+  if (isProcessingQueue || transformQueue.length === 0) return;
+
+  isProcessingQueue = true;
+  console.log(`[QUEUE] Starting to process ${transformQueue.length} articles`);
+
+  while (transformQueue.length > 0) {
+    const articleId = transformQueue.shift();
+
+    try {
+      // Check if article exists and is not already transformed
+      const result = await pgPool.query(
+        'SELECT * FROM articles WHERE id = $1 AND status != $2',
+        [articleId, 'transformed']
+      );
+
+      if (result.rows.length === 0) {
+        console.log(`[QUEUE] Article ${articleId} already transformed or not found, skipping`);
+        continue;
+      }
+
+      const article = result.rows[0];
+      console.log(`[QUEUE] Transforming article ${articleId}: ${article.original_title?.substring(0, 40)}...`);
+
+      // Transform with DeepSeek
+      const transformed = await transformWithDeepSeek(article);
+
+      // Update article
+      await pgPool.query(`
+        UPDATE articles SET
+          transformed_title = $1,
+          transformed_content = $2,
+          ovh_links = $3,
+          disclaimer = $4,
+          status = 'transformed',
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = $5
+      `, [
+        transformed.title,
+        transformed.content,
+        JSON.stringify(transformed.ovhLinks || []),
+        transformed.disclaimer,
+        articleId
+      ]);
+
+      console.log(`[QUEUE] Article ${articleId} transformed successfully`);
+
+      // Small delay between transformations to avoid rate limiting
+      await new Promise(r => setTimeout(r, 1000));
+
+    } catch (error) {
+      console.error(`[QUEUE] Error transforming article ${articleId}:`, error.message);
+    }
+  }
+
+  isProcessingQueue = false;
+  console.log('[QUEUE] Queue processing completed');
+}
+
+// Initialize listener after a short delay to ensure pool is ready
+setTimeout(() => {
+  initPgListener().catch(err => console.error('[PG LISTENER] Init error:', err.message));
+}, 2000);
+
 // ==================== OVH AI CONFIGURATION ====================
 
 const OVH_AI_API_KEY = process.env.OVH_AI_API_KEY || 'eyJhbGciOiJFZERTQSIsImtpZCI6IjgzMkFGNUE5ODg3MzFCMDNGM0EzMTRFMDJFRUJFRjBGNDE5MUY0Q0YiLCJraW5kIjoicGF0IiwidHlwIjoiSldUIn0.eyJ0b2tlbiI6InltMGFjS25TVHJNZFpTUG1mMzdZbWhzNGRpUFpjOWpKTGR0VENHM0xvT1U9In0.2XL4_On8F91xhPLOMO_voxiWLjvJMgO8V7KH73VO2kzN0lR_zS7swoHzmJaSdn0U9MCTV2IzRJUBRWeK7TCVDA';
@@ -336,50 +436,69 @@ app.post('/api/scrape/single', async (req, res) => {
 
 // Get articles with filters
 app.get('/api/articles', async (req, res) => {
-  const { language, providerId, status, limit = 100, offset = 0 } = req.query;
+  const { language, providerId, status, limit = 500, offset = 0 } = req.query;
 
   try {
-    let query = `
-      SELECT a.*, p.name as provider_name, p.slug as provider_slug
-      FROM articles a
-      LEFT JOIN providers p ON a.provider_id = p.id
-      WHERE 1=1
-    `;
+    let whereClause = 'WHERE 1=1';
     const params = [];
     let paramIndex = 1;
 
     if (language) {
-      query += ` AND a.language = $${paramIndex}`;
+      whereClause += ` AND a.language = $${paramIndex}`;
       params.push(language);
       paramIndex++;
     }
 
     if (providerId) {
-      query += ` AND a.provider_id = $${paramIndex}`;
+      whereClause += ` AND a.provider_id = $${paramIndex}`;
       params.push(providerId);
       paramIndex++;
     }
 
     if (status) {
-      query += ` AND a.status = $${paramIndex}`;
+      whereClause += ` AND a.status = $${paramIndex}`;
       params.push(status);
       paramIndex++;
     }
 
-    query += ` ORDER BY a.created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    // Get total count first
+    const countQuery = `SELECT COUNT(*) as total FROM articles a ${whereClause}`;
+    const totalResult = await pgPool.query(countQuery, params);
+    const total = parseInt(totalResult.rows[0].total);
+
+    // Get paginated results
+    let query = `
+      SELECT a.*, p.name as provider_name, p.slug as provider_slug
+      FROM articles a
+      LEFT JOIN providers p ON a.provider_id = p.id
+      ${whereClause}
+      ORDER BY a.created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+    `;
     params.push(parseInt(limit), parseInt(offset));
 
     const result = await pgPool.query(query, params);
 
     // Get counts by language
-    const countResult = await pgPool.query(`
+    const langCountResult = await pgPool.query(`
       SELECT language, COUNT(*) as count FROM articles GROUP BY language
+    `);
+
+    // Get counts by status
+    const statusCountResult = await pgPool.query(`
+      SELECT status, COUNT(*) as count FROM articles GROUP BY status
     `);
 
     res.json({
       articles: result.rows,
-      counts: countResult.rows.reduce((acc, row) => {
+      total,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      counts: langCountResult.rows.reduce((acc, row) => {
         acc[row.language] = parseInt(row.count);
+        return acc;
+      }, {}),
+      statusCounts: statusCountResult.rows.reduce((acc, row) => {
+        acc[row.status] = parseInt(row.count);
         return acc;
       }, {})
     });
@@ -430,6 +549,50 @@ let transformProgress = {
 
 app.get('/api/transform/progress', (req, res) => {
   res.json(transformProgress);
+});
+
+// Auto-transform queue status and control
+app.get('/api/transform/auto', (req, res) => {
+  res.json({
+    enabled: autoTransformEnabled,
+    queueSize: transformQueue.length,
+    isProcessing: isProcessingQueue,
+    queue: transformQueue.slice(0, 10) // Show first 10 items
+  });
+});
+
+app.post('/api/transform/auto', (req, res) => {
+  const { enabled } = req.body;
+  if (typeof enabled === 'boolean') {
+    autoTransformEnabled = enabled;
+    console.log(`[AUTO-TRANSFORM] ${enabled ? 'Enabled' : 'Disabled'}`);
+  }
+  res.json({ enabled: autoTransformEnabled });
+});
+
+// Manually trigger queue processing for all scraped articles
+app.post('/api/transform/auto/process-all', async (req, res) => {
+  try {
+    const result = await pgPool.query(
+      "SELECT id FROM articles WHERE status = 'scraped' ORDER BY created_at ASC"
+    );
+
+    const ids = result.rows.map(r => r.id);
+    transformQueue.push(...ids);
+
+    console.log(`[AUTO-TRANSFORM] Added ${ids.length} articles to queue`);
+
+    if (!isProcessingQueue && transformQueue.length > 0) {
+      processTransformQueue();
+    }
+
+    res.json({
+      message: `${ids.length} articles added to transform queue`,
+      queueSize: transformQueue.length
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 app.post('/api/transform', async (req, res) => {
