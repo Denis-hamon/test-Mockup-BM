@@ -22,18 +22,21 @@ import {
 import { format } from "date-fns";
 import { toast } from "sonner";
 import api from "@/lib/api";
+import { SEOScoreCard } from "@/components/SEOScoreCard";
+import { TranslationsPanel } from "@/components/TranslationsPanel";
 
 const ALL_LANGUAGES = ['en', 'fr', 'es', 'de', 'it', 'pt', 'nl', 'pl'];
 
-function TranslationStatus({ translations, hasTranslations, onTranslate }: {
-  translations: Array<{ id: number; language: string; status: string; title: string }>;
-  hasTranslations: Record<string, boolean>;
+function TranslationStatus({ translations, onTranslate }: {
+  translations: Array<{ id: number; language: string; status: string; transformed_title?: string }>;
   onTranslate: (lang: string) => void;
 }) {
+  const translatedLangs = new Set(translations.map(t => t.language));
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       {ALL_LANGUAGES.map(lang => {
-        const isCompleted = hasTranslations[lang];
+        const isCompleted = translatedLangs.has(lang);
         const translation = translations.find(t => t.language === lang);
 
         return (
@@ -155,10 +158,10 @@ export default function ArticleDetail() {
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-foreground">
-              {article.transformedTitle || article.originalTitle}
+              {article.transformed_title || article.original_title}
             </h1>
             <div className="flex items-center gap-3 mt-2">
-              <Badge variant="outline">{article.providerName}</Badge>
+              <Badge variant="outline">{article.provider_name}</Badge>
               <Badge
                 variant="secondary"
                 className={statusColors[article.status] || statusColors.collected}
@@ -167,7 +170,7 @@ export default function ArticleDetail() {
               </Badge>
               <Badge variant="outline">{article.language.toUpperCase()}</Badge>
               <a
-                href={article.sourceUrl}
+                href={article.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 text-sm text-primary hover:underline"
@@ -237,12 +240,12 @@ export default function ArticleDetail() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Badge variant="outline">Original</Badge>
-                        <span className="text-xs text-muted-foreground">{article.providerName}</span>
+                        <span className="text-xs text-muted-foreground">{article.provider_name}</span>
                       </div>
                       <ScrollArea className="h-[400px] rounded-lg border p-4">
                         <div className="prose prose-sm max-w-none">
                           <pre className="whitespace-pre-wrap text-sm font-mono">
-                            {article.originalContent || 'No original content'}
+                            {article.original_content || 'No original content'}
                           </pre>
                         </div>
                       </ScrollArea>
@@ -255,7 +258,7 @@ export default function ArticleDetail() {
                       <ScrollArea className="h-[400px] rounded-lg border p-4 bg-primary/5">
                         <div className="prose prose-sm max-w-none">
                           <pre className="whitespace-pre-wrap text-sm font-mono">
-                            {article.transformedContent || 'Not yet transformed'}
+                            {article.transformed_content || 'Not yet transformed'}
                           </pre>
                         </div>
                       </ScrollArea>
@@ -266,7 +269,7 @@ export default function ArticleDetail() {
                   <ScrollArea className="h-[500px] rounded-lg border p-4">
                     <div className="prose prose-sm max-w-none">
                       <pre className="whitespace-pre-wrap text-sm font-mono">
-                        {article.originalContent || 'No original content'}
+                        {article.original_content || 'No original content'}
                       </pre>
                     </div>
                   </ScrollArea>
@@ -275,7 +278,7 @@ export default function ArticleDetail() {
                   <ScrollArea className="h-[500px] rounded-lg border p-4 bg-primary/5">
                     <div className="prose prose-sm max-w-none">
                       <pre className="whitespace-pre-wrap text-sm font-mono">
-                        {article.transformedContent || 'Not yet transformed'}
+                        {article.transformed_content || 'Not yet transformed'}
                       </pre>
                     </div>
                   </ScrollArea>
@@ -284,19 +287,22 @@ export default function ArticleDetail() {
             </CardContent>
           </Card>
 
-          {/* Translation Status */}
+          {/* Translation Management */}
           <Card>
             <CardHeader>
-              <CardTitle>Translation Status</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Languages className="h-5 w-5" />
+                Translations
+              </CardTitle>
               <CardDescription>
-                {article.translationsCount} of {ALL_LANGUAGES.length} languages completed
+                {article.translations?.length || 0} of {ALL_LANGUAGES.length - 1} languages completed
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <TranslationStatus
-                translations={article.translations}
-                hasTranslations={article.hasTranslations}
-                onTranslate={(lang) => translateMutation.mutate([lang])}
+              <TranslationsPanel
+                articleId={article.id}
+                translations={article.translations || []}
+                sourceLanguage={article.language}
               />
             </CardContent>
           </Card>
@@ -304,6 +310,14 @@ export default function ArticleDetail() {
 
         {/* Sidebar */}
         <div className="space-y-6">
+          {/* SEO Score */}
+          {article.seoScore && (
+            <SEOScoreCard
+              score={article.seoScore}
+              breakdown={article.seo_breakdown}
+            />
+          )}
+
           {/* Metadata */}
           <Card>
             <CardHeader>
@@ -315,7 +329,7 @@ export default function ArticleDetail() {
                   <FileText className="h-4 w-4 text-muted-foreground" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">{article.wordCount?.toLocaleString() || 0} words</p>
+                  <p className="text-sm font-medium">{article.word_count?.toLocaleString() || 0} words</p>
                   <p className="text-xs text-muted-foreground">Word count</p>
                 </div>
               </div>
@@ -325,7 +339,7 @@ export default function ArticleDetail() {
                 </div>
                 <div>
                   <p className="text-sm font-medium">
-                    {article.createdAt ? format(new Date(article.createdAt), 'MMM d, yyyy') : 'Unknown'}
+                    {article.created_at ? format(new Date(article.created_at), 'MMM d, yyyy') : 'Unknown'}
                   </p>
                   <p className="text-xs text-muted-foreground">Collected date</p>
                 </div>
@@ -347,14 +361,14 @@ export default function ArticleDetail() {
           </Card>
 
           {/* OVH Links */}
-          {article.ovhLinks && article.ovhLinks.length > 0 && (
+          {article.ovh_links && article.ovh_links.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle>OVHcloud Links</CardTitle>
                 <CardDescription>Related documentation</CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
-                {article.ovhLinks.map((link, i) => (
+                {article.ovh_links.map((link: { keyword: string; url: string }, i: number) => (
                   <a
                     key={i}
                     href={link.url}

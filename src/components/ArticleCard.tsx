@@ -21,8 +21,8 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { Article } from "@/lib/api";
-
-type ArticleStatus = Article["status"];
+import { SEOBadge } from "@/components/SEOBadge";
+import { ArticleStatusBadge } from "@/components/ArticleStatusBadge";
 
 interface ArticleCardProps {
   article: Article;
@@ -32,23 +32,6 @@ interface ArticleCardProps {
   onTranslate: () => void;
   onPublish: () => void;
   onDelete: () => void;
-}
-
-function StatusBadge({ status }: { status: ArticleStatus }) {
-  const config = {
-    collected: { label: "Collected", className: "bg-muted text-muted-foreground" },
-    transformed: { label: "Transformed", className: "bg-warning/10 text-warning" },
-    translated: { label: "Translated", className: "bg-primary/10 text-primary" },
-    published: { label: "Published", className: "bg-success/10 text-success" },
-  };
-
-  const { label, className } = config[status] || config.collected;
-
-  return (
-    <Badge variant="secondary" className={`${className} border-0`}>
-      {label}
-    </Badge>
-  );
 }
 
 export function ArticleCard({
@@ -78,7 +61,7 @@ export function ArticleCard({
                 {article.title}
               </Link>
               <p className="text-xs text-muted-foreground mt-1">
-                {article.providerName}
+                {article.provider_name}
               </p>
             </div>
           </div>
@@ -97,7 +80,7 @@ export function ArticleCard({
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <a
-                  href={article.sourceUrl}
+                  href={article.source_url}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -132,16 +115,17 @@ export function ArticleCard({
       </CardHeader>
       <CardContent className="pt-2">
         <div className="flex flex-wrap items-center gap-2">
-          <StatusBadge status={article.status} />
+          <ArticleStatusBadge status={article.status} />
           <Badge variant="outline">{article.language.toUpperCase()}</Badge>
+          {article.seoScore && <SEOBadge score={article.seoScore} showIcon={false} />}
           <span className="text-xs text-muted-foreground">
-            {article.wordCount.toLocaleString()} words
+            {(article.word_count || 0).toLocaleString()} words
           </span>
         </div>
         <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
           <span>{article.translationsCount} translations</span>
           <span>
-            {formatDistanceToNow(new Date(article.createdAt), { addSuffix: true })}
+            {formatDistanceToNow(new Date(article.created_at), { addSuffix: true })}
           </span>
         </div>
       </CardContent>

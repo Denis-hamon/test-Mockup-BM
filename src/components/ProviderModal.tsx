@@ -28,6 +28,7 @@ interface ProviderModalProps {
   provider?: Provider | null;
   onSubmit: (data: ProviderFormData) => void;
   isLoading?: boolean;
+  projectId?: number;
 }
 
 export interface ProviderFormData {

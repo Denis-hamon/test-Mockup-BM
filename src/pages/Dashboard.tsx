@@ -15,10 +15,11 @@ import {
   CheckCircle,
   ArrowUpRight,
   Loader2,
+  Users,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
-import api, { type Activity, type Job } from "@/lib/api";
+import api, { type Job } from "@/lib/api";
 
 function StatCard({
   title,
@@ -62,9 +63,7 @@ function StatCard({
 }
 
 function ActiveJobCard({ job }: { job: Job }) {
-  const progress = job.estimatedTotal > 0
-    ? Math.round((job.articlesProcessed / job.estimatedTotal) * 100)
-    : 0;
+  const progress = job.completionRate || 0;
 
   return (
     <Card>
@@ -77,54 +76,27 @@ function ActiveJobCard({ job }: { job: Job }) {
             <div>
               <p className="font-medium text-sm">{job.providerName}</p>
               <p className="text-xs text-muted-foreground">
-                Started {formatDistanceToNow(new Date(job.startedAt), { addSuffix: true })}
+                {job.startedAt ? formatDistanceToNow(new Date(job.startedAt), { addSuffix: true }) : 'Starting...'}
               </p>
             </div>
           </div>
           <Badge variant="secondary" className="bg-success/10 text-success border-0">
-            Running
+            {job.status === 'running' ? 'Running' : job.status}
           </Badge>
         </div>
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Progress</span>
-            <span className="font-medium">{job.articlesProcessed} / {job.estimatedTotal}</span>
+            <span className="font-medium">{job.current} / {job.total}</span>
           </div>
           <Progress value={progress} className="h-2" />
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>{progress}% complete</span>
-            <span>{job.articlesPerHour} articles/hour</span>
+            <span>{job.speed} articles/min</span>
           </div>
         </div>
       </CardContent>
     </Card>
-  );
-}
-
-function ActivityItem({ activity }: { activity: Activity }) {
-  const getIcon = () => {
-    switch (activity.type) {
-      case 'collection': return <RefreshCw className="h-4 w-4 text-primary" />;
-      case 'transformation': return <FileText className="h-4 w-4 text-warning" />;
-      case 'translation': return <Languages className="h-4 w-4 text-success" />;
-      case 'publish': return <Globe className="h-4 w-4 text-success" />;
-      case 'error': return <AlertCircle className="h-4 w-4 text-destructive" />;
-      default: return <CheckCircle className="h-4 w-4 text-muted-foreground" />;
-    }
-  };
-
-  return (
-    <div className="flex items-start gap-3 py-3">
-      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
-        {getIcon()}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm">{activity.message}</p>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
-        </p>
-      </div>
-    </div>
   );
 }
 
@@ -135,20 +107,18 @@ export default function Dashboard() {
     refetchInterval: 30000,
   });
 
-  const { data: jobsData, isLoading: jobsLoading } = useQuery({
-    queryKey: ['jobs', 'active'],
-    queryFn: () => api.getJobs(true),
+  const { data: jobs = [], isLoading: jobsLoading } = useQuery({
+    queryKey: ['jobs'],
+    queryFn: api.getJobs,
     refetchInterval: 5000,
   });
 
-  const { data: activityData } = useQuery({
-    queryKey: ['activity'],
-    queryFn: () => api.getActivity(6),
-    refetchInterval: 10000,
+  const { data: overview } = useQuery({
+    queryKey: ['reporting-overview'],
+    queryFn: api.getReportingOverview,
   });
 
-  const activeJobs = jobsData?.jobs.filter(j => j.status === 'running') || [];
-  const activities = activityData?.activities || [];
+  const activeJobs = jobs.filter(j => j.status === 'running');
 
   return (
     <div className="p-6 space-y-6">
@@ -157,7 +127,7 @@ export default function Dashboard() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
           <p className="text-muted-foreground mt-1">
-            Overview of your content absorption pipeline
+            Overview of your content pipeline
           </p>
         </div>
         <div className="flex gap-3">
@@ -180,30 +150,30 @@ export default function Dashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Articles"
-          value={stats?.totalArticles || 0}
+          value={stats?.total || 0}
           subtitle="Across all sources"
           icon={FileText}
           loading={statsLoading}
         />
         <StatCard
           title="Transformed"
-          value={(stats?.transformed || 0) + (stats?.translated || 0)}
+          value={stats?.transformed || 0}
           subtitle={`${stats?.collected || 0} pending transformation`}
           icon={RefreshCw}
           loading={statsLoading}
         />
         <StatCard
-          title="Translated"
-          value={stats?.translated || 0}
-          subtitle="Multi-language ready"
+          title="Total Words"
+          value={((stats?.totalWords || 0) / 1000).toFixed(1) + 'k'}
+          subtitle="Content volume"
           icon={Languages}
           loading={statsLoading}
         />
         <StatCard
-          title="Avg Word Count"
-          value={stats?.avgWordCount?.toLocaleString() || 0}
-          subtitle="Per article"
-          icon={TrendingUp}
+          title="Providers"
+          value={overview?.totalProviders || 0}
+          subtitle="Collection sources"
+          icon={Users}
           loading={statsLoading}
         />
       </div>
@@ -270,7 +240,7 @@ export default function Dashboard() {
                   </div>
                   <div>
                     <p className="text-2xl font-bold">{stats?.transformed || 0}</p>
-                    <p className="text-xs text-muted-foreground">Ready for Translation</p>
+                    <p className="text-xs text-muted-foreground">Transformed</p>
                   </div>
                 </div>
               </CardContent>
@@ -282,8 +252,8 @@ export default function Dashboard() {
                     <Globe className="h-5 w-5 text-success" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold">{stats?.published || 0}</p>
-                    <p className="text-xs text-muted-foreground">Published</p>
+                    <p className="text-2xl font-bold">{overview?.successRate || 0}%</p>
+                    <p className="text-xs text-muted-foreground">Success Rate</p>
                   </div>
                 </div>
               </CardContent>
@@ -291,24 +261,52 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Activity Feed */}
+        {/* Languages & Providers */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Recent Activity</h2>
-            <Button variant="ghost" size="sm">
-              View All
-              <ArrowUpRight className="h-4 w-4 ml-1" />
-            </Button>
+            <h2 className="text-lg font-semibold">By Language</h2>
           </div>
           <Card>
-            <CardContent className="divide-y">
-              {activities.length > 0 ? (
-                activities.map(activity => (
-                  <ActivityItem key={activity.id} activity={activity} />
-                ))
+            <CardContent className="pt-6">
+              {stats?.byLanguage && stats.byLanguage.length > 0 ? (
+                <div className="space-y-4">
+                  {stats.byLanguage.slice(0, 5).map((lang) => (
+                    <div key={lang.language} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">{lang.language.toUpperCase()}</Badge>
+                        <span className="text-sm">{lang.count} articles</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {((lang.words || 0) / 1000).toFixed(1)}k words
+                      </span>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <div className="py-8 text-center text-muted-foreground">
-                  No recent activity
+                  No language data
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">By Provider</h2>
+          </div>
+          <Card>
+            <CardContent className="pt-6">
+              {stats?.byProvider && stats.byProvider.length > 0 ? (
+                <div className="space-y-4">
+                  {stats.byProvider.slice(0, 5).map((provider) => (
+                    <div key={provider.slug} className="flex items-center justify-between">
+                      <span className="text-sm font-medium">{provider.name}</span>
+                      <Badge variant="secondary">{provider.count}</Badge>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-8 text-center text-muted-foreground">
+                  No provider data
                 </div>
               )}
             </CardContent>

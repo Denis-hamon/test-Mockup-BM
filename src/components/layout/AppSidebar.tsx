@@ -1,4 +1,4 @@
-import { Home, Radio, Activity, BookOpen, Settings } from "lucide-react";
+import { Home, FolderKanban, BarChart3, Settings } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 
@@ -16,10 +16,9 @@ import {
 } from "@/components/ui/sidebar";
 
 const navigationItems = [
-  { title: "Dashboard", url: "/", icon: Home },
-  { title: "Collection Points", url: "/collection-points", icon: Radio },
-  { title: "Live Monitor", url: "/live-monitor", icon: Activity },
-  { title: "Content Repository", url: "/repository", icon: BookOpen },
+  { title: "Home", url: "/", icon: Home },
+  { title: "Projects", url: "/projects", icon: FolderKanban },
+  { title: "Reporting", url: "/reporting", icon: BarChart3 },
 ];
 
 const settingsItem = { title: "Settings", url: "/settings", icon: Settings };
@@ -39,13 +38,13 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r-0">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-red-600 text-white font-bold text-sm">
-            HS
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 text-white font-bold text-sm">
+            CP
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="font-semibold text-sidebar-foreground text-sm">Hot Stinger</span>
-              <span className="text-xs text-sidebar-muted">Content Platform</span>
+              <span className="font-semibold text-sidebar-foreground text-sm">Content Pipeline</span>
+              <span className="text-xs text-sidebar-muted">OVHcloud Platform</span>
             </div>
           )}
         </div>
