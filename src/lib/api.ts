@@ -527,6 +527,53 @@ export const api = {
   deleteArticle: (id: number) =>
     fetchApi<{ success: boolean }>(`/articles/${id}`, { method: 'DELETE' }),
 
+  // Article Diagnostics
+  diagnoseArticles: (params: { providerId?: number; status?: string } = {}) => {
+    const searchParams = new URLSearchParams();
+    if (params.providerId) searchParams.set('providerId', String(params.providerId));
+    if (params.status) searchParams.set('status', params.status);
+    return fetchApi<{
+      summary: {
+        total: number;
+        valid: number;
+        invalid: number;
+        botProtectionBlocked: number;
+        transformable: number;
+      };
+      articles: Array<{
+        id: number;
+        title: string;
+        url: string;
+        status: string;
+        providerId: number;
+        validation: {
+          isValid: boolean;
+          issues: Array<{ type: string; message: string; severity: string }>;
+          wordCount: number;
+          contentLength: number;
+          canTransform: boolean;
+        };
+      }>;
+    }>(`/articles/diagnose?${searchParams.toString()}`);
+  },
+
+  validateArticles: (providerId: number, markInvalid: boolean = false) =>
+    fetchApi<{
+      success: boolean;
+      total: number;
+      valid: number;
+      invalid: number;
+      markedInvalid: number;
+      invalidArticles: Array<{
+        id: number;
+        title: string;
+        issues: Array<{ type: string; message: string; severity: string }>;
+      }>;
+    }>('/articles/validate-batch', {
+      method: 'POST',
+      body: JSON.stringify({ providerId, markInvalid }),
+    }),
+
   batchTransform: (articleIds: number[]) =>
     fetchApi<{ message: string; queued: number }>('/articles/batch/transform', {
       method: 'POST',
