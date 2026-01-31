@@ -34,12 +34,14 @@ import {
   AlertCircle,
   Loader2,
   Activity,
+  Stethoscope,
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { toast } from "sonner";
 import api, { type Provider, type Job } from "@/lib/api";
 import { ProviderModal, type ProviderFormData } from "@/components/ProviderModal";
 import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
+import { ArticleDiagnosticPanel, DiagnosticBadge } from "@/components/ArticleDiagnosticPanel";
 import { Link, useParams } from "react-router-dom";
 
 function StatusBadge({ isActive, hasArticles }: { isActive: boolean; hasArticles: boolean }) {
@@ -66,7 +68,7 @@ function StatusBadge({ isActive, hasArticles }: { isActive: boolean; hasArticles
   );
 }
 
-function CollectionPointRow({ point, activeJob, lastCompletedJob, onStart, onPause, onEdit, onDelete, isStarting }: {
+function CollectionPointRow({ point, activeJob, lastCompletedJob, onStart, onPause, onEdit, onDelete, onDiagnose, isStarting, isDiagnosing }: {
   point: Provider;
   activeJob?: Job;
   lastCompletedJob?: Job;
@@ -74,7 +76,9 @@ function CollectionPointRow({ point, activeJob, lastCompletedJob, onStart, onPau
   onPause: (id: number) => void;
   onEdit: (provider: Provider) => void;
   onDelete: (provider: Provider) => void;
+  onDiagnose: (provider: Provider) => void;
   isStarting: boolean;
+  isDiagnosing: boolean;
 }) {
   const hasActiveJob = !!activeJob && (activeJob.status === 'running' || activeJob.status === 'paused');
   const articleCount = parseInt(String(point.articles_count || '0'), 10);
@@ -134,20 +138,23 @@ function CollectionPointRow({ point, activeJob, lastCompletedJob, onStart, onPau
         )}
       </TableCell>
       <TableCell>
-        {successRate !== undefined ? (
-          <div className="flex items-center gap-1 text-sm">
-            {successRate >= 90 ? (
-              <CheckCircle className="h-4 w-4 text-success" />
-            ) : successRate >= 70 ? (
-              <Clock className="h-4 w-4 text-yellow-500" />
-            ) : (
-              <AlertCircle className="h-4 w-4 text-destructive" />
-            )}
-            <span>{successRate}%</span>
-          </div>
-        ) : (
-          <span className="text-muted-foreground text-sm">—</span>
-        )}
+        <div className="flex items-center gap-2">
+          {successRate !== undefined ? (
+            <div className="flex items-center gap-1 text-sm">
+              {successRate >= 90 ? (
+                <CheckCircle className="h-4 w-4 text-success" />
+              ) : successRate >= 70 ? (
+                <Clock className="h-4 w-4 text-yellow-500" />
+              ) : (
+                <AlertCircle className="h-4 w-4 text-destructive" />
+              )}
+              <span>{successRate}%</span>
+            </div>
+          ) : (
+            <span className="text-muted-foreground text-sm">—</span>
+          )}
+          {articleCount > 0 && <DiagnosticBadge providerId={point.id} />}
+        </div>
       </TableCell>
       <TableCell className="text-muted-foreground text-sm">
         {point.last_sync_at ? formatDistanceToNow(new Date(point.last_sync_at), { addSuffix: true }) : 'Never'}
@@ -189,6 +196,10 @@ function CollectionPointRow({ point, activeJob, lastCompletedJob, onStart, onPau
                 View Source
               </a>
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onDiagnose(point)}>
+              <Stethoscope className="h-4 w-4 mr-2" />
+              Diagnostiquer
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => onEdit(point)}>
               <Pencil className="h-4 w-4 mr-2" />
@@ -215,6 +226,7 @@ export default function CollectionPoints() {
   const [providerModalOpen, setProviderModalOpen] = useState(false);
   const [editingProvider, setEditingProvider] = useState<Provider | null>(null);
   const [deletingProvider, setDeletingProvider] = useState<Provider | null>(null);
+  const [diagnosingProvider, setDiagnosingProvider] = useState<Provider | null>(null);
   const queryClient = useQueryClient();
 
   const parsedProjectId = projectId ? parseInt(projectId) : undefined;
@@ -511,7 +523,9 @@ export default function CollectionPoints() {
                     onPause={(id) => pauseMutation.mutate(id)}
                     onEdit={(provider) => setEditingProvider(provider)}
                     onDelete={(provider) => setDeletingProvider(provider)}
+                    onDiagnose={(provider) => setDiagnosingProvider(provider)}
                     isStarting={startingId === point.id}
+                    isDiagnosing={diagnosingProvider?.id === point.id}
                   />
                 ))}
               </TableBody>
@@ -524,6 +538,14 @@ export default function CollectionPoints() {
                 Add Your First Collection Point
               </Button>
             </div>
+          )}
+
+          {/* Diagnostic Panel */}
+          {diagnosingProvider && (
+            <ArticleDiagnosticPanel
+              providerId={diagnosingProvider.id}
+              providerName={diagnosingProvider.name}
+            />
           )}
         </CardContent>
       </Card>
