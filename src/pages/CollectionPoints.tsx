@@ -138,23 +138,20 @@ function CollectionPointRow({ point, activeJob, lastCompletedJob, onStart, onPau
         )}
       </TableCell>
       <TableCell>
-        <div className="flex items-center gap-2">
-          {successRate !== undefined ? (
-            <div className="flex items-center gap-1 text-sm">
-              {successRate >= 90 ? (
-                <CheckCircle className="h-4 w-4 text-success" />
-              ) : successRate >= 70 ? (
-                <Clock className="h-4 w-4 text-yellow-500" />
-              ) : (
-                <AlertCircle className="h-4 w-4 text-destructive" />
-              )}
-              <span>{successRate}%</span>
-            </div>
-          ) : (
-            <span className="text-muted-foreground text-sm">—</span>
-          )}
-          {articleCount > 0 && <DiagnosticBadge providerId={point.id} />}
-        </div>
+        {successRate !== undefined ? (
+          <div className="flex items-center gap-1 text-sm">
+            {successRate >= 90 ? (
+              <CheckCircle className="h-4 w-4 text-success" />
+            ) : successRate >= 70 ? (
+              <Clock className="h-4 w-4 text-yellow-500" />
+            ) : (
+              <AlertCircle className="h-4 w-4 text-destructive" />
+            )}
+            <span>{successRate}%</span>
+          </div>
+        ) : (
+          <span className="text-muted-foreground text-sm">—</span>
+        )}
       </TableCell>
       <TableCell className="text-muted-foreground text-sm">
         {point.last_sync_at ? formatDistanceToNow(new Date(point.last_sync_at), { addSuffix: true }) : 'Never'}
