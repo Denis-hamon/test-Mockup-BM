@@ -129,6 +129,8 @@ export interface Provider {
   contentSelectors?: string;
   autoTransform?: boolean;
   autoTranslate?: boolean;
+  jsRender?: boolean;
+  scrapingMethod?: 'firecrawl' | 'direct' | 'playwright';
   is_active: boolean;
   activeJobs?: number;
   project_id?: number;

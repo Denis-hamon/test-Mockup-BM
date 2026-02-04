@@ -19,7 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Loader2, Settings2, Zap, Globe, Shield } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 import type { Provider } from "@/lib/api";
 
 interface ProviderModalProps {
@@ -43,6 +44,8 @@ export interface ProviderFormData {
   schedule: string;
   autoTransform: boolean;
   autoTranslate: boolean;
+  jsRender: boolean;
+  scrapingMethod: 'firecrawl' | 'direct' | 'playwright';
 }
 
 function generateSlug(name: string): string {
@@ -73,6 +76,8 @@ export function ProviderModal({
     schedule: "manual",
     autoTransform: true,
     autoTranslate: false,
+    jsRender: false,
+    scrapingMethod: 'firecrawl',
   });
 
   useEffect(() => {
@@ -93,6 +98,8 @@ export function ProviderModal({
         schedule: provider.schedule || "manual",
         autoTransform: provider.autoTransform ?? true,
         autoTranslate: provider.autoTranslate ?? false,
+        jsRender: provider.jsRender ?? false,
+        scrapingMethod: provider.scrapingMethod || 'firecrawl',
       });
     } else {
       setFormData({
@@ -107,6 +114,8 @@ export function ProviderModal({
         schedule: "manual",
         autoTransform: true,
         autoTranslate: false,
+        jsRender: false,
+        scrapingMethod: 'firecrawl',
       });
     }
   }, [provider, open]);
@@ -284,6 +293,67 @@ export function ProviderModal({
               placeholder="article, .post-content, main"
             />
           </div>
+
+          {/* Scraping Method Section */}
+          <Separator className="my-4" />
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Settings2 className="h-4 w-4" />
+              Méthode de collecte
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="scrapingMethod">Méthode</Label>
+                <Select
+                  value={formData.scrapingMethod}
+                  onValueChange={(v: 'firecrawl' | 'direct' | 'playwright') =>
+                    setFormData((prev) => ({ ...prev, scrapingMethod: v }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="firecrawl">
+                      <span className="flex items-center gap-2">
+                        <Zap className="h-3 w-3" />
+                        Firecrawl (Recommandé)
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="direct">
+                      <span className="flex items-center gap-2">
+                        <Globe className="h-3 w-3" />
+                        HTTP Direct
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="playwright">
+                      <span className="flex items-center gap-2">
+                        <Shield className="h-3 w-3" />
+                        Playwright (Anti-bot)
+                      </span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2 flex flex-col justify-end">
+                <div className="flex items-center space-x-2 h-10">
+                  <Switch
+                    id="jsRender"
+                    checked={formData.jsRender}
+                    onCheckedChange={(checked) =>
+                      setFormData((prev) => ({ ...prev, jsRender: checked }))
+                    }
+                  />
+                  <Label htmlFor="jsRender" className="text-sm">JavaScript Rendering</Label>
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Activez JavaScript Rendering pour les sites dynamiques (React, Vue, etc.) ou protégés par Cloudflare.
+            </p>
+          </div>
+          <Separator className="my-4" />
 
           <div className="flex items-center justify-between pt-2">
             <div className="flex items-center space-x-2">

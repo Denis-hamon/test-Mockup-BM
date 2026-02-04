@@ -590,6 +590,11 @@ export default function CollectionPoints() {
             <ArticleDiagnosticPanel
               providerId={diagnosingProvider.id}
               providerName={diagnosingProvider.name}
+              provider={diagnosingProvider}
+              onProviderUpdate={() => {
+                queryClient.invalidateQueries({ queryKey: ['providers'] });
+                setDiagnosingProvider(null);
+              }}
             />
           )}
         </CardContent>

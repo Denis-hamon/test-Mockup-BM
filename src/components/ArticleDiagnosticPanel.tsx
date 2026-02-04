@@ -25,9 +25,13 @@ import {
   ExternalLink,
   ChevronDown,
   ChevronUp,
+  Zap,
+  Settings,
+  Play,
+  Lightbulb,
 } from "lucide-react";
 import { toast } from "sonner";
-import api from "@/lib/api";
+import api, { Provider } from "@/lib/api";
 
 interface DiagnosticSummary {
   total: number;
@@ -101,7 +105,14 @@ function IssuesList({ issues }: { issues: Array<{ type: string; message: string;
   );
 }
 
-export function ArticleDiagnosticPanel({ providerId, providerName }: { providerId: number; providerName: string }) {
+interface ArticleDiagnosticPanelProps {
+  providerId: number;
+  providerName: string;
+  provider?: Provider;
+  onProviderUpdate?: () => void;
+}
+
+export function ArticleDiagnosticPanel({ providerId, providerName, provider, onProviderUpdate }: ArticleDiagnosticPanelProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const queryClient = useQueryClient();
@@ -119,6 +130,30 @@ export function ArticleDiagnosticPanel({ providerId, providerName }: { providerI
       toast.success(`${result.markedInvalid} articles marqués comme invalides`);
       queryClient.invalidateQueries({ queryKey: ['article-diagnosis', providerId] });
       queryClient.invalidateQueries({ queryKey: ['providers'] });
+    },
+    onError: (error: Error) => {
+      toast.error(`Erreur: ${error.message}`);
+    },
+  });
+
+  const enableJsRenderMutation = useMutation({
+    mutationFn: async () => {
+      // Update provider to enable JS rendering
+      const response = await fetch(`/api/providers/${providerId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsRender: true,
+          scrapingMethod: 'playwright'
+        })
+      });
+      if (!response.ok) throw new Error('Failed to update provider');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast.success('JavaScript Rendering activé. Relancez la collecte.');
+      queryClient.invalidateQueries({ queryKey: ['providers'] });
+      onProviderUpdate?.();
     },
     onError: (error: Error) => {
       toast.error(`Erreur: ${error.message}`);
@@ -242,10 +277,10 @@ export function ArticleDiagnosticPanel({ providerId, providerName }: { providerI
 
             {/* Warning if many invalid */}
             {summary.botProtectionBlocked > 0 && (
-              <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-                <div className="flex items-start gap-2">
-                  <Shield className="h-5 w-5 text-yellow-600 mt-0.5" />
-                  <div>
+              <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                <div className="flex items-start gap-3">
+                  <Shield className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
                     <p className="font-medium text-yellow-700 dark:text-yellow-500">
                       Protection Cloudflare détectée
                     </p>
@@ -253,10 +288,78 @@ export function ArticleDiagnosticPanel({ providerId, providerName }: { providerI
                       {summary.botProtectionBlocked} article(s) ont été bloqués par la protection anti-bot
                       du site source. Le contenu collecté est une page d'attente au lieu du vrai article.
                     </p>
-                    <p className="text-xs text-yellow-600/80 mt-2">
-                      Solution: Utilisez un scraper avec support des navigateurs headless ou
-                      configurez un proxy avec Firecrawl.
+
+                    {/* Recommendation */}
+                    <div className="mt-3 p-3 rounded-md bg-blue-500/10 border border-blue-500/20">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Lightbulb className="h-4 w-4 text-blue-500" />
+                        <span className="font-medium text-sm text-blue-700 dark:text-blue-400">
+                          Action recommandée
+                        </span>
+                      </div>
+                      <p className="text-xs text-blue-600 dark:text-blue-400 mb-3">
+                        Activez le rendu JavaScript avec Playwright pour contourner la protection anti-bot.
+                        Cette méthode simule un vrai navigateur et peut résoudre les blocages Cloudflare.
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {(!provider?.jsRender || provider?.scrapingMethod !== 'playwright') && (
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={() => enableJsRenderMutation.mutate()}
+                            disabled={enableJsRenderMutation.isPending}
+                            className="bg-blue-600 hover:bg-blue-700"
+                          >
+                            {enableJsRenderMutation.isPending ? (
+                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                            ) : (
+                              <Zap className="h-3 w-3 mr-1" />
+                            )}
+                            Activer JS Rendering
+                          </Button>
+                        )}
+                        {provider?.jsRender && provider?.scrapingMethod === 'playwright' && (
+                          <Badge variant="secondary" className="bg-green-500/10 text-green-600">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            JS Rendering activé
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* General recommendation for low success rate */}
+            {summary.total > 0 && summary.invalid > summary.total * 0.3 && summary.botProtectionBlocked === 0 && (
+              <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-orange-700 dark:text-orange-500">
+                      Taux d'échec élevé ({Math.round((summary.invalid / summary.total) * 100)}%)
                     </p>
+                    <p className="text-sm text-orange-600 dark:text-orange-400 mt-1">
+                      Beaucoup d'articles ont un contenu trop court ou invalide. Vérifiez que les sélecteurs
+                      CSS sont corrects ou essayez d'activer le JavaScript Rendering.
+                    </p>
+                    {!provider?.jsRender && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="mt-2"
+                        onClick={() => enableJsRenderMutation.mutate()}
+                        disabled={enableJsRenderMutation.isPending}
+                      >
+                        {enableJsRenderMutation.isPending ? (
+                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                        ) : (
+                          <Settings className="h-3 w-3 mr-1" />
+                        )}
+                        Essayer JS Rendering
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
