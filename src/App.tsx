@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ProjectLayout } from "@/components/layout/ProjectLayout";
+import { AuthProvider } from "@/context/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Home from "./pages/Home";
 import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
@@ -15,6 +17,10 @@ import LiveMonitor from "./pages/LiveMonitor";
 import ContentRepository from "./pages/ContentRepository";
 import ArticleDetail from "./pages/ArticleDetail";
 import Settings from "./pages/Settings";
+import AIGuidelines from "./pages/AIGuidelines";
+import Documentation from "./pages/Documentation";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -38,31 +44,102 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AppLayout>
+        <AuthProvider>
           <Routes>
-            {/* Global Routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/projects" element={<Projects />} />
-            <Route path="/reporting" element={<Reporting />} />
-            <Route path="/article/:id" element={<ArticleDetail />} />
-            <Route path="/settings" element={<Settings />} />
+            {/* Public Routes (no authentication required) */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+
+            {/* Protected Routes (authentication required) */}
+            <Route path="/" element={
+              <ProtectedRoute>
+                <AppLayout><Home /></AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/projects" element={
+              <ProtectedRoute>
+                <AppLayout><Projects /></AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/reporting" element={
+              <ProtectedRoute>
+                <AppLayout><Reporting /></AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/article/:id" element={
+              <ProtectedRoute>
+                <AppLayout><ArticleDetail /></AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/documentation" element={
+              <ProtectedRoute>
+                <AppLayout><Documentation /></AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <AppLayout><Settings /></AppLayout>
+              </ProtectedRoute>
+            } />
 
             {/* Project-Scoped Routes with ProjectLayout */}
-            <Route path="/projects/:id" element={<ProjectPage><ProjectDetail /></ProjectPage>} />
-            <Route path="/projects/:id/collection-points" element={<ProjectPage><CollectionPoints /></ProjectPage>} />
-            <Route path="/projects/:id/live-monitor" element={<ProjectPage><LiveMonitor /></ProjectPage>} />
-            <Route path="/projects/:id/repository" element={<ProjectPage><ContentRepository /></ProjectPage>} />
-            <Route path="/projects/:id/settings" element={<ProjectPage><ProjectSettings /></ProjectPage>} />
+            <Route path="/projects/:id" element={
+              <ProtectedRoute>
+                <AppLayout><ProjectPage><ProjectDetail /></ProjectPage></AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/projects/:id/collection-points" element={
+              <ProtectedRoute>
+                <AppLayout><ProjectPage><CollectionPoints /></ProjectPage></AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/projects/:id/live-monitor" element={
+              <ProtectedRoute>
+                <AppLayout><ProjectPage><LiveMonitor /></ProjectPage></AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/projects/:id/repository" element={
+              <ProtectedRoute>
+                <AppLayout><ProjectPage><ContentRepository /></ProjectPage></AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/projects/:id/article/:articleId" element={
+              <ProtectedRoute>
+                <AppLayout><ProjectPage><ArticleDetail /></ProjectPage></AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/projects/:id/ai-guidelines" element={
+              <ProtectedRoute>
+                <AppLayout><ProjectPage><AIGuidelines /></ProjectPage></AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/projects/:id/settings" element={
+              <ProtectedRoute>
+                <AppLayout><ProjectPage><ProjectSettings /></ProjectPage></AppLayout>
+              </ProtectedRoute>
+            } />
 
-            {/* Legacy standalone routes (redirect to default project or show global view) */}
-            <Route path="/collection-points" element={<CollectionPoints />} />
-            <Route path="/live-monitor" element={<LiveMonitor />} />
-            <Route path="/repository" element={<ContentRepository />} />
+            {/* Legacy standalone routes */}
+            <Route path="/collection-points" element={
+              <ProtectedRoute>
+                <AppLayout><CollectionPoints /></AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/live-monitor" element={
+              <ProtectedRoute>
+                <AppLayout><LiveMonitor /></AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/repository" element={
+              <ProtectedRoute>
+                <AppLayout><ContentRepository /></AppLayout>
+              </ProtectedRoute>
+            } />
 
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </AppLayout>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

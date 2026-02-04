@@ -6,6 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AnimatedCard, AnimatedCardContent } from "@/components/ui/animated-card";
+import { AnimatedProgress } from "@/components/ui/animated-progress";
+import { AnimatedNumber } from "@/components/ui/animated-number";
+import { AnimatedStatusBadge } from "@/components/ui/animated-badge";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Dialog,
   DialogContent,
@@ -43,11 +48,19 @@ import {
   Sparkles,
   Languages,
   Wand2,
-  Bot
+  Bot,
+  Zap,
+  Timer,
+  Activity,
+  ShieldAlert,
+  Trash2,
+  ChevronDown,
+  ChevronUp,
+  Target,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
-import api, { type Job, type JobDiagnosis, type ArchivedJob, type JobLog, type Provider, type PipelineJob } from "@/lib/api";
+import api, { type Job, type JobDiagnosis, type ArchivedJob, type JobLog, type Provider, type PipelineJob, type PipelineDiagnostics } from "@/lib/api";
 
 function JobStatusBadge({ status }: { status: string }) {
   const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; className: string }> = {
@@ -517,6 +530,114 @@ function JobsTable({ jobs, onDiagnose }: {
   );
 }
 
+function formatDuration(startedAt: string, completedAt: string): string {
+  const start = new Date(startedAt).getTime();
+  const end = new Date(completedAt).getTime();
+  const durationMs = end - start;
+
+  if (durationMs < 60000) {
+    return `${Math.round(durationMs / 1000)}s`;
+  } else if (durationMs < 3600000) {
+    const mins = Math.floor(durationMs / 60000);
+    const secs = Math.round((durationMs % 60000) / 1000);
+    return `${mins}m ${secs}s`;
+  } else {
+    const hours = Math.floor(durationMs / 3600000);
+    const mins = Math.round((durationMs % 3600000) / 60000);
+    return `${hours}h ${mins}m`;
+  }
+}
+
+function ArchivedJobCard({ job }: { job: ArchivedJob }) {
+  const duration = job.started_at && job.completed_at
+    ? formatDuration(job.started_at, job.completed_at)
+    : '-';
+
+  const successRate = job.articles_found > 0
+    ? Math.round((job.articles_processed / job.articles_found) * 100)
+    : 0;
+
+  return (
+    <div className="p-4 border rounded-lg hover:bg-muted/30 transition-colors">
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <div className={`p-2 rounded-full ${
+            job.status === 'completed' ? 'bg-green-100 dark:bg-green-900/30' :
+            job.status === 'failed' ? 'bg-red-100 dark:bg-red-900/30' :
+            'bg-muted'
+          }`}>
+            {job.status === 'completed' ? (
+              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+            ) : job.status === 'failed' ? (
+              <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+            ) : (
+              <Archive className="h-4 w-4 text-muted-foreground" />
+            )}
+          </div>
+          <div>
+            <h4 className="font-medium">{job.provider_name}</h4>
+            <p className="text-xs text-muted-foreground">
+              {new Date(job.started_at).toLocaleDateString('en-US', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </p>
+          </div>
+        </div>
+        <JobStatusBadge status={job.status} />
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-4 gap-3 mb-3">
+        <div className="text-center p-2 bg-muted/50 rounded">
+          <p className="text-lg font-semibold">{job.articles_found}</p>
+          <p className="text-xs text-muted-foreground">Collected</p>
+        </div>
+        <div className="text-center p-2 bg-muted/50 rounded">
+          <p className="text-lg font-semibold">{job.articles_processed}</p>
+          <p className="text-xs text-muted-foreground">Processed</p>
+        </div>
+        <div className="text-center p-2 bg-muted/50 rounded">
+          <p className={`text-lg font-semibold ${
+            job.completion_rate >= 90 ? 'text-green-600' :
+            job.completion_rate >= 50 ? 'text-yellow-600' :
+            'text-red-600'
+          }`}>{job.completion_rate}%</p>
+          <p className="text-xs text-muted-foreground">Complete</p>
+        </div>
+        <div className="text-center p-2 bg-muted/50 rounded">
+          <p className="text-lg font-semibold">{duration}</p>
+          <p className="text-xs text-muted-foreground">Duration</p>
+        </div>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="mb-3">
+        <Progress value={job.completion_rate} className="h-2" />
+      </div>
+
+      {/* Failure Reason */}
+      {job.failure_reason && (
+        <div className="p-2 bg-destructive/10 rounded text-sm text-destructive flex items-start gap-2">
+          <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+          <span>{job.failure_reason}</span>
+        </div>
+      )}
+
+      {/* Footer */}
+      <div className="flex items-center justify-between text-xs text-muted-foreground mt-3 pt-3 border-t">
+        <span>Archived {formatDistanceToNow(new Date(job.archived_at), { addSuffix: true })}</span>
+        {job.estimated_total > 0 && (
+          <span>{job.articles_found} / {job.estimated_total} URLs</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function ArchivedJobsSection() {
   const { data: archivedJobs, isLoading } = useQuery({
     queryKey: ['archived-jobs'],
@@ -543,46 +664,446 @@ function ArchivedJobsSection() {
     );
   }
 
+  // Stats summary
+  const totalJobs = archivedJobs.length;
+  const successfulJobs = archivedJobs.filter(j => j.status === 'completed').length;
+  const totalArticles = archivedJobs.reduce((sum, j) => sum + j.articles_found, 0);
+  const avgCompletion = Math.round(
+    archivedJobs.reduce((sum, j) => sum + j.completion_rate, 0) / totalJobs
+  );
+
+  return (
+    <div className="space-y-4">
+      {/* Summary Stats */}
+      <div className="grid grid-cols-4 gap-4">
+        <div className="p-3 bg-muted/50 rounded-lg text-center">
+          <p className="text-2xl font-bold">{totalJobs}</p>
+          <p className="text-xs text-muted-foreground">Total Jobs</p>
+        </div>
+        <div className="p-3 bg-muted/50 rounded-lg text-center">
+          <p className="text-2xl font-bold text-green-600">{successfulJobs}</p>
+          <p className="text-xs text-muted-foreground">Successful</p>
+        </div>
+        <div className="p-3 bg-muted/50 rounded-lg text-center">
+          <p className="text-2xl font-bold">{totalArticles.toLocaleString()}</p>
+          <p className="text-xs text-muted-foreground">Articles Collected</p>
+        </div>
+        <div className="p-3 bg-muted/50 rounded-lg text-center">
+          <p className={`text-2xl font-bold ${
+            avgCompletion >= 90 ? 'text-green-600' :
+            avgCompletion >= 50 ? 'text-yellow-600' :
+            'text-red-600'
+          }`}>{avgCompletion}%</p>
+          <p className="text-xs text-muted-foreground">Avg. Completion</p>
+        </div>
+      </div>
+
+      {/* Jobs Grid */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {archivedJobs.map(job => (
+          <ArchivedJobCard key={job.id} job={job} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PipelineDiagnosticsPanel() {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const queryClient = useQueryClient();
+
+  const { data: diagnostics, isLoading } = useQuery({
+    queryKey: ['pipeline-diagnostics'],
+    queryFn: api.getPipelineDiagnostics,
+    refetchInterval: 3000,
+    enabled: isExpanded,
+  });
+
+  const pauseMutation = useMutation({
+    mutationFn: api.pausePipeline,
+    onSuccess: () => {
+      toast.success('Pipeline paused');
+      queryClient.invalidateQueries({ queryKey: ['pipeline-jobs'] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const resumeMutation = useMutation({
+    mutationFn: api.resumePipeline,
+    onSuccess: () => {
+      toast.success('Pipeline resumed');
+      queryClient.invalidateQueries({ queryKey: ['pipeline-jobs'] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: api.cancelPipeline,
+    onSuccess: () => {
+      toast.success('Pipeline cancelled');
+      queryClient.invalidateQueries({ queryKey: ['pipeline-jobs'] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const retryMutation = useMutation({
+    mutationFn: api.retryFailedPipeline,
+    onSuccess: (result) => {
+      toast.success(result.message);
+      queryClient.invalidateQueries({ queryKey: ['pipeline-jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['pipeline-diagnostics'] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const clearMutation = useMutation({
+    mutationFn: api.clearPipeline,
+    onSuccess: () => {
+      toast.success('Pipeline cleared');
+      queryClient.invalidateQueries({ queryKey: ['pipeline-jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['pipeline-diagnostics'] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const transformPendingMutation = useMutation({
+    mutationFn: () => api.transformPending(20),
+    onSuccess: (result) => {
+      toast.success(`Started transformation of ${result.count} articles`);
+      queryClient.invalidateQueries({ queryKey: ['pipeline-jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['pipeline-diagnostics'] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  // Query for pending articles count
+  const { data: transformProgress } = useQuery({
+    queryKey: ['transform-progress'],
+    queryFn: api.getTransformProgress,
+    refetchInterval: 5000,
+    enabled: isExpanded,
+  });
+
+  const isPaused = diagnostics?.transform.paused || diagnostics?.translate.paused;
+  const isRunning = diagnostics?.transform.status === 'running' || diagnostics?.translate.status === 'running';
+  const totalErrors = (diagnostics?.transform.errors || 0) + (diagnostics?.translate.errors || 0);
+
   return (
     <div className="border rounded-lg overflow-hidden">
-      <table className="w-full">
-        <thead className="bg-muted/50">
-          <tr>
-            <th className="text-left py-3 px-4 font-medium">Provider</th>
-            <th className="text-left py-3 px-4 font-medium">Status</th>
-            <th className="text-right py-3 px-4 font-medium">Articles</th>
-            <th className="text-right py-3 px-4 font-medium">Completion</th>
-            <th className="text-right py-3 px-4 font-medium">Archived</th>
-          </tr>
-        </thead>
-        <tbody>
-          {archivedJobs.map(job => (
-            <tr key={job.id} className="border-t hover:bg-muted/30">
-              <td className="py-3 px-4 font-medium">{job.provider_name}</td>
-              <td className="py-3 px-4">
-                <JobStatusBadge status={job.status} />
-              </td>
-              <td className="py-3 px-4 text-right">
-                {job.articles_found} / {job.estimated_total}
-              </td>
-              <td className="py-3 px-4 text-right">
-                <Badge variant={job.completion_rate >= 90 ? "default" : "secondary"}>
-                  {job.completion_rate}%
-                </Badge>
-              </td>
-              <td className="py-3 px-4 text-right text-sm text-muted-foreground">
-                {formatDistanceToNow(new Date(job.archived_at), { addSuffix: true })}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {/* Header - Always visible */}
+      <div
+        className="flex items-center justify-between p-4 bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex items-center gap-3">
+          <Activity className="h-5 w-5 text-purple-500" />
+          <div>
+            <h3 className="font-medium">Pipeline Controls & Diagnostics</h3>
+            <p className="text-xs text-muted-foreground">
+              Monitor performance, errors, and control the AI pipeline
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {diagnostics?.isRateLimited && (
+            <Badge variant="destructive" className="gap-1">
+              <ShieldAlert className="h-3 w-3" />
+              Rate Limited
+            </Badge>
+          )}
+          {totalErrors > 0 && (
+            <Badge variant="secondary" className="gap-1 bg-destructive/10 text-destructive">
+              <AlertTriangle className="h-3 w-3" />
+              {totalErrors} errors
+            </Badge>
+          )}
+          {diagnostics?.speed ? (
+            <Badge variant="outline" className="gap-1">
+              <Zap className="h-3 w-3" />
+              {diagnostics.speed}/min
+            </Badge>
+          ) : null}
+          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </div>
+      </div>
+
+      {/* Expanded Content */}
+      {isExpanded && (
+        <div className="p-4 space-y-4 border-t">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin" />
+            </div>
+          ) : diagnostics ? (
+            <>
+              {/* Control Buttons */}
+              <div className="flex flex-wrap gap-2">
+                {isRunning && !isPaused && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => pauseMutation.mutate()}
+                    disabled={pauseMutation.isPending}
+                  >
+                    {pauseMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Pause className="h-4 w-4 mr-2" />
+                    )}
+                    Pause Pipeline
+                  </Button>
+                )}
+                {isPaused && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => resumeMutation.mutate()}
+                    disabled={resumeMutation.isPending}
+                  >
+                    {resumeMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Play className="h-4 w-4 mr-2" />
+                    )}
+                    Resume Pipeline
+                  </Button>
+                )}
+                {isRunning && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => cancelMutation.mutate()}
+                    disabled={cancelMutation.isPending}
+                  >
+                    {cancelMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Square className="h-4 w-4 mr-2" />
+                    )}
+                    Cancel
+                  </Button>
+                )}
+                {diagnostics.failedArticleCount > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => retryMutation.mutate()}
+                    disabled={retryMutation.isPending}
+                    className="text-orange-600 border-orange-300 hover:bg-orange-50"
+                  >
+                    {retryMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <RotateCcw className="h-4 w-4 mr-2" />
+                    )}
+                    Retry {diagnostics.failedArticleCount} Failed
+                  </Button>
+                )}
+                {!isRunning && (diagnostics.transform.status !== 'idle' || diagnostics.translate.status !== 'idle') && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => clearMutation.mutate()}
+                    disabled={clearMutation.isPending}
+                  >
+                    {clearMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4 mr-2" />
+                    )}
+                    Clear History
+                  </Button>
+                )}
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => transformPendingMutation.mutate()}
+                  disabled={transformPendingMutation.isPending || (transformProgress?.status === 'running')}
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
+                  {transformPendingMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Wand2 className="h-4 w-4 mr-2" />
+                  )}
+                  Transform Pending Articles
+                </Button>
+              </div>
+
+              {/* Transform Progress */}
+              {transformProgress && transformProgress.status === 'running' && (
+                <div className="p-3 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-200 dark:border-purple-800">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                      Transforming Articles
+                    </span>
+                    <span className="text-sm text-purple-600 dark:text-purple-400">
+                      {transformProgress.current} / {transformProgress.total}
+                    </span>
+                  </div>
+                  <Progress
+                    value={(transformProgress.current / transformProgress.total) * 100}
+                    className="h-2 bg-purple-200 dark:bg-purple-900"
+                  />
+                  {transformProgress.errors > 0 && (
+                    <p className="text-xs text-destructive mt-1">
+                      {transformProgress.errors} errors (rate limited - will retry)
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="p-3 bg-muted/50 rounded-lg text-center">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <Zap className="h-4 w-4 text-yellow-500" />
+                    <span className="text-sm text-muted-foreground">Speed</span>
+                  </div>
+                  <p className="text-xl font-bold">{diagnostics.speed || 0}</p>
+                  <p className="text-xs text-muted-foreground">articles/min</p>
+                </div>
+                <div className="p-3 bg-muted/50 rounded-lg text-center">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <Timer className="h-4 w-4 text-blue-500" />
+                    <span className="text-sm text-muted-foreground">ETA</span>
+                  </div>
+                  <p className="text-xl font-bold">
+                    {diagnostics.etaMinutes ? (
+                      diagnostics.etaMinutes < 60
+                        ? `${diagnostics.etaMinutes}m`
+                        : `${Math.floor(diagnostics.etaMinutes / 60)}h ${diagnostics.etaMinutes % 60}m`
+                    ) : '-'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">remaining</p>
+                </div>
+                <div className="p-3 bg-muted/50 rounded-lg text-center">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <AlertTriangle className="h-4 w-4 text-red-500" />
+                    <span className="text-sm text-muted-foreground">Errors</span>
+                  </div>
+                  <p className={`text-xl font-bold ${totalErrors > 0 ? 'text-red-600' : ''}`}>
+                    {totalErrors}
+                  </p>
+                  <p className="text-xs text-muted-foreground">total</p>
+                </div>
+                <div className="p-3 bg-muted/50 rounded-lg text-center">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <XCircle className="h-4 w-4 text-orange-500" />
+                    <span className="text-sm text-muted-foreground">Failed</span>
+                  </div>
+                  <p className={`text-xl font-bold ${diagnostics.failedArticleCount > 0 ? 'text-orange-600' : ''}`}>
+                    {diagnostics.failedArticleCount}
+                  </p>
+                  <p className="text-xs text-muted-foreground">articles</p>
+                </div>
+              </div>
+
+              {/* Error Breakdown */}
+              {Object.keys(diagnostics.errorsByType).length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-red-500" />
+                    Error Breakdown
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(diagnostics.errorsByType).map(([type, count]) => (
+                      <Badge
+                        key={type}
+                        variant="secondary"
+                        className={`${
+                          type === 'rate_limit' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                          'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                        }`}
+                      >
+                        {type === 'rate_limit' && <ShieldAlert className="h-3 w-3 mr-1" />}
+                        {type.replace('_', ' ')}: {count}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Rate Limit Warning */}
+              {diagnostics.isRateLimited && (
+                <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <ShieldAlert className="h-5 w-5 text-yellow-600 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-yellow-700 dark:text-yellow-500">Rate Limited</p>
+                      <p className="text-sm text-yellow-600 dark:text-yellow-400">
+                        The OVH AI API is rate limiting requests. The pipeline will automatically retry with exponential backoff.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Recent Errors */}
+              {diagnostics.recentErrors.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Recent Errors</h4>
+                  <ScrollArea className="h-32 border rounded-lg">
+                    <div className="p-2 space-y-1 font-mono text-xs">
+                      {diagnostics.recentErrors.map((error, i) => (
+                        <div
+                          key={i}
+                          className={`p-2 rounded ${
+                            error.type === 'rate_limit' ? 'bg-yellow-500/10' : 'bg-destructive/10'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">
+                              {new Date(error.timestamp).toLocaleTimeString()}
+                            </span>
+                            <Badge variant="outline" className="text-xs">
+                              {error.type}
+                            </Badge>
+                          </div>
+                          <p className={error.type === 'rate_limit' ? 'text-yellow-600' : 'text-destructive'}>
+                            {error.message}
+                          </p>
+                          {error.articleId && (
+                            <p className="text-muted-foreground">Article #{error.articleId}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+              )}
+
+              {/* Last Error */}
+              {diagnostics.transform.lastError && (
+                <div className="p-3 bg-destructive/5 rounded-lg border border-destructive/10">
+                  <p className="text-sm font-medium text-destructive">Last Transform Error</p>
+                  <p className="text-xs text-muted-foreground mt-1">{diagnostics.transform.lastError}</p>
+                  {diagnostics.transform.lastErrorAt && (
+                    <p className="text-xs text-muted-foreground">
+                      {formatDistanceToNow(new Date(diagnostics.transform.lastErrorAt), { addSuffix: true })}
+                    </p>
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            <p className="text-center text-muted-foreground py-4">No diagnostic data available</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
 function PipelineJobCard({ job }: { job: PipelineJob }) {
+  const isScoring = job.phase === 'scoring';
   const isTransforming = job.phase === 'transform';
+  const isTranslating = job.phase === 'translate';
+
+  // Calculate progress for each phase
+  const scoringProgress = job.totalArticles > 0
+    ? Math.round((job.scoredCount || 0) / job.totalArticles * 100)
+    : 0;
   const transformProgress = job.totalArticles > 0
     ? Math.round((job.transformedCount / job.totalArticles) * 100)
     : 0;
@@ -592,7 +1113,7 @@ function PipelineJobCard({ job }: { job: PipelineJob }) {
 
   return (
     <Card className="overflow-hidden">
-      <div className={`h-1 ${job.status === 'running' ? 'bg-gradient-to-r from-purple-500 via-blue-500 to-purple-500 animate-pulse' : job.status === 'completed' ? 'bg-green-500' : 'bg-red-500'}`} />
+      <div className={`h-1 ${job.status === 'running' ? 'bg-gradient-to-r from-purple-500 via-yellow-500 via-blue-500 to-purple-500 animate-pulse' : job.status === 'completed' ? 'bg-green-500' : 'bg-red-500'}`} />
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -613,6 +1134,31 @@ function PipelineJobCard({ job }: { job: PipelineJob }) {
             {job.status === 'running' && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
             {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
           </Badge>
+        </div>
+
+        {/* Scoring Phase */}
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2">
+              <Target className={`h-4 w-4 ${isScoring && job.status === 'running' ? 'text-purple-500' : 'text-muted-foreground'}`} />
+              <span className={isScoring && job.status === 'running' ? 'font-medium' : ''}>
+                Relevance Scoring
+              </span>
+              {isScoring && job.status === 'running' && (
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+                </span>
+              )}
+            </div>
+            <span className="text-muted-foreground">
+              {job.scoredCount || 0}/{job.totalArticles}
+            </span>
+          </div>
+          <Progress
+            value={scoringProgress}
+            className="h-2"
+          />
         </div>
 
         {/* Transform Phase */}
@@ -692,7 +1238,16 @@ function PipelineJobsSection({ projectId }: { projectId?: number }) {
     enabled: !!projectId,
   });
 
+  // Also fetch all providers if no projectId for name mapping
+  const { data: allProviders = [] } = useQuery({
+    queryKey: ['providers'],
+    queryFn: () => api.getProviders(),
+    enabled: !projectId,
+  });
+
+  const activeProviders = projectId ? providers : allProviders;
   const providerIds = new Set(providers.map(p => p.id));
+  const providerNameMap = new Map(activeProviders.map(p => [p.id, p.name]));
 
   const { data: pipelineJobs, isLoading } = useQuery({
     queryKey: ['pipeline-jobs'],
@@ -700,10 +1255,15 @@ function PipelineJobsSection({ projectId }: { projectId?: number }) {
     refetchInterval: 2000, // Refresh every 2 seconds
   });
 
-  // Filter by project if projectId is set
-  const jobs = projectId && pipelineJobs
-    ? pipelineJobs.filter(j => providerIds.has(j.providerId))
-    : pipelineJobs;
+  // Enrich with provider names and filter by project if projectId is set
+  const enrichedJobs = pipelineJobs?.map(j => ({
+    ...j,
+    providerName: j.providerName || providerNameMap.get(j.providerId) || `Provider #${j.providerId}`,
+  }));
+
+  const jobs = projectId && enrichedJobs
+    ? enrichedJobs.filter(j => providerIds.has(j.providerId))
+    : enrichedJobs;
 
   const runningJobs = jobs?.filter(j => j.status === 'running') || [];
   const completedJobs = jobs?.filter(j => j.status === 'completed' || j.status === 'failed') || [];
@@ -732,6 +1292,9 @@ function PipelineJobsSection({ projectId }: { projectId?: number }) {
 
   return (
     <div className="space-y-4">
+      {/* Diagnostics Panel */}
+      <PipelineDiagnosticsPanel />
+
       {/* Running Jobs */}
       {runningJobs.length > 0 && (
         <div className="space-y-3">
@@ -787,10 +1350,19 @@ export default function LiveMonitor() {
     staleTime: 500, // Data is considered stale after 500ms
   });
 
+  // Create a map of provider IDs to names
+  const providerNameMap = new Map(providers.map(p => [p.id, p.name]));
+
+  // Enrich jobs with provider names and filter by project
+  const enrichedJobs = allJobs?.map(j => ({
+    ...j,
+    providerName: j.providerName || providerNameMap.get(j.providerId) || `Provider #${j.providerId}`,
+  }));
+
   // Filter jobs by project providers
   const jobs = parsedProjectId
-    ? allJobs?.filter(j => providerIds.has(j.providerId))
-    : allJobs;
+    ? enrichedJobs?.filter(j => providerIds.has(j.providerId))
+    : enrichedJobs;
 
   const [isPausingAll, setIsPausingAll] = useState(false);
   const [isCancellingAll, setIsCancellingAll] = useState(false);
@@ -907,50 +1479,73 @@ export default function LiveMonitor() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
+        <AnimatedCard hoverEffect="lift" delay={0}>
+          <AnimatedCardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Running</p>
-                <p className="text-2xl font-bold">{runningJobs.length}</p>
+                <AnimatedNumber value={runningJobs.length} className="text-2xl font-bold" />
               </div>
-              <RefreshCw className={`h-8 w-8 text-green-500 ${runningJobs.length > 0 ? 'animate-spin' : ''}`} />
+              <motion.div
+                animate={{ rotate: runningJobs.length > 0 ? 360 : 0 }}
+                transition={{ duration: 2, repeat: runningJobs.length > 0 ? Infinity : 0, ease: "linear" }}
+              >
+                <RefreshCw className="h-8 w-8 text-green-500" />
+              </motion.div>
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
+          </AnimatedCardContent>
+        </AnimatedCard>
+        <AnimatedCard hoverEffect="lift" delay={0.1}>
+          <AnimatedCardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Paused</p>
-                <p className="text-2xl font-bold">{jobs?.filter(j => j.status === 'paused').length || 0}</p>
+                <AnimatedNumber value={jobs?.filter(j => j.status === 'paused').length || 0} className="text-2xl font-bold" />
               </div>
-              <Pause className="h-8 w-8 text-yellow-500" />
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring" }}
+              >
+                <Pause className="h-8 w-8 text-yellow-500" />
+              </motion.div>
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
+          </AnimatedCardContent>
+        </AnimatedCard>
+        <AnimatedCard hoverEffect="lift" delay={0.2}>
+          <AnimatedCardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Completed</p>
-                <p className="text-2xl font-bold">{jobs?.filter(j => j.status === 'completed').length || 0}</p>
+                <AnimatedNumber value={jobs?.filter(j => j.status === 'completed').length || 0} className="text-2xl font-bold" />
               </div>
-              <CheckCircle className="h-8 w-8 text-green-500" />
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.3, type: "spring" }}
+              >
+                <CheckCircle className="h-8 w-8 text-green-500" />
+              </motion.div>
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
+          </AnimatedCardContent>
+        </AnimatedCard>
+        <AnimatedCard hoverEffect="lift" delay={0.3}>
+          <AnimatedCardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Failed</p>
-                <p className="text-2xl font-bold">{jobs?.filter(j => j.status === 'failed').length || 0}</p>
+                <AnimatedNumber value={jobs?.filter(j => j.status === 'failed').length || 0} className="text-2xl font-bold" />
               </div>
-              <AlertCircle className="h-8 w-8 text-red-500" />
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.4, type: "spring" }}
+              >
+                <AlertCircle className="h-8 w-8 text-red-500" />
+              </motion.div>
             </div>
-          </CardContent>
-        </Card>
+          </AnimatedCardContent>
+        </AnimatedCard>
       </div>
 
       {/* Tabs */}
@@ -1000,7 +1595,7 @@ export default function LiveMonitor() {
                 AI Processing Pipeline
               </CardTitle>
               <CardDescription>
-                Automatic transformation and translation of collected articles
+                Relevance scoring, transformation and translation of collected articles
               </CardDescription>
             </CardHeader>
             <CardContent>

@@ -3,6 +3,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { AnimatedCard, AnimatedCardContent } from "@/components/ui/animated-card";
+import { AnimatedButton } from "@/components/ui/animated-button";
+import { AnimatedStatusBadge } from "@/components/ui/animated-badge";
+import { AnimatedNumber } from "@/components/ui/animated-number";
+import { AnimatedList } from "@/components/ui/animated-list";
+import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -47,6 +53,12 @@ import {
   FileText,
   Zap,
   Filter,
+  Calendar,
+  ArrowUpDown,
+  Image,
+  TrendingUp,
+  X,
+  Target,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Link, useParams } from "react-router-dom";
@@ -55,8 +67,10 @@ import api, { type Article } from "@/lib/api";
 import { ArticleCard } from "@/components/ArticleCard";
 import { ArticleStatusBadge } from "@/components/ArticleStatusBadge";
 import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
+import { RelevanceScoringPanel, RelevanceScoreCompact } from "@/components/RelevanceScoringPanel";
+import { RelevanceScoreBadge } from "@/components/RelevanceScoreBadge";
 
-function ArticleRow({ article, isSelected, onSelect, onTransform, onTranslate, onPublish, onDelete }: {
+function ArticleRow({ article, isSelected, onSelect, onTransform, onTranslate, onPublish, onDelete, onScore, isScoring, projectId }: {
   article: Article;
   isSelected: boolean;
   onSelect: (checked: boolean) => void;
@@ -64,6 +78,9 @@ function ArticleRow({ article, isSelected, onSelect, onTransform, onTranslate, o
   onTranslate: () => void;
   onPublish: () => void;
   onDelete: () => void;
+  onScore: () => void;
+  isScoring?: boolean;
+  projectId?: string;
 }) {
   const handleCopyTitle = async () => {
     const title = article.transformed_title || article.original_title || article.title || '';
@@ -100,9 +117,9 @@ function ArticleRow({ article, isSelected, onSelect, onTransform, onTranslate, o
           onCheckedChange={onSelect}
         />
       </TableCell>
-      <TableCell className="max-w-[300px]">
-        <Link to={`/article/${article.id}`} className="hover:underline">
-          <span className="font-medium truncate block">{article.title}</span>
+      <TableCell className="max-w-[400px]">
+        <Link to={projectId ? `/projects/${projectId}/article/${article.id}` : `/article/${article.id}`} className="hover:underline">
+          <span className="font-medium line-clamp-2">{article.transformed_title || article.original_title || article.title || 'Untitled'}</span>
         </Link>
         <span className="text-xs text-muted-foreground">{article.provider_name}</span>
       </TableCell>
@@ -115,6 +132,13 @@ function ArticleRow({ article, isSelected, onSelect, onTransform, onTranslate, o
       <TableCell className="text-muted-foreground text-sm">
         {(article.word_count || 0).toLocaleString()} words
       </TableCell>
+      <TableCell>
+        <RelevanceScoreBadge
+          score={article.relevance_score}
+          reason={article.relevance_reason}
+          size="sm"
+        />
+      </TableCell>
       <TableCell className="text-muted-foreground text-sm">
         {article.translationsCount || 0} langs
       </TableCell>
@@ -123,6 +147,23 @@ function ArticleRow({ article, isSelected, onSelect, onTransform, onTranslate, o
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-1">
+          {/* Score button - show if not scored */}
+          {(article.relevance_score === null || article.relevance_score === undefined) && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-purple-600"
+              onClick={onScore}
+              disabled={isScoring}
+              title="Score Relevance"
+            >
+              {isScoring ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Target className="h-4 w-4" />
+              )}
+            </Button>
+          )}
           {/* Quick action button */}
           {nextAction && (
             <Button
@@ -143,7 +184,7 @@ function ArticleRow({ article, isSelected, onSelect, onTransform, onTranslate, o
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem asChild>
-                <Link to={`/article/${article.id}`}>
+                <Link to={projectId ? `/projects/${projectId}/article/${article.id}` : `/article/${article.id}`}>
                   <Eye className="h-4 w-4 mr-2" />
                   View Details
                 </Link>
@@ -186,6 +227,10 @@ function ArticleRow({ article, isSelected, onSelect, onTransform, onTranslate, o
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Re-transform
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={onScore} disabled={isScoring}>
+                <Target className="h-4 w-4 mr-2" />
+                {article.relevance_score !== null && article.relevance_score !== undefined ? 'Re-score Relevance' : 'Score Relevance'}
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
                 <Trash2 className="h-4 w-4 mr-2" />
@@ -204,8 +249,16 @@ export default function ContentRepository() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [languageFilter, setLanguageFilter] = useState<string>("all");
+  const [providerFilter, setProviderFilter] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<string>("all");
+  const [wordCountFilter, setWordCountFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("newest");
+  const [hasTranslations, setHasTranslations] = useState<string>("all");
+  const [relevanceFilter, setRelevanceFilter] = useState<string>("all");
   const [selectedArticles, setSelectedArticles] = useState<Set<number>>(new Set());
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showRelevancePanel, setShowRelevancePanel] = useState(false);
   const [page, setPage] = useState(0);
   const [deletingArticle, setDeletingArticle] = useState<Article | null>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -214,17 +267,154 @@ export default function ContentRepository() {
   const queryClient = useQueryClient();
   const parsedProjectId = projectId ? parseInt(projectId) : undefined;
 
+  // Fetch providers for the filter
+  const { data: providers = [] } = useQuery({
+    queryKey: ['providers', parsedProjectId],
+    queryFn: () => api.getProviders(parsedProjectId),
+  });
+
+  // Fetch stats separately (without status filter) so cards always show correct totals
+  const { data: statsData } = useQuery({
+    queryKey: ['articles-stats', parsedProjectId, providerFilter, languageFilter],
+    queryFn: () => api.getArticles({
+      language: languageFilter !== 'all' ? languageFilter : undefined,
+      providerId: providerFilter !== 'all' ? parseInt(providerFilter) : undefined,
+      projectId: parsedProjectId,
+      limit: 1000, // Get enough to count stats
+      offset: 0,
+    }),
+    staleTime: 10000, // Cache for 10 seconds
+  });
+
   const { data, isLoading } = useQuery({
-    queryKey: ['articles', searchQuery, statusFilter, languageFilter, page, parsedProjectId],
+    queryKey: ['articles', searchQuery, statusFilter, languageFilter, providerFilter, dateFilter, wordCountFilter, sortBy, hasTranslations, page, parsedProjectId],
     queryFn: () => api.getArticles({
       status: statusFilter !== 'all' ? statusFilter : undefined,
       language: languageFilter !== 'all' ? languageFilter : undefined,
+      providerId: providerFilter !== 'all' ? parseInt(providerFilter) : undefined,
       projectId: parsedProjectId,
       limit: pageSize,
       offset: page * pageSize,
     }),
     placeholderData: (previousData) => previousData,
   });
+
+  // Count active filters
+  const activeFilterCount = [
+    statusFilter !== 'all',
+    languageFilter !== 'all',
+    providerFilter !== 'all',
+    dateFilter !== 'all',
+    wordCountFilter !== 'all',
+    hasTranslations !== 'all',
+    relevanceFilter !== 'all',
+  ].filter(Boolean).length;
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    setStatusFilter('all');
+    setLanguageFilter('all');
+    setProviderFilter('all');
+    setDateFilter('all');
+    setWordCountFilter('all');
+    setHasTranslations('all');
+    setRelevanceFilter('all');
+    setSearchQuery('');
+    setPage(0);
+  };
+
+  // Apply client-side filters for date, word count, translations (until backend supports them)
+  const filterArticles = (articles: Article[]) => {
+    let filtered = [...articles];
+
+    // Date filter
+    if (dateFilter !== 'all') {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+      filtered = filtered.filter(a => {
+        const created = new Date(a.created_at);
+        switch (dateFilter) {
+          case 'today': return created >= today;
+          case 'week': return created >= weekAgo;
+          case 'month': return created >= monthAgo;
+          case 'older': return created < monthAgo;
+          default: return true;
+        }
+      });
+    }
+
+    // Word count filter
+    if (wordCountFilter !== 'all') {
+      filtered = filtered.filter(a => {
+        const wc = a.word_count || 0;
+        switch (wordCountFilter) {
+          case 'short': return wc < 500;
+          case 'medium': return wc >= 500 && wc <= 1500;
+          case 'long': return wc > 1500;
+          default: return true;
+        }
+      });
+    }
+
+    // Has translations filter
+    if (hasTranslations !== 'all') {
+      filtered = filtered.filter(a => {
+        const count = a.translationsCount || 0;
+        return hasTranslations === 'yes' ? count > 0 : count === 0;
+      });
+    }
+
+    // Relevance score filter
+    if (relevanceFilter !== 'all') {
+      filtered = filtered.filter(a => {
+        const score = a.relevance_score;
+        if (relevanceFilter === 'unscored') return score === null || score === undefined;
+        if (score === null || score === undefined) return false;
+        switch (relevanceFilter) {
+          case 'high': return score >= 80;
+          case 'medium': return score >= 60 && score < 80;
+          case 'moderate': return score >= 40 && score < 60;
+          case 'low': return score < 40;
+          default: return true;
+        }
+      });
+    }
+
+    // Search filter (client-side for better UX)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(a =>
+        (a.transformed_title || a.original_title || a.title || '').toLowerCase().includes(query) ||
+        (a.provider_name || '').toLowerCase().includes(query)
+      );
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'oldest':
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case 'longest':
+          return (b.word_count || 0) - (a.word_count || 0);
+        case 'shortest':
+          return (a.word_count || 0) - (b.word_count || 0);
+        case 'alphabetical':
+          return (a.transformed_title || a.original_title || '').localeCompare(b.transformed_title || b.original_title || '');
+        case 'relevance_high':
+          return (b.relevance_score ?? -1) - (a.relevance_score ?? -1);
+        case 'relevance_low':
+          return (a.relevance_score ?? 101) - (b.relevance_score ?? 101);
+        case 'newest':
+        default:
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+    });
+
+    return filtered;
+  };
 
   // Single article mutations
   const transformSingleMutation = useMutation({
@@ -295,8 +485,41 @@ export default function ContentRepository() {
     onError: (error: Error) => toast.error(error.message),
   });
 
-  const articles = data?.articles || [];
-  const total = data?.total || articles.length;
+  // Single article scoring
+  const [scoringArticleId, setScoringArticleId] = useState<number | null>(null);
+  const scoreSingleMutation = useMutation({
+    mutationFn: (id: number) => {
+      setScoringArticleId(id);
+      return api.scoreArticleRelevance(id);
+    },
+    onSuccess: (result) => {
+      toast.success(`Article scored: ${result.score}% - ${result.recommendation}`);
+      setScoringArticleId(null);
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
+      queryClient.invalidateQueries({ queryKey: ['relevance-stats'] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+      setScoringArticleId(null);
+    },
+  });
+
+  // Batch scoring mutation
+  const batchScoreMutation = useMutation({
+    mutationFn: (ids: number[]) => api.batchScoreRelevance(ids, parsedProjectId),
+    onSuccess: (result) => {
+      toast.success(`${result.scored} articles scored, ${result.errors} errors`);
+      setSelectedArticles(new Set());
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
+      queryClient.invalidateQueries({ queryKey: ['relevance-stats'] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const rawArticles = data?.articles || [];
+  const articles = filterArticles(rawArticles);
+  const total = data?.total || rawArticles.length;
+  const filteredTotal = articles.length;
   const languages = Object.keys(data?.counts || {});
 
   const toggleSelectAll = (checked: boolean) => {
@@ -344,16 +567,17 @@ export default function ContentRepository() {
     }
   };
 
-  // Calculate pipeline stats
+  // Calculate pipeline stats from stats query (independent of status filter)
+  const allArticlesForStats = statsData?.articles || [];
   const pipelineStats = {
-    collected: articles.filter(a => a.status === 'collected').length,
-    transformed: articles.filter(a => a.status === 'transformed').length,
-    translated: articles.filter(a => a.status === 'translated').length,
-    published: articles.filter(a => a.status === 'published').length,
+    collected: allArticlesForStats.filter(a => a.status === 'collected').length,
+    transformed: allArticlesForStats.filter(a => a.status === 'transformed').length,
+    translated: allArticlesForStats.filter(a => a.status === 'translated').length,
+    published: allArticlesForStats.filter(a => a.status === 'published').length,
   };
 
-  const collectedIds = articles.filter(a => a.status === 'collected').map(a => a.id);
-  const transformedIds = articles.filter(a => a.status === 'transformed').map(a => a.id);
+  const collectedIds = allArticlesForStats.filter(a => a.status === 'collected').map(a => a.id);
+  const transformedIds = allArticlesForStats.filter(a => a.status === 'transformed').map(a => a.id);
 
   // Transform all collected articles
   const transformAllMutation = useMutation({
@@ -392,6 +616,15 @@ export default function ContentRepository() {
           </p>
         )}
         <div className="flex gap-2">
+          {parsedProjectId && (
+            <Button
+              variant={showRelevancePanel ? "secondary" : "outline"}
+              onClick={() => setShowRelevancePanel(!showRelevancePanel)}
+            >
+              <Target className="h-4 w-4 mr-2" />
+              Relevance AI
+            </Button>
+          )}
           <Button variant="outline" onClick={handleExport} disabled={isExporting}>
             {isExporting ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -403,20 +636,47 @@ export default function ContentRepository() {
         </div>
       </div>
 
+      {/* Relevance Scoring Panel */}
+      <AnimatePresence>
+        {showRelevancePanel && parsedProjectId && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+          >
+            <RelevanceScoringPanel
+              projectId={parsedProjectId}
+              articles={allArticlesForStats}
+              onComplete={() => queryClient.invalidateQueries({ queryKey: ['articles'] })}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Pipeline Overview - Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className={`cursor-pointer transition-colors ${statusFilter === 'collected' ? 'ring-2 ring-primary' : 'hover:bg-muted/50'}`}
-          onClick={() => setStatusFilter(statusFilter === 'collected' ? 'all' : 'collected')}>
-          <CardContent className="pt-6">
+        <AnimatedCard
+          hoverEffect="lift"
+          delay={0}
+          className={`cursor-pointer ${statusFilter === 'collected' ? 'ring-2 ring-primary' : ''}`}
+          onClick={() => setStatusFilter(statusFilter === 'collected' ? 'all' : 'collected')}
+        >
+          <AnimatedCardContent className="pt-6">
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className="text-sm text-muted-foreground">Collected</p>
-                <p className="text-2xl font-bold">{pipelineStats.collected}</p>
+                <AnimatedNumber value={pipelineStats.collected} className="text-2xl font-bold" />
               </div>
-              <FileText className="h-8 w-8 text-muted-foreground" />
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring" }}
+              >
+                <FileText className="h-8 w-8 text-muted-foreground" />
+              </motion.div>
             </div>
             {pipelineStats.collected > 0 && (
-              <Button
+              <AnimatedButton
                 size="sm"
                 className="w-full"
                 onClick={(e) => {
@@ -431,23 +691,33 @@ export default function ContentRepository() {
                   <Sparkles className="h-4 w-4 mr-2" />
                 )}
                 Transform All
-              </Button>
+              </AnimatedButton>
             )}
-          </CardContent>
-        </Card>
+          </AnimatedCardContent>
+        </AnimatedCard>
 
-        <Card className={`cursor-pointer transition-colors ${statusFilter === 'transformed' ? 'ring-2 ring-primary' : 'hover:bg-muted/50'}`}
-          onClick={() => setStatusFilter(statusFilter === 'transformed' ? 'all' : 'transformed')}>
-          <CardContent className="pt-6">
+        <AnimatedCard
+          hoverEffect="lift"
+          delay={0.1}
+          className={`cursor-pointer ${statusFilter === 'transformed' ? 'ring-2 ring-primary' : ''}`}
+          onClick={() => setStatusFilter(statusFilter === 'transformed' ? 'all' : 'transformed')}
+        >
+          <AnimatedCardContent className="pt-6">
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className="text-sm text-muted-foreground">Transformed</p>
-                <p className="text-2xl font-bold">{pipelineStats.transformed}</p>
+                <AnimatedNumber value={pipelineStats.transformed} className="text-2xl font-bold" />
               </div>
-              <Sparkles className="h-8 w-8 text-yellow-500" />
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ delay: 0.3, type: "spring" }}
+              >
+                <Sparkles className="h-8 w-8 text-yellow-500" />
+              </motion.div>
             </div>
             {pipelineStats.transformed > 0 && (
-              <Button
+              <AnimatedButton
                 size="sm"
                 className="w-full"
                 onClick={(e) => {
@@ -462,40 +732,60 @@ export default function ContentRepository() {
                   <Languages className="h-4 w-4 mr-2" />
                 )}
                 Translate All
-              </Button>
+              </AnimatedButton>
             )}
-          </CardContent>
-        </Card>
+          </AnimatedCardContent>
+        </AnimatedCard>
 
-        <Card className={`cursor-pointer transition-colors ${statusFilter === 'translated' ? 'ring-2 ring-primary' : 'hover:bg-muted/50'}`}
-          onClick={() => setStatusFilter(statusFilter === 'translated' ? 'all' : 'translated')}>
-          <CardContent className="pt-6">
+        <AnimatedCard
+          hoverEffect="lift"
+          delay={0.2}
+          className={`cursor-pointer ${statusFilter === 'translated' ? 'ring-2 ring-primary' : ''}`}
+          onClick={() => setStatusFilter(statusFilter === 'translated' ? 'all' : 'translated')}
+        >
+          <AnimatedCardContent className="pt-6">
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className="text-sm text-muted-foreground">Translated</p>
-                <p className="text-2xl font-bold">{pipelineStats.translated}</p>
+                <AnimatedNumber value={pipelineStats.translated} className="text-2xl font-bold" />
               </div>
-              <Languages className="h-8 w-8 text-blue-500" />
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.4, type: "spring" }}
+              >
+                <Languages className="h-8 w-8 text-blue-500" />
+              </motion.div>
             </div>
             {pipelineStats.translated > 0 && (
               <p className="text-xs text-muted-foreground text-center">Ready to publish</p>
             )}
-          </CardContent>
-        </Card>
+          </AnimatedCardContent>
+        </AnimatedCard>
 
-        <Card className={`cursor-pointer transition-colors ${statusFilter === 'published' ? 'ring-2 ring-primary' : 'hover:bg-muted/50'}`}
-          onClick={() => setStatusFilter(statusFilter === 'published' ? 'all' : 'published')}>
-          <CardContent className="pt-6">
+        <AnimatedCard
+          hoverEffect="glow"
+          delay={0.3}
+          className={`cursor-pointer ${statusFilter === 'published' ? 'ring-2 ring-primary' : ''}`}
+          onClick={() => setStatusFilter(statusFilter === 'published' ? 'all' : 'published')}
+        >
+          <AnimatedCardContent className="pt-6">
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className="text-sm text-muted-foreground">Published</p>
-                <p className="text-2xl font-bold">{pipelineStats.published}</p>
+                <AnimatedNumber value={pipelineStats.published} className="text-2xl font-bold" />
               </div>
-              <CheckCircle2 className="h-8 w-8 text-green-500" />
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.5, type: "spring" }}
+              >
+                <CheckCircle2 className="h-8 w-8 text-green-500" />
+              </motion.div>
             </div>
             <p className="text-xs text-muted-foreground text-center">Complete</p>
-          </CardContent>
-        </Card>
+          </AnimatedCardContent>
+        </AnimatedCard>
       </div>
 
       {/* Selection Actions Bar */}
@@ -536,6 +826,19 @@ export default function ContentRepository() {
                 <Button
                   size="sm"
                   variant="outline"
+                  onClick={() => batchScoreMutation.mutate(Array.from(selectedArticles))}
+                  disabled={batchScoreMutation.isPending}
+                >
+                  {batchScoreMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Target className="h-4 w-4 mr-2" />
+                  )}
+                  Score
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
                   className="text-destructive hover:text-destructive"
                   onClick={() => batchDeleteMutation.mutate(Array.from(selectedArticles))}
                   disabled={batchDeleteMutation.isPending}
@@ -562,8 +865,9 @@ export default function ContentRepository() {
 
       {/* Filters */}
       <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-wrap items-center gap-4">
+        <CardContent className="pt-6 space-y-4">
+          {/* Main filter row */}
+          <div className="flex flex-wrap items-center gap-3">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -576,8 +880,19 @@ export default function ContentRepository() {
                 className="pl-9"
               />
             </div>
+            <Select value={providerFilter} onValueChange={(v) => { setProviderFilter(v); setPage(0); }}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Provider" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Providers</SelectItem>
+                {providers.map(p => (
+                  <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(0); }}>
-              <SelectTrigger className="w-[150px]">
+              <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -589,7 +904,7 @@ export default function ContentRepository() {
               </SelectContent>
             </Select>
             <Select value={languageFilter} onValueChange={(v) => { setLanguageFilter(v); setPage(0); }}>
-              <SelectTrigger className="w-[150px]">
+              <SelectTrigger className="w-[130px]">
                 <SelectValue placeholder="Language" />
               </SelectTrigger>
               <SelectContent>
@@ -599,11 +914,40 @@ export default function ContentRepository() {
                 ))}
               </SelectContent>
             </Select>
+            <Select value={sortBy} onValueChange={(v) => { setSortBy(v); setPage(0); }}>
+              <SelectTrigger className="w-[140px]">
+                <ArrowUpDown className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Sort" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest First</SelectItem>
+                <SelectItem value="oldest">Oldest First</SelectItem>
+                <SelectItem value="relevance_high">Most Relevant</SelectItem>
+                <SelectItem value="relevance_low">Least Relevant</SelectItem>
+                <SelectItem value="longest">Longest</SelectItem>
+                <SelectItem value="shortest">Shortest</SelectItem>
+                <SelectItem value="alphabetical">A-Z</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant={showAdvancedFilters ? "secondary" : "outline"}
+              size="sm"
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              className="gap-2"
+            >
+              <Filter className="h-4 w-4" />
+              Filters
+              {activeFilterCount > 0 && (
+                <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                  {activeFilterCount}
+                </Badge>
+              )}
+            </Button>
             <div className="flex border rounded-md">
               <Button
                 variant={viewMode === 'table' ? 'secondary' : 'ghost'}
                 size="icon"
-                className="rounded-r-none"
+                className="rounded-r-none h-9 w-9"
                 onClick={() => setViewMode('table')}
               >
                 <List className="h-4 w-4" />
@@ -611,13 +955,97 @@ export default function ContentRepository() {
               <Button
                 variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
                 size="icon"
-                className="rounded-l-none"
+                className="rounded-l-none h-9 w-9"
                 onClick={() => setViewMode('grid')}
               >
                 <Grid className="h-4 w-4" />
               </Button>
             </div>
           </div>
+
+          {/* Advanced filters row */}
+          {showAdvancedFilters && (
+            <div className="flex flex-wrap items-center gap-3 pt-3 border-t">
+              <Select value={dateFilter} onValueChange={(v) => { setDateFilter(v); setPage(0); }}>
+                <SelectTrigger className="w-[140px]">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Date" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Any Time</SelectItem>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="week">This Week</SelectItem>
+                  <SelectItem value="month">This Month</SelectItem>
+                  <SelectItem value="older">Older</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={wordCountFilter} onValueChange={(v) => { setWordCountFilter(v); setPage(0); }}>
+                <SelectTrigger className="w-[150px]">
+                  <FileText className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Length" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Any Length</SelectItem>
+                  <SelectItem value="short">Short (&lt;500 words)</SelectItem>
+                  <SelectItem value="medium">Medium (500-1500)</SelectItem>
+                  <SelectItem value="long">Long (&gt;1500 words)</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={hasTranslations} onValueChange={(v) => { setHasTranslations(v); setPage(0); }}>
+                <SelectTrigger className="w-[160px]">
+                  <Languages className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Translations" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Articles</SelectItem>
+                  <SelectItem value="yes">With Translations</SelectItem>
+                  <SelectItem value="no">Without Translations</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={relevanceFilter} onValueChange={(v) => { setRelevanceFilter(v); setPage(0); }}>
+                <SelectTrigger className="w-[160px]">
+                  <Target className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Relevance" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Scores</SelectItem>
+                  <SelectItem value="high">High (80+)</SelectItem>
+                  <SelectItem value="medium">Medium (60-79)</SelectItem>
+                  <SelectItem value="moderate">Moderate (40-59)</SelectItem>
+                  <SelectItem value="low">Low (&lt;40)</SelectItem>
+                  <SelectItem value="unscored">Not Scored</SelectItem>
+                </SelectContent>
+              </Select>
+              {activeFilterCount > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearAllFilters}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Clear All
+                </Button>
+              )}
+            </div>
+          )}
+
+          {/* Active filters summary */}
+          {activeFilterCount > 0 && !showAdvancedFilters && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>{activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''} active</span>
+              <span>•</span>
+              <span>{filteredTotal} of {total} articles</span>
+              <Button
+                variant="link"
+                size="sm"
+                onClick={clearAllFilters}
+                className="text-muted-foreground hover:text-foreground h-auto p-0"
+              >
+                Clear
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -647,22 +1075,29 @@ export default function ContentRepository() {
               {/* Pagination */}
               <div className="flex items-center justify-between px-4 py-3 border-t">
                 <p className="text-sm text-muted-foreground">
-                  Showing {page * pageSize + 1} - {Math.min((page + 1) * pageSize, total)} of {total}
+                  Page {page + 1} of {Math.ceil(total / pageSize)} • Showing {articles.length} of {total} articles
                 </p>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage(p => Math.max(0, p - 1))}
-                    disabled={page === 0}
+                    onClick={() => {
+                      if (page > 0) setPage(page - 1);
+                    }}
+                    disabled={page === 0 || isLoading}
                   >
                     Previous
                   </Button>
+                  <span className="text-sm text-muted-foreground px-2">
+                    {page + 1} / {Math.ceil(total / pageSize) || 1}
+                  </span>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage(p => p + 1)}
-                    disabled={(page + 1) * pageSize >= total}
+                    onClick={() => {
+                      if ((page + 1) * pageSize < total) setPage(page + 1);
+                    }}
+                    disabled={(page + 1) * pageSize >= total || isLoading}
                   >
                     Next
                   </Button>
@@ -684,6 +1119,7 @@ export default function ContentRepository() {
                     <TableHead>Status</TableHead>
                     <TableHead>Language</TableHead>
                     <TableHead>Length</TableHead>
+                    <TableHead>Relevance</TableHead>
                     <TableHead>Translations</TableHead>
                     <TableHead>Collected</TableHead>
                     <TableHead className="w-10"></TableHead>
@@ -700,6 +1136,9 @@ export default function ContentRepository() {
                       onTranslate={() => translateSingleMutation.mutate(article.id)}
                       onPublish={() => publishSingleMutation.mutate(article.id)}
                       onDelete={() => setDeletingArticle(article)}
+                      onScore={() => scoreSingleMutation.mutate(article.id)}
+                      isScoring={scoringArticleId === article.id}
+                      projectId={projectId}
                     />
                   ))}
                 </TableBody>
@@ -708,22 +1147,29 @@ export default function ContentRepository() {
               {/* Pagination */}
               <div className="flex items-center justify-between px-4 py-3 border-t">
                 <p className="text-sm text-muted-foreground">
-                  Showing {page * pageSize + 1} - {Math.min((page + 1) * pageSize, total)} of {total}
+                  Page {page + 1} of {Math.ceil(total / pageSize)} • Showing {articles.length} of {total} articles
                 </p>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage(p => Math.max(0, p - 1))}
-                    disabled={page === 0}
+                    onClick={() => {
+                      if (page > 0) setPage(page - 1);
+                    }}
+                    disabled={page === 0 || isLoading}
                   >
                     Previous
                   </Button>
+                  <span className="text-sm text-muted-foreground px-2">
+                    {page + 1} / {Math.ceil(total / pageSize) || 1}
+                  </span>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage(p => p + 1)}
-                    disabled={(page + 1) * pageSize >= total}
+                    onClick={() => {
+                      if ((page + 1) * pageSize < total) setPage(page + 1);
+                    }}
+                    disabled={(page + 1) * pageSize >= total || isLoading}
                   >
                     Next
                   </Button>

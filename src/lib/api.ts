@@ -59,6 +59,7 @@ export interface Project {
   name: string;
   slug: string;
   description?: string;
+  project_intention?: string;
   color: string;
   icon: string;
   is_active: boolean;
@@ -71,6 +72,27 @@ export interface Project {
   ai_guidelines?: AIGuidelines;
   created_at: string;
   updated_at: string;
+}
+
+// Relevance Score
+export interface RelevanceScore {
+  articleId: number;
+  score: number;
+  reason: string;
+  keywords_match: string[];
+  recommendation: 'keep' | 'review' | 'delete';
+}
+
+export interface RelevanceStats {
+  total_articles: string;
+  scored_articles: string;
+  avg_score: number | null;
+  highly_relevant: string;
+  relevant: string;
+  moderate: string;
+  low_relevance: string;
+  has_intention: boolean;
+  intention_preview?: string;
 }
 
 // Folder
@@ -178,10 +200,11 @@ export interface PipelineJob {
   type: 'pipeline';
   providerId: number;
   providerName?: string;
-  status: 'running' | 'completed' | 'failed';
-  phase: 'transform' | 'translate';
+  status: 'running' | 'completed' | 'failed' | 'paused';
+  phase: 'scoring' | 'transform' | 'translate';
   totalArticles: number;
   currentArticle: number;
+  scoredCount?: number;
   transformedCount: number;
   translatedCount: number;
   totalTranslations: number;
@@ -190,6 +213,40 @@ export interface PipelineJob {
   startedAt: string;
   completedAt?: string;
   logs: Array<{ timestamp: string; message: string; level: string }>;
+}
+
+// Pipeline Diagnostics
+export interface PipelineDiagnostics {
+  transform: {
+    status: string;
+    phase: string;
+    current: number;
+    total: number;
+    errors: number;
+    lastError: string | null;
+    lastErrorAt: string | null;
+    paused: boolean;
+  };
+  translate: {
+    status: string;
+    current: number;
+    total: number;
+    errors: number;
+    lastError: string | null;
+    lastErrorAt: string | null;
+    paused: boolean;
+  };
+  errorsByType: Record<string, number>;
+  recentErrors: Array<{
+    type: string;
+    articleId?: number;
+    message: string;
+    timestamp: string;
+  }>;
+  failedArticleCount: number;
+  speed: number;
+  etaMinutes: number | null;
+  isRateLimited: boolean;
 }
 
 // Article
@@ -203,7 +260,7 @@ export interface Article {
   provider_name?: string;
   provider_slug?: string;
   project_name?: string;
-  status: 'collected' | 'transformed' | 'translated' | 'published';
+  status: 'collected' | 'transformed' | 'approved' | 'translated' | 'published';
   language: string;
   word_count: number;
   seoScore?: number;
@@ -215,6 +272,10 @@ export interface Article {
   translationsCount?: number;
   parent_article_id?: number;
   thumbnail_url?: string;
+  // Relevance scoring
+  relevance_score?: number;
+  relevance_reason?: string;
+  relevance_scored_at?: string;
 }
 
 export interface ArticleDetail extends Article {
@@ -240,6 +301,12 @@ export interface ArticlesResponse {
   articles: Article[];
   counts: Record<string, number>;
   total: number;
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 // Reporting
@@ -303,6 +370,7 @@ export interface TransformProgress {
   status: 'idle' | 'running' | 'completed' | 'error';
   current: number;
   total: number;
+  errors: number;
   logs: Array<{ timestamp: string; message: string; type: string }>;
 }
 
@@ -370,12 +438,30 @@ function getDefaultErrorMessage(status: number): string {
 // ==================== API FUNCTIONS ====================
 
 async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  // Get auth token from localStorage
+  const token = localStorage.getItem('auth_token');
+
+  // Build headers with auth token if available
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    ...(options?.headers || {}),
+  };
+
   const response = await fetch(`${API_BASE}${endpoint}`, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
     ...options,
+    headers,
   });
+
+  // Handle authentication errors
+  if (response.status === 401) {
+    // Clear token and redirect to login
+    localStorage.removeItem('auth_token');
+    if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+      window.location.href = '/login';
+    }
+    throw new ApiError(401, 'UNAUTHORIZED', 'Session expirée, veuillez vous reconnecter', false);
+  }
 
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
@@ -413,6 +499,15 @@ export const api = {
 
   getProjectStats: (id: number) =>
     fetchApi<{ providers_count: number; articles_count: number; total_words: number; collected: number; transformed: number }>(`/projects/${id}/stats`),
+
+  updateProjectIntention: (id: number, intention: string) =>
+    fetchApi<{ success: boolean }>(`/projects/${id}/intention`, {
+      method: 'PATCH',
+      body: JSON.stringify({ intention }),
+    }),
+
+  getRelevanceStats: (projectId: number) =>
+    fetchApi<RelevanceStats>(`/projects/${projectId}/relevance-stats`),
 
   // ==================== FOLDERS ====================
   getFolders: (projectId: number) => fetchApi<Folder[]>(`/projects/${projectId}/folders`),
@@ -488,6 +583,28 @@ export const api = {
   // Pipeline Jobs (AI Processing)
   getPipelineJobs: () => fetchApi<PipelineJob[]>('/pipeline-jobs'),
 
+  getPipelineDiagnostics: () => fetchApi<PipelineDiagnostics>('/pipeline-jobs/diagnostics'),
+
+  retryFailedPipeline: () => fetchApi<{ message: string; retried: number }>('/pipeline-jobs/retry-failed', {
+    method: 'POST',
+  }),
+
+  pausePipeline: () => fetchApi<{ success: boolean; message: string }>('/pipeline-jobs/pause', {
+    method: 'POST',
+  }),
+
+  resumePipeline: () => fetchApi<{ success: boolean; message: string }>('/pipeline-jobs/resume', {
+    method: 'POST',
+  }),
+
+  cancelPipeline: () => fetchApi<{ success: boolean; message: string }>('/pipeline-jobs/cancel', {
+    method: 'POST',
+  }),
+
+  clearPipeline: () => fetchApi<{ success: boolean; message: string }>('/pipeline-jobs/clear', {
+    method: 'POST',
+  }),
+
   // ==================== SCRAPING ====================
   getScrapeProgress: () => fetchApi<ScrapeProgress>('/scrape/progress'),
 
@@ -524,8 +641,97 @@ export const api = {
 
   getArticle: (id: number) => fetchApi<ArticleDetail>(`/articles/${id}`),
 
+  updateArticle: (id: number, data: { title?: string; content?: string }) =>
+    fetchApi<ArticleDetail>(`/articles/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+
+  // Edit article with learning capture
+  editArticle: (id: number, data: { title?: string; content?: string }) =>
+    fetchApi<{ message: string; editId: number | null; editType: string; wordCountDelta: number }>(`/articles/${id}/edit`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  // Get edit history for an article
+  getArticleEdits: (id: number) =>
+    fetchApi<{ edits: Array<{
+      id: number;
+      edit_type: string;
+      word_count_before: number;
+      word_count_after: number;
+      char_diff: number;
+      ai_analysis: unknown;
+      analysis_status: string;
+      created_at: string;
+    }> }>(`/articles/${id}/edits`),
+
+  // Get project learnings
+  getProjectLearnings: (projectId: number) =>
+    fetchApi<{
+      learnings: Array<{
+        id: number;
+        rule_type: string;
+        rule_description: string;
+        confidence_score: number;
+        occurrence_count: number;
+        status: string;
+        created_at: string;
+      }>;
+      stats: { suggested: string; applied: string };
+      totalEdits: number;
+    }>(`/projects/${projectId}/learnings`),
+
+  // Apply or reject a learning
+  learningAction: (projectId: number, learningId: number, action: 'apply' | 'reject') =>
+    fetchApi<{ message: string; learningId: number; newStatus: string }>(`/projects/${projectId}/learnings/${learningId}/action`, {
+      method: 'POST',
+      body: JSON.stringify({ action }),
+    }),
+
+  // Get edit stats for a project
+  getEditStats: (projectId: number) =>
+    fetchApi<{
+      total_edits: string;
+      analyzed: string;
+      edits_this_week: string;
+    }>(`/projects/${projectId}/edit-stats`),
+
   deleteArticle: (id: number) =>
     fetchApi<{ success: boolean }>(`/articles/${id}`, { method: 'DELETE' }),
+
+  // AI Transform
+  transformText: (params: {
+    text: string;
+    action?: string;
+    customPrompt?: string;
+    context?: string;
+  }) =>
+    fetchApi<{ success: boolean; result: string; action: string }>('/ai/transform', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    }),
+
+  // Batch transform pending articles
+  transformPending: (limit: number = 20) =>
+    fetchApi<{ message: string; count: number; articleIds: number[] }>('/articles/transform-pending', {
+      method: 'POST',
+      body: JSON.stringify({ limit }),
+    }),
+
+  // Approve article for translation
+  approveArticle: (id: number) =>
+    fetchApi<{ success: boolean; message: string; targetLanguages: string[] }>(`/articles/${id}/approve`, {
+      method: 'POST',
+    }),
+
+  // Bulk approve articles
+  bulkApproveArticles: (articleIds: number[]) =>
+    fetchApi<{ success: boolean; message: string }>('/articles/bulk-approve', {
+      method: 'POST',
+      body: JSON.stringify({ articleIds }),
+    }),
 
   // Article Diagnostics
   diagnoseArticles: (params: { providerId?: number; status?: string } = {}) => {
@@ -580,6 +786,30 @@ export const api = {
       body: JSON.stringify({ articleIds }),
     }),
 
+  // Single article transform with DeepSeek (for re-transform from article detail)
+  transformSingleWithDeepSeek: (articleId: number) =>
+    fetchApi<{
+      success: boolean;
+      message: string;
+      taskId: string;
+    }>(`/articles/${articleId}/transform-deepseek`, {
+      method: 'POST',
+    }),
+
+  // Get transform task status
+  getTransformTaskStatus: (taskId: string) =>
+    fetchApi<{
+      taskId: string;
+      status: 'pending' | 'thinking' | 'generating' | 'completed' | 'failed';
+      phase: string;
+      progress: number;
+      thinkingContent?: string;
+      generatedContent?: string;
+      error?: string;
+      startedAt: string;
+      completedAt?: string;
+    }>(`/transform-tasks/${taskId}`),
+
   batchTranslate: (articleIds: number[], languages?: string[]) =>
     fetchApi<{ message: string; queued: number }>('/articles/batch/translate', {
       method: 'POST',
@@ -619,6 +849,24 @@ export const api = {
       body: JSON.stringify({ articleIds }),
     }),
 
+  // ==================== RELEVANCE SCORING ====================
+  scoreArticleRelevance: (articleId: number) =>
+    fetchApi<RelevanceScore & { success: boolean }>(`/articles/${articleId}/relevance-score`, {
+      method: 'POST',
+    }),
+
+  batchScoreRelevance: (articleIds: number[], projectId?: number) =>
+    fetchApi<{
+      success: boolean;
+      scored: number;
+      errors: number;
+      results: RelevanceScore[];
+      errorDetails: Array<{ articleId: number; error: string }>;
+    }>('/articles/batch-relevance-score', {
+      method: 'POST',
+      body: JSON.stringify({ articleIds, projectId }),
+    }),
+
   // ==================== TRANSFORMATION ====================
   getTransformProgress: () => fetchApi<TransformProgress>('/transform/progress'),
 
@@ -654,6 +902,13 @@ export const api = {
     database: { postgresql: string; redis: string };
     version: string;
   }>('/health'),
+
+  // ==================== AUTH ====================
+  resendVerificationEmail: (email: string) =>
+    fetchApi<{ message: string; emailSent: boolean }>('/auth/resend-verification', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    }),
 };
 
 export default api;

@@ -44,6 +44,64 @@ import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
 import { ArticleDiagnosticPanel, DiagnosticBadge } from "@/components/ArticleDiagnosticPanel";
 import { Link, useParams } from "react-router-dom";
 
+function JobStatusBadge({ job }: { job?: Job }) {
+  if (!job) return null;
+
+  switch (job.status) {
+    case 'running':
+      return (
+        <Badge className="bg-green-500/15 text-green-600 border-green-500/30 hover:bg-green-500/20 px-2">
+          <span className="relative flex h-2 w-2 mr-1.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+          </span>
+          Running
+        </Badge>
+      );
+    case 'paused':
+      return (
+        <Badge variant="secondary" className="bg-yellow-500/15 text-yellow-600 border-yellow-500/30 px-2">
+          <Pause className="h-3 w-3 mr-1" />
+          Paused
+        </Badge>
+      );
+    case 'completed':
+      if (job.completionRate < 100) {
+        return (
+          <Badge variant="secondary" className="bg-orange-500/15 text-orange-600 border-orange-500/30 px-2">
+            <AlertCircle className="h-3 w-3 mr-1" />
+            Partial ({job.completionRate}%)
+          </Badge>
+        );
+      }
+      return (
+        <Badge variant="secondary" className="bg-success/10 text-success border-0">
+          <CheckCircle className="h-3 w-3 mr-1" />
+          Done
+        </Badge>
+      );
+    case 'failed':
+      return (
+        <Badge variant="destructive" className="px-2">
+          <AlertCircle className="h-3 w-3 mr-1" />
+          Failed
+        </Badge>
+      );
+    case 'cancelled':
+      return (
+        <Badge variant="secondary" className="bg-muted text-muted-foreground px-2">
+          Cancelled
+        </Badge>
+      );
+    default:
+      return (
+        <Badge variant="secondary" className="bg-muted text-muted-foreground px-2">
+          Pending
+        </Badge>
+      );
+  }
+}
+
 function StatusBadge({ isActive, hasArticles }: { isActive: boolean; hasArticles: boolean }) {
   if (!isActive) {
     return (
@@ -86,6 +144,9 @@ function CollectionPointRow({ point, activeJob, lastCompletedJob, onStart, onPau
   // Calculate success rate from last completed job
   const successRate = lastCompletedJob?.completionRate;
 
+  // Determine which job to show status for
+  const displayJob = activeJob || lastCompletedJob;
+
   return (
     <TableRow>
       <TableCell>
@@ -97,21 +158,8 @@ function CollectionPointRow({ point, activeJob, lastCompletedJob, onStart, onPau
         </div>
       </TableCell>
       <TableCell>
-        {hasActiveJob ? (
-          activeJob?.status === 'running' ? (
-            <Badge className="bg-green-500/15 text-green-600 border-green-500/30 hover:bg-green-500/20 px-2">
-              <span className="relative flex h-2 w-2 mr-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-              </span>
-              Live
-            </Badge>
-          ) : (
-            <Badge variant="secondary" className="bg-yellow-500/15 text-yellow-600 border-yellow-500/30 px-2">
-              <Pause className="h-3 w-3 mr-1" />
-              Paused
-            </Badge>
-          )
+        {displayJob ? (
+          <JobStatusBadge job={displayJob} />
         ) : (
           <StatusBadge isActive={point.is_active} hasArticles={articleCount > 0} />
         )}
@@ -195,7 +243,7 @@ function CollectionPointRow({ point, activeJob, lastCompletedJob, onStart, onPau
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onDiagnose(point)}>
               <Stethoscope className="h-4 w-4 mr-2" />
-              Diagnostiquer
+              Diagnose
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => onEdit(point)}>

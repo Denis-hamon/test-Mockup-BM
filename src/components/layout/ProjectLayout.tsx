@@ -13,6 +13,7 @@ import {
   Settings,
   Play,
   Loader2,
+  Brain,
 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -26,6 +27,7 @@ const navItems = [
   { label: "Collection Points", path: "/collection-points", icon: Radio },
   { label: "Live Monitor", path: "/live-monitor", icon: Activity },
   { label: "Repository", path: "/repository", icon: FileText },
+  { label: "AI Guidelines", path: "/ai-guidelines", icon: Brain },
   { label: "Settings", path: "/settings", icon: Settings },
 ];
 
