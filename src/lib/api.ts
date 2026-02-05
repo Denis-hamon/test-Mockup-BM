@@ -262,11 +262,12 @@ export interface Article {
   provider_name?: string;
   provider_slug?: string;
   project_name?: string;
-  status: 'collected' | 'transformed' | 'approved' | 'translated' | 'published';
+  status: 'collected' | 'transformed' | 'to_publish' | 'translated' | 'published';
   language: string;
   word_count: number;
   seoScore?: number;
   category?: string;
+  rubric?: string;
   created_at: string;
   updated_at?: string;
   transformedAt?: string;
@@ -643,7 +644,7 @@ export const api = {
 
   getArticle: (id: number) => fetchApi<ArticleDetail>(`/articles/${id}`),
 
-  updateArticle: (id: number, data: { title?: string; content?: string }) =>
+  updateArticle: (id: number, data: { title?: string; content?: string; rubric?: string }) =>
     fetchApi<ArticleDetail>(`/articles/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data),

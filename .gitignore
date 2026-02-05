@@ -24,3 +24,19 @@ dist-ssr
 *.sw?
 test-results/
 *.tsbuildinfo
+playwright-report/
+
+# Utility scripts and patches
+*.py
+check-*.js
+cleanup-*.js
+diagnose-*.js
+edit-*.js
+fix-*.js
+js-*.js
+patch-*.py
+patch-*.js
+score-*.js
+auth-endpoints.js
+update-ai-guidelines.sql
+debug-*.png

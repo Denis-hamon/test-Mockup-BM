@@ -59,6 +59,8 @@ import {
   TrendingUp,
   X,
   Target,
+  Send,
+  Tag,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Link, useParams } from "react-router-dom";
@@ -70,13 +72,13 @@ import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
 import { RelevanceScoringPanel, RelevanceScoreCompact } from "@/components/RelevanceScoringPanel";
 import { RelevanceScoreBadge } from "@/components/RelevanceScoreBadge";
 
-function ArticleRow({ article, isSelected, onSelect, onTransform, onTranslate, onPublish, onDelete, onScore, isScoring, projectId }: {
+function ArticleRow({ article, isSelected, onSelect, onTransform, onTranslate, onToPublish, onDelete, onScore, isScoring, projectId }: {
   article: Article;
   isSelected: boolean;
   onSelect: (checked: boolean) => void;
   onTransform: () => void;
   onTranslate: () => void;
-  onPublish: () => void;
+  onToPublish: () => void;
   onDelete: () => void;
   onScore: () => void;
   isScoring?: boolean;
@@ -99,9 +101,10 @@ function ArticleRow({ article, isSelected, onSelect, onTransform, onTranslate, o
       case 'collected':
         return { label: 'Transform', icon: Sparkles, action: onTransform, color: 'text-yellow-600' };
       case 'transformed':
-        return { label: 'Translate', icon: Languages, action: onTranslate, color: 'text-blue-600' };
+        return { label: 'To Publish', icon: Send, action: onToPublish, color: 'text-green-600' };
+      case 'to_publish':
       case 'translated':
-        return { label: 'Publish', icon: Globe, action: onPublish, color: 'text-green-600' };
+        return null; // Already ready to publish
       default:
         return null;
     }
@@ -211,16 +214,16 @@ function ArticleRow({ article, isSelected, onSelect, onTransform, onTranslate, o
                   Transform
                 </DropdownMenuItem>
               )}
-              {(article.status === 'transformed' || article.status === 'collected') && (
-                <DropdownMenuItem onClick={onTranslate}>
-                  <Languages className="h-4 w-4 mr-2" />
-                  Translate
+              {article.status === 'transformed' && (
+                <DropdownMenuItem onClick={onToPublish}>
+                  <Send className="h-4 w-4 mr-2" />
+                  To Publish
                 </DropdownMenuItem>
               )}
-              {article.status !== 'published' && (
-                <DropdownMenuItem onClick={onPublish}>
-                  <Globe className="h-4 w-4 mr-2" />
-                  Publish
+              {(article.status === 'to_publish' || article.status === 'translated') && (
+                <DropdownMenuItem onClick={onTranslate}>
+                  <Languages className="h-4 w-4 mr-2" />
+                  Retranslate
                 </DropdownMenuItem>
               )}
               <DropdownMenuItem onClick={onTransform}>
@@ -435,10 +438,10 @@ export default function ContentRepository() {
     onError: (error: Error) => toast.error(error.message),
   });
 
-  const publishSingleMutation = useMutation({
-    mutationFn: (id: number) => api.batchPublish([id]),
+  const toPublishSingleMutation = useMutation({
+    mutationFn: (id: number) => api.approveArticle(id),
     onSuccess: () => {
-      toast.success('Article published');
+      toast.success('Article marked for publication');
       queryClient.invalidateQueries({ queryKey: ['articles'] });
     },
     onError: (error: Error) => toast.error(error.message),
@@ -572,8 +575,7 @@ export default function ContentRepository() {
   const pipelineStats = {
     collected: allArticlesForStats.filter(a => a.status === 'collected').length,
     transformed: allArticlesForStats.filter(a => a.status === 'transformed').length,
-    translated: allArticlesForStats.filter(a => a.status === 'translated').length,
-    published: allArticlesForStats.filter(a => a.status === 'published').length,
+    toPublish: allArticlesForStats.filter(a => a.status === 'to_publish' || a.status === 'translated').length,
   };
 
   const collectedIds = allArticlesForStats.filter(a => a.status === 'collected').map(a => a.id);
@@ -738,52 +740,28 @@ export default function ContentRepository() {
         </AnimatedCard>
 
         <AnimatedCard
-          hoverEffect="lift"
+          hoverEffect="glow"
           delay={0.2}
-          className={`cursor-pointer ${statusFilter === 'translated' ? 'ring-2 ring-primary' : ''}`}
-          onClick={() => setStatusFilter(statusFilter === 'translated' ? 'all' : 'translated')}
+          className={`cursor-pointer ${statusFilter === 'to_publish' ? 'ring-2 ring-primary' : ''}`}
+          onClick={() => setStatusFilter(statusFilter === 'to_publish' ? 'all' : 'to_publish')}
         >
           <AnimatedCardContent className="pt-6">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <p className="text-sm text-muted-foreground">Translated</p>
-                <AnimatedNumber value={pipelineStats.translated} className="text-2xl font-bold" />
+                <p className="text-sm text-muted-foreground">To Publish</p>
+                <AnimatedNumber value={pipelineStats.toPublish} className="text-2xl font-bold" />
               </div>
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.4, type: "spring" }}
               >
-                <Languages className="h-8 w-8 text-blue-500" />
-              </motion.div>
-            </div>
-            {pipelineStats.translated > 0 && (
-              <p className="text-xs text-muted-foreground text-center">Ready to publish</p>
-            )}
-          </AnimatedCardContent>
-        </AnimatedCard>
-
-        <AnimatedCard
-          hoverEffect="glow"
-          delay={0.3}
-          className={`cursor-pointer ${statusFilter === 'published' ? 'ring-2 ring-primary' : ''}`}
-          onClick={() => setStatusFilter(statusFilter === 'published' ? 'all' : 'published')}
-        >
-          <AnimatedCardContent className="pt-6">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <p className="text-sm text-muted-foreground">Published</p>
-                <AnimatedNumber value={pipelineStats.published} className="text-2xl font-bold" />
-              </div>
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.5, type: "spring" }}
-              >
                 <CheckCircle2 className="h-8 w-8 text-green-500" />
               </motion.div>
             </div>
-            <p className="text-xs text-muted-foreground text-center">Complete</p>
+            {pipelineStats.toPublish > 0 && (
+              <p className="text-xs text-muted-foreground text-center">Ready for publication</p>
+            )}
           </AnimatedCardContent>
         </AnimatedCard>
       </div>
@@ -899,8 +877,7 @@ export default function ContentRepository() {
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="collected">Collected</SelectItem>
                 <SelectItem value="transformed">Transformed</SelectItem>
-                <SelectItem value="translated">Translated</SelectItem>
-                <SelectItem value="published">Published</SelectItem>
+                <SelectItem value="to_publish">To Publish</SelectItem>
               </SelectContent>
             </Select>
             <Select value={languageFilter} onValueChange={(v) => { setLanguageFilter(v); setPage(0); }}>
@@ -1067,7 +1044,7 @@ export default function ContentRepository() {
                     onSelect={(checked) => toggleSelectArticle(article.id, checked)}
                     onTransform={() => transformSingleMutation.mutate(article.id)}
                     onTranslate={() => translateSingleMutation.mutate(article.id)}
-                    onPublish={() => publishSingleMutation.mutate(article.id)}
+                    onToPublish={() => toPublishSingleMutation.mutate(article.id)}
                     onDelete={() => setDeletingArticle(article)}
                   />
                 ))}
@@ -1134,7 +1111,7 @@ export default function ContentRepository() {
                       onSelect={(checked) => toggleSelectArticle(article.id, checked)}
                       onTransform={() => transformSingleMutation.mutate(article.id)}
                       onTranslate={() => translateSingleMutation.mutate(article.id)}
-                      onPublish={() => publishSingleMutation.mutate(article.id)}
+                      onToPublish={() => toPublishSingleMutation.mutate(article.id)}
                       onDelete={() => setDeletingArticle(article)}
                       onScore={() => scoreSingleMutation.mutate(article.id)}
                       isScoring={scoringArticleId === article.id}

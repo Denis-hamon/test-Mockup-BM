@@ -15,7 +15,7 @@ import {
   Eye,
   RefreshCw,
   Languages,
-  Globe,
+  Send,
   Trash2,
   ExternalLink,
 } from "lucide-react";
@@ -30,7 +30,7 @@ interface ArticleCardProps {
   onSelect: (checked: boolean) => void;
   onTransform: () => void;
   onTranslate: () => void;
-  onPublish: () => void;
+  onToPublish: () => void;
   onDelete: () => void;
 }
 
@@ -40,7 +40,7 @@ export function ArticleCard({
   onSelect,
   onTransform,
   onTranslate,
-  onPublish,
+  onToPublish,
   onDelete,
 }: ArticleCardProps) {
   return (
@@ -93,14 +93,18 @@ export function ArticleCard({
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Re-transform
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={onTranslate}>
-                <Languages className="h-4 w-4 mr-2" />
-                Translate
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onPublish}>
-                <Globe className="h-4 w-4 mr-2" />
-                Publish
-              </DropdownMenuItem>
+              {article.status === 'transformed' && (
+                <DropdownMenuItem onClick={onToPublish}>
+                  <Send className="h-4 w-4 mr-2" />
+                  To Publish
+                </DropdownMenuItem>
+              )}
+              {(article.status === 'to_publish' || article.status === 'translated') && (
+                <DropdownMenuItem onClick={onTranslate}>
+                  <Languages className="h-4 w-4 mr-2" />
+                  Retranslate
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={onDelete}

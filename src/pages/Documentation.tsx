@@ -372,6 +372,40 @@ function CollectionPointsSection() {
             Le job apparaîtra dans le Live Monitor où vous pourrez suivre sa progression.
           </p>
 
+          <h4 className="font-semibold mt-6">Méthodes de scraping</h4>
+          <p className="text-sm text-muted-foreground mb-2">
+            Trois méthodes de collecte sont disponibles selon le site source :
+          </p>
+          <div className="space-y-2 text-sm">
+            <div className="p-2 rounded border">
+              <strong>Firecrawl</strong> - Service de scraping cloud (recommandé par défaut)
+            </div>
+            <div className="p-2 rounded border">
+              <strong>Direct HTTP</strong> - Requêtes HTTP simples pour sites statiques
+            </div>
+            <div className="p-2 rounded border">
+              <strong>Playwright</strong> - Navigateur headless pour sites avec JavaScript
+            </div>
+          </div>
+
+          <h4 className="font-semibold mt-6">JavaScript Rendering</h4>
+          <p className="text-sm text-muted-foreground">
+            Activez cette option pour les sites qui nécessitent l'exécution de JavaScript
+            pour afficher leur contenu (Single Page Applications, contenu dynamique).
+          </p>
+
+          <div className="p-4 rounded-lg border border-blue-500/20 bg-blue-500/5 mt-4">
+            <h5 className="font-medium flex items-center gap-2 text-blue-600">
+              <Zap className="h-4 w-4" />
+              Auto-Switch intelligent
+            </h5>
+            <p className="text-sm text-muted-foreground mt-1">
+              Si la collecte détecte une protection anti-bot (Cloudflare, DDoS protection) après
+              3 échecs consécutifs, le système bascule automatiquement vers Playwright avec
+              JavaScript Rendering pour contourner la protection.
+            </p>
+          </div>
+
           <h4 className="font-semibold mt-6">Options automatiques</h4>
           <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
             <li><strong>Auto-Transform</strong> - Transforme automatiquement les articles collectés</li>
@@ -402,7 +436,7 @@ function ContentRepositorySection() {
             Le repository affiche tous les articles avec leur statut dans le pipeline :
           </p>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div className="p-3 rounded-lg border text-center">
               <div className="text-2xl font-bold text-muted-foreground">Collected</div>
               <p className="text-xs text-muted-foreground">Articles bruts</p>
@@ -412,12 +446,8 @@ function ContentRepositorySection() {
               <p className="text-xs text-muted-foreground">Réécrits par IA</p>
             </div>
             <div className="p-3 rounded-lg border text-center">
-              <div className="text-2xl font-bold text-blue-600">Translated</div>
-              <p className="text-xs text-muted-foreground">Multi-langue</p>
-            </div>
-            <div className="p-3 rounded-lg border text-center">
-              <div className="text-2xl font-bold text-green-600">Published</div>
-              <p className="text-xs text-muted-foreground">Finalisés</p>
+              <div className="text-2xl font-bold text-green-600">To Publish</div>
+              <p className="text-xs text-muted-foreground">Prêts à publier</p>
             </div>
           </div>
 
@@ -428,18 +458,21 @@ function ContentRepositorySection() {
               <span><strong>Transform</strong> - Réécrit l'article avec l'IA</span>
             </div>
             <div className="flex items-center gap-2">
-              <Languages className="h-4 w-4 text-blue-600" />
-              <span><strong>Translate</strong> - Traduit dans les langues cibles</span>
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <span><strong>To Publish</strong> - Marque l'article prêt à publier et lance la traduction</span>
             </div>
             <div className="flex items-center gap-2">
               <Target className="h-4 w-4 text-purple-600" />
               <span><strong>Score</strong> - Évalue la pertinence avec l'IA</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Globe className="h-4 w-4 text-green-600" />
-              <span><strong>Publish</strong> - Marque comme publié</span>
-            </div>
           </div>
+
+          <h4 className="font-semibold mt-6">Rubrique (Tag)</h4>
+          <p className="text-sm text-muted-foreground">
+            Chaque article peut avoir une rubrique associée pour déterminer dans quelle catégorie
+            il sera publié. Cliquez sur la rubrique dans le détail d'un article pour la modifier.
+            Exemples : "Tech", "Cloud", "Tutoriel", "Actualités", etc.
+          </p>
 
           <h4 className="font-semibold mt-6">Actions batch</h4>
           <p className="text-sm text-muted-foreground">
@@ -978,6 +1011,25 @@ function FAQSection() {
                 Oui. L'IA est hébergée sur OVHcloud AI Endpoints en Europe. Vos données
                 ne quittent pas l'infrastructure OVHcloud et ne sont pas utilisées pour
                 entraîner des modèles. La base de données est également hébergée sur OVHcloud.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-8">
+              <AccordionTrigger>Ma collecte échoue avec "Bot protection détectée"</AccordionTrigger>
+              <AccordionContent>
+                Certains sites utilisent des protections anti-bot (Cloudflare, DDoS Guard).
+                Le système bascule automatiquement vers Playwright avec JavaScript Rendering
+                après 3 échecs consécutifs. Vous pouvez aussi activer manuellement "JavaScript
+                Rendering" dans la configuration du point de collecte. Un diagnostic détaillé
+                est disponible dans le panneau de l'article pour identifier la cause exacte.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-9">
+              <AccordionTrigger>À quoi sert la rubrique d'un article ?</AccordionTrigger>
+              <AccordionContent>
+                La rubrique (tag) permet de catégoriser vos articles pour la publication.
+                Elle indique dans quelle section ou catégorie l'article devrait être publié
+                sur votre site. Vous pouvez la modifier en cliquant dessus dans le détail
+                de l'article. Exemples : "Tech", "Cloud", "Tutoriel", "Actualités".
               </AccordionContent>
             </AccordionItem>
           </Accordion>

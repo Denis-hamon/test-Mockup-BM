@@ -42,6 +42,8 @@ import {
   X,
   Image as ImageIcon,
   ImagePlus,
+  Tag,
+  Send,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -169,6 +171,8 @@ export default function ArticleDetail() {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [deepSeekTaskId, setDeepSeekTaskId] = useState<string | null>(null);
   const [showDeepSeekDialog, setShowDeepSeekDialog] = useState(false);
+  const [editingRubric, setEditingRubric] = useState(false);
+  const [rubricValue, setRubricValue] = useState("");
 
   const { data: article, isLoading, error } = useQuery({
     queryKey: ['article', actualArticleId],
@@ -205,20 +209,23 @@ export default function ArticleDetail() {
     onError: (error: Error) => toast.error(error.message),
   });
 
-  const publishMutation = useMutation({
-    mutationFn: () => api.batchPublish([Number(actualArticleId)]),
-    onSuccess: () => {
-      toast.success('Article published');
+  // "To Publish" mutation - marks article as ready for publication and triggers translation
+  const toPublishMutation = useMutation({
+    mutationFn: () => api.approveArticle(Number(actualArticleId)),
+    onSuccess: (result) => {
+      toast.success(`Article marked for publication! Translating to ${result.targetLanguages.length} languages`);
       queryClient.invalidateQueries({ queryKey: ['article', actualArticleId] });
     },
     onError: (error: Error) => toast.error(error.message),
   });
 
-  const approveMutation = useMutation({
-    mutationFn: () => api.approveArticle(Number(actualArticleId)),
-    onSuccess: (result) => {
-      toast.success(`Article approved! Translating to ${result.targetLanguages.length} languages`);
+  // Update rubric mutation
+  const updateRubricMutation = useMutation({
+    mutationFn: (rubric: string) => api.updateArticle(Number(actualArticleId), { rubric }),
+    onSuccess: () => {
+      toast.success('Rubric updated');
       queryClient.invalidateQueries({ queryKey: ['article', actualArticleId] });
+      setEditingRubric(false);
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -376,19 +383,19 @@ export default function ArticleDetail() {
           {article.status === 'transformed' && (
             <Button
               size="sm"
-              onClick={() => approveMutation.mutate()}
-              disabled={approveMutation.isPending}
+              onClick={() => toPublishMutation.mutate()}
+              disabled={toPublishMutation.isPending}
               className="bg-green-600 hover:bg-green-700 text-white"
             >
-              {approveMutation.isPending ? (
+              {toPublishMutation.isPending ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
-                <CheckCircle className="h-4 w-4 mr-2" />
+                <Send className="h-4 w-4 mr-2" />
               )}
-              Approve & Translate
+              To Publish
             </Button>
           )}
-          {(article.status === 'approved' || article.status === 'translated') && (
+          {(article.status === 'to_publish' || article.status === 'translated') && (
             <Button
               variant="outline"
               size="sm"
@@ -403,18 +410,12 @@ export default function ArticleDetail() {
               Retranslate
             </Button>
           )}
-          <Button
-            size="sm"
-            onClick={() => publishMutation.mutate()}
-            disabled={publishMutation.isPending || article.status === 'published'}
-          >
-            {publishMutation.isPending ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Globe className="h-4 w-4 mr-2" />
-            )}
-            {article.status === 'published' ? 'Published' : 'Publish'}
-          </Button>
+          {(article.status === 'to_publish' || article.status === 'translated') && (
+            <Badge variant="secondary" className="bg-green-500/10 text-green-600 h-9 px-4">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Ready to Publish
+            </Badge>
+          )}
         </div>
       </div>
 
@@ -509,6 +510,76 @@ export default function ArticleDetail() {
                           Transform the article first
                         </p>
                       )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Rubric Tag */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Tag className="h-4 w-4" />
+                    Rubrique
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    Catégorie de publication
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {editingRubric ? (
+                    <div className="space-y-2">
+                      <Input
+                        value={rubricValue}
+                        onChange={(e) => setRubricValue(e.target.value)}
+                        placeholder="Ex: Tech, Cloud, Tutoriel..."
+                        className="text-sm"
+                        autoFocus
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => updateRubricMutation.mutate(rubricValue)}
+                          disabled={updateRubricMutation.isPending}
+                          className="flex-1"
+                        >
+                          {updateRubricMutation.isPending ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <Save className="h-3 w-3 mr-1" />
+                          )}
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingRubric(false);
+                            setRubricValue(article.rubric || "");
+                          }}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      className="flex items-center justify-between p-2 rounded-md border bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => {
+                        setRubricValue(article.rubric || "");
+                        setEditingRubric(true);
+                      }}
+                    >
+                      {article.rubric ? (
+                        <Badge variant="secondary" className="text-sm">
+                          {article.rubric}
+                        </Badge>
+                      ) : (
+                        <span className="text-sm text-muted-foreground italic">
+                          Aucune rubrique
+                        </span>
+                      )}
+                      <Pencil className="h-3 w-3 text-muted-foreground" />
                     </div>
                   )}
                 </CardContent>
