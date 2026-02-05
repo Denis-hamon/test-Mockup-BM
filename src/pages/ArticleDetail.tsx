@@ -173,12 +173,27 @@ export default function ArticleDetail() {
   const [showDeepSeekDialog, setShowDeepSeekDialog] = useState(false);
   const [editingRubric, setEditingRubric] = useState(false);
   const [rubricValue, setRubricValue] = useState("");
+const [showRubricSuggestions, setShowRubricSuggestions] = useState(false);
 
   const { data: article, isLoading, error } = useQuery({
     queryKey: ['article', actualArticleId],
     queryFn: () => api.getArticle(Number(actualArticleId)),
     enabled: !!actualArticleId,
   });
+
+  // Fetch existing rubrics for autocomplete
+  const { data: existingRubrics = [] } = useQuery({
+    queryKey: ['rubrics'],
+    queryFn: () => api.getRubrics(),
+  });
+
+  // Filter rubrics based on user input
+  const filteredRubrics = rubricValue.trim()
+    ? existingRubrics.filter(r =>
+        r.toLowerCase().includes(rubricValue.toLowerCase()) &&
+        r.toLowerCase() !== rubricValue.toLowerCase()
+      )
+    : existingRubrics;
 
   // Back link based on context
   const backLink = actualProjectId ? `/projects/${actualProjectId}/repository` : '/repository';
@@ -529,13 +544,51 @@ export default function ArticleDetail() {
                 <CardContent>
                   {editingRubric ? (
                     <div className="space-y-2">
-                      <Input
-                        value={rubricValue}
-                        onChange={(e) => setRubricValue(e.target.value)}
-                        placeholder="Ex: Tech, Cloud, Tutoriel..."
-                        className="text-sm"
-                        autoFocus
-                      />
+                      <div className="relative">
+                        <Input
+                          value={rubricValue}
+                          onChange={(e) => {
+                            setRubricValue(e.target.value);
+                            setShowRubricSuggestions(true);
+                          }}
+                          onFocus={() => setShowRubricSuggestions(true)}
+                          onBlur={() => {
+                            // Delay to allow click on suggestion
+                            setTimeout(() => setShowRubricSuggestions(false), 150);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && rubricValue.trim()) {
+                              updateRubricMutation.mutate(rubricValue);
+                            } else if (e.key === 'Escape') {
+                              setEditingRubric(false);
+                              setRubricValue(article.rubric || "");
+                            }
+                          }}
+                          placeholder="Ex: Tech, Cloud, Tutoriel..."
+                          className="text-sm"
+                          autoFocus
+                        />
+                        {/* Autocomplete suggestions dropdown */}
+                        {showRubricSuggestions && filteredRubrics.length > 0 && (
+                          <div className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-lg max-h-40 overflow-auto">
+                            {filteredRubrics.slice(0, 8).map((rubric) => (
+                              <div
+                                key={rubric}
+                                className="px-3 py-2 text-sm cursor-pointer hover:bg-muted transition-colors"
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
+                                  setRubricValue(rubric);
+                                  setShowRubricSuggestions(false);
+                                }}
+                              >
+                                <Badge variant="secondary" className="text-xs">
+                                  {rubric}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                       <div className="flex gap-2">
                         <Button
                           size="sm"
@@ -556,6 +609,7 @@ export default function ArticleDetail() {
                           onClick={() => {
                             setEditingRubric(false);
                             setRubricValue(article.rubric || "");
+                            setShowRubricSuggestions(false);
                           }}
                         >
                           <X className="h-3 w-3" />

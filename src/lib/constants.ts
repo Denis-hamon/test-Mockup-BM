@@ -4,14 +4,14 @@
 // ==================== LANGUAGES ====================
 
 export const SUPPORTED_LANGUAGES = [
-  { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
-  { code: 'en', name: 'English', nativeName: 'English', flag: '🇬🇧' },
-  { code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
-  { code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪' },
-  { code: 'it', name: 'Italian', nativeName: 'Italiano', flag: '🇮🇹' },
-  { code: 'pt', name: 'Portuguese', nativeName: 'Português', flag: '🇵🇹' },
-  { code: 'nl', name: 'Dutch', nativeName: 'Nederlands', flag: '🇳🇱' },
-  { code: 'pl', name: 'Polish', nativeName: 'Polski', flag: '🇵🇱' },
+  { code: 'fr', name: 'French', nativeName: 'Francais' },
+  { code: 'en', name: 'English', nativeName: 'English' },
+  { code: 'es', name: 'Spanish', nativeName: 'Espanol' },
+  { code: 'de', name: 'German', nativeName: 'Deutsch' },
+  { code: 'it', name: 'Italian', nativeName: 'Italiano' },
+  { code: 'pt', name: 'Portuguese', nativeName: 'Portugues' },
+  { code: 'nl', name: 'Dutch', nativeName: 'Nederlands' },
+  { code: 'pl', name: 'Polish', nativeName: 'Polski' },
 ] as const;
 
 export const LANGUAGE_CODES = SUPPORTED_LANGUAGES.map(l => l.code);
@@ -26,9 +26,8 @@ export function getLanguageNativeName(code: string): string {
   return SUPPORTED_LANGUAGES.find(l => l.code === code)?.nativeName || code.toUpperCase();
 }
 
-export function getLanguageFlag(code: string): string {
-  return SUPPORTED_LANGUAGES.find(l => l.code === code)?.flag || '🏳️';
-}
+// Language flag is now handled by the FlagIcon component
+// import { FlagIcon } from "@/components/ui/flag-icon";
 
 // ==================== ARTICLE STATUS ====================
 

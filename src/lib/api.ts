@@ -650,6 +650,9 @@ export const api = {
       body: JSON.stringify(data),
     }),
 
+  // Get all unique rubrics for autocomplete
+  getRubrics: () => fetchApi<string[]>('/rubrics'),
+
   // Edit article with learning capture
   editArticle: (id: number, data: { title?: string; content?: string }) =>
     fetchApi<{ message: string; editId: number | null; editType: string; wordCountDelta: number }>(`/articles/${id}/edit`, {

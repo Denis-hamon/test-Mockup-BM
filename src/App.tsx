@@ -22,6 +22,8 @@ import Documentation from "./pages/Documentation";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
+import PublicArticlesList from "./pages/PublicArticlesList";
+import PublicArticle from "./pages/PublicArticle";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +51,10 @@ const App = () => (
             {/* Public Routes (no authentication required) */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+
+            {/* Public Article Pages (no authentication required) */}
+            <Route path="/p" element={<PublicArticlesList />} />
+            <Route path="/p/:id" element={<PublicArticle />} />
 
             {/* Protected Routes (authentication required) */}
             <Route path="/" element={

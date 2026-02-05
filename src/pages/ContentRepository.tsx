@@ -130,6 +130,16 @@ function ArticleRow({ article, isSelected, onSelect, onTransform, onTranslate, o
         <ArticleStatusBadge status={article.status} />
       </TableCell>
       <TableCell>
+        {article.rubric ? (
+          <Badge variant="secondary" className="text-xs">
+            <Tag className="h-3 w-3 mr-1" />
+            {article.rubric}
+          </Badge>
+        ) : (
+          <span className="text-xs text-muted-foreground">-</span>
+        )}
+      </TableCell>
+      <TableCell>
         <Badge variant="outline">{article.language.toUpperCase()}</Badge>
       </TableCell>
       <TableCell className="text-muted-foreground text-sm">
@@ -258,6 +268,7 @@ export default function ContentRepository() {
   const [sortBy, setSortBy] = useState<string>("newest");
   const [hasTranslations, setHasTranslations] = useState<string>("all");
   const [relevanceFilter, setRelevanceFilter] = useState<string>("all");
+  const [rubricFilter, setRubricFilter] = useState<string>("all");
   const [selectedArticles, setSelectedArticles] = useState<Set<number>>(new Set());
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -274,6 +285,12 @@ export default function ContentRepository() {
   const { data: providers = [] } = useQuery({
     queryKey: ['providers', parsedProjectId],
     queryFn: () => api.getProviders(parsedProjectId),
+  });
+
+  // Fetch rubrics for the filter
+  const { data: rubrics = [] } = useQuery({
+    queryKey: ['rubrics'],
+    queryFn: () => api.getRubrics(),
   });
 
   // Fetch stats separately (without status filter) so cards always show correct totals
@@ -311,6 +328,7 @@ export default function ContentRepository() {
     wordCountFilter !== 'all',
     hasTranslations !== 'all',
     relevanceFilter !== 'all',
+    rubricFilter !== 'all',
   ].filter(Boolean).length;
 
   // Clear all filters
@@ -322,6 +340,7 @@ export default function ContentRepository() {
     setWordCountFilter('all');
     setHasTranslations('all');
     setRelevanceFilter('all');
+    setRubricFilter('all');
     setSearchQuery('');
     setPage(0);
   };
@@ -384,6 +403,15 @@ export default function ContentRepository() {
           default: return true;
         }
       });
+    }
+
+    // Rubric filter
+    if (rubricFilter !== 'all') {
+      if (rubricFilter === 'none') {
+        filtered = filtered.filter(a => !a.rubric);
+      } else {
+        filtered = filtered.filter(a => a.rubric === rubricFilter);
+      }
     }
 
     // Search filter (client-side for better UX)
@@ -993,6 +1021,19 @@ export default function ContentRepository() {
                   <SelectItem value="unscored">Not Scored</SelectItem>
                 </SelectContent>
               </Select>
+              <Select value={rubricFilter} onValueChange={(v) => { setRubricFilter(v); setPage(0); }}>
+                <SelectTrigger className="w-[160px]">
+                  <Tag className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Rubrique" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Toutes rubriques</SelectItem>
+                  <SelectItem value="none">Sans rubrique</SelectItem>
+                  {rubrics.map(rubric => (
+                    <SelectItem key={rubric} value={rubric}>{rubric}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {activeFilterCount > 0 && (
                 <Button
                   variant="ghost"
@@ -1094,6 +1135,7 @@ export default function ContentRepository() {
                     </TableHead>
                     <TableHead>Title</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Rubrique</TableHead>
                     <TableHead>Language</TableHead>
                     <TableHead>Length</TableHead>
                     <TableHead>Relevance</TableHead>

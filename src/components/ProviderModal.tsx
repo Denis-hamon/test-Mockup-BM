@@ -82,24 +82,45 @@ export function ProviderModal({
 
   useEffect(() => {
     if (provider) {
+      // Map snake_case from API to camelCase for form
+      const p = provider as any;
+
+      // Try to extract domain and entryUrl from base_urls if not set directly
+      let domain = p.domain || "";
+      let entryUrl = p.entry_url || p.entryUrl || "";
+
+      if ((!domain || !entryUrl) && p.base_urls) {
+        const baseUrls = typeof p.base_urls === 'string' ? JSON.parse(p.base_urls) : p.base_urls;
+        const firstUrl = Object.values(baseUrls)[0] as string;
+        if (firstUrl) {
+          try {
+            const url = new URL(firstUrl);
+            if (!domain) domain = `${url.protocol}//${url.host}`;
+            if (!entryUrl) entryUrl = firstUrl;
+          } catch (e) {
+            // Invalid URL, ignore
+          }
+        }
+      }
+
       setFormData({
-        name: provider.name,
-        slug: provider.slug,
-        domain: provider.domain || "",
-        entryUrl: provider.entryUrl || "",
-        crawlDepth: provider.crawlDepth || 2,
-        urlPatterns: Array.isArray(provider.urlPatterns)
-          ? provider.urlPatterns.join("\n")
-          : provider.urlPatterns || "",
-        excludePatterns: Array.isArray(provider.excludePatterns)
-          ? provider.excludePatterns.join("\n")
-          : provider.excludePatterns || "",
-        contentSelectors: provider.contentSelectors || "",
-        schedule: provider.schedule || "manual",
-        autoTransform: provider.autoTransform ?? true,
-        autoTranslate: provider.autoTranslate ?? false,
-        jsRender: provider.jsRender ?? false,
-        scrapingMethod: provider.scrapingMethod || 'firecrawl',
+        name: p.name,
+        slug: p.slug,
+        domain: domain,
+        entryUrl: entryUrl,
+        crawlDepth: p.crawl_depth || p.crawlDepth || 2,
+        urlPatterns: Array.isArray(p.url_patterns || p.urlPatterns)
+          ? (p.url_patterns || p.urlPatterns).join("\n")
+          : (p.url_patterns || p.urlPatterns || ""),
+        excludePatterns: Array.isArray(p.exclude_patterns || p.excludePatterns)
+          ? (p.exclude_patterns || p.excludePatterns).join("\n")
+          : (p.exclude_patterns || p.excludePatterns || ""),
+        contentSelectors: p.content_selectors || p.contentSelectors || "",
+        schedule: p.schedule || "manual",
+        autoTransform: (p.auto_transform ?? p.autoTransform) ?? true,
+        autoTranslate: (p.auto_translate ?? p.autoTranslate) ?? false,
+        jsRender: (p.js_render ?? p.jsRender) ?? false,
+        scrapingMethod: p.scraping_method || p.scrapingMethod || 'firecrawl',
       });
     } else {
       setFormData({
@@ -299,59 +320,61 @@ export function ProviderModal({
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm font-medium">
               <Settings2 className="h-4 w-4" />
-              Méthode de collecte
+              Methode de collecte actuelle
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="scrapingMethod">Méthode</Label>
-                <Select
-                  value={formData.scrapingMethod}
-                  onValueChange={(v: 'firecrawl' | 'direct' | 'playwright') =>
-                    setFormData((prev) => ({ ...prev, scrapingMethod: v }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="firecrawl">
-                      <span className="flex items-center gap-2">
-                        <Zap className="h-3 w-3" />
-                        Firecrawl (Recommandé)
-                      </span>
-                    </SelectItem>
-                    <SelectItem value="direct">
-                      <span className="flex items-center gap-2">
-                        <Globe className="h-3 w-3" />
-                        HTTP Direct
-                      </span>
-                    </SelectItem>
-                    <SelectItem value="playwright">
-                      <span className="flex items-center gap-2">
-                        <Shield className="h-3 w-3" />
-                        Playwright (Anti-bot)
-                      </span>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+            <div className="p-4 rounded-lg border bg-muted/30">
+              <div className="flex items-center gap-3 mb-3">
+                {formData.scrapingMethod === 'firecrawl' && (
+                  <>
+                    <div className="p-2 rounded-full bg-green-500/10">
+                      <Zap className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Firecrawl</p>
+                      <p className="text-xs text-muted-foreground">Service cloud rapide</p>
+                    </div>
+                  </>
+                )}
+                {formData.scrapingMethod === 'direct' && (
+                  <>
+                    <div className="p-2 rounded-full bg-blue-500/10">
+                      <Globe className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium">HTTP Direct</p>
+                      <p className="text-xs text-muted-foreground">Requetes simples</p>
+                    </div>
+                  </>
+                )}
+                {formData.scrapingMethod === 'playwright' && (
+                  <>
+                    <div className="p-2 rounded-full bg-orange-500/10">
+                      <Shield className="h-5 w-5 text-orange-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Playwright</p>
+                      <p className="text-xs text-muted-foreground">Navigateur headless (anti-bot)</p>
+                    </div>
+                  </>
+                )}
+                {formData.jsRender && (
+                  <span className="ml-auto text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                    JS active
+                  </span>
+                )}
               </div>
-              <div className="space-y-2 flex flex-col justify-end">
-                <div className="flex items-center space-x-2 h-10">
-                  <Switch
-                    id="jsRender"
-                    checked={formData.jsRender}
-                    onCheckedChange={(checked) =>
-                      setFormData((prev) => ({ ...prev, jsRender: checked }))
-                    }
-                  />
-                  <Label htmlFor="jsRender" className="text-sm">JavaScript Rendering</Label>
-                </div>
+
+              <div className="text-xs text-muted-foreground border-t pt-3 mt-2">
+                <p className="mb-2">
+                  <strong>Gestion automatique</strong> - Aucune intervention requise.
+                </p>
+                <p>
+                  Si la collecte echoue (protection anti-bot, timeout), le systeme
+                  bascule automatiquement vers une methode plus robuste et met a jour ce champ.
+                </p>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Activez JavaScript Rendering pour les sites dynamiques (React, Vue, etc.) ou protégés par Cloudflare.
-            </p>
           </div>
           <Separator className="my-4" />
 

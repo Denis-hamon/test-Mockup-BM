@@ -55,6 +55,7 @@ import {
   HelpCircle,
   ChevronRight,
   Send,
+  Table2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -75,6 +76,11 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { common, createLowlight } from "lowlight";
 import { api } from "@/lib/api";
+import { FlagIcon } from "@/components/ui/flag-icon";
+import { Table } from "@tiptap/extension-table";
+import { TableRow } from "@tiptap/extension-table-row";
+import { TableCell } from "@tiptap/extension-table-cell";
+import { TableHeader } from "@tiptap/extension-table-header";
 
 // Create lowlight instance for code highlighting
 const lowlight = createLowlight(common);
@@ -202,6 +208,14 @@ const suggestionItems = [
     },
   },
   {
+    title: "Table",
+    description: "Insert a data table",
+    icon: Table2,
+    command: ({ editor, range }: any) => {
+      editor.chain().focus().deleteRange(range).insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+    },
+  },
+  {
     title: "Divider",
     description: "Add a horizontal divider",
     icon: Minus,
@@ -218,17 +232,83 @@ interface ArticleEditorProps {
   className?: string;
 }
 
+// Convert markdown table to HTML table
+function markdownTableToHTML(tableContent: string): string {
+  const lines = tableContent.trim().split('\n').filter(line => line.trim());
+  if (lines.length < 2) return tableContent;
+
+  // Check if this looks like a table (has pipes)
+  if (!lines[0].includes('|')) return tableContent;
+
+  const parseRow = (row: string): string[] => {
+    return row
+      .split('|')
+      .map(cell => cell.trim())
+      .filter((cell, idx, arr) => idx > 0 && idx < arr.length); // Remove empty first/last from | split
+  };
+
+  const headerCells = parseRow(lines[0]);
+  if (headerCells.length === 0) return tableContent;
+
+  // Skip separator row (the --- row)
+  const separatorIdx = lines.findIndex(line => /^\|?\s*[-:]+\s*\|/.test(line));
+  const dataStartIdx = separatorIdx >= 0 ? separatorIdx + 1 : 1;
+
+  let html = '<table><thead><tr>';
+  headerCells.forEach(cell => {
+    // Convert markdown links in cells
+    const cellContent = cell
+      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>');
+    html += `<th>${cellContent}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  for (let i = dataStartIdx; i < lines.length; i++) {
+    const cells = parseRow(lines[i]);
+    if (cells.length > 0) {
+      html += '<tr>';
+      cells.forEach(cell => {
+        // Convert markdown links in cells
+        const cellContent = cell
+          .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.*?)\*/g, '<em>$1</em>')
+          .replace(/`([^`]+)`/g, '<code>$1</code>');
+        html += `<td>${cellContent}</td>`;
+      });
+      html += '</tr>';
+    }
+  }
+
+  html += '</tbody></table>';
+  return html;
+}
+
 // Convert plain text or markdown to HTML
 function contentToHTML(content: string): string {
   if (!content) return "<p></p>";
 
   // If content already has HTML tags, return as-is
-  if (content.includes("<p>") || content.includes("<h1>") || content.includes("<div>")) {
+  if (content.includes("<p>") || content.includes("<h1>") || content.includes("<div>") || content.includes("<table>")) {
     return content;
   }
 
+  // First, extract and convert markdown tables
+  // Tables are blocks of lines starting with |
+  const tableRegex = /(?:^|\n)((?:\|[^\n]+\|\n?)+)/g;
+  let html = content.replace(tableRegex, (match, tableContent) => {
+    // Check if it's actually a table (has header separator row)
+    if (/\|[\s-:]+\|/.test(tableContent)) {
+      return '\n' + markdownTableToHTML(tableContent) + '\n';
+    }
+    return match;
+  });
+
   // Simple markdown to HTML conversion
-  let html = content
+  html = html
     .replace(/^### (.*$)/gm, '<h3>$1</h3>')
     .replace(/^## (.*$)/gm, '<h2>$1</h2>')
     .replace(/^# (.*$)/gm, '<h1>$1</h1>')
@@ -244,7 +324,7 @@ function contentToHTML(content: string): string {
     .map(p => {
       const trimmed = p.trim();
       if (!trimmed) return '';
-      if (trimmed.startsWith('<h') || trimmed.startsWith('<pre') || trimmed.startsWith('<ul') || trimmed.startsWith('<ol') || trimmed.startsWith('<blockquote')) {
+      if (trimmed.startsWith('<h') || trimmed.startsWith('<pre') || trimmed.startsWith('<ul') || trimmed.startsWith('<ol') || trimmed.startsWith('<blockquote') || trimmed.startsWith('<table')) {
         return trimmed;
       }
       return `<p>${trimmed.replace(/\n/g, '<br>')}</p>`;
@@ -317,10 +397,10 @@ const aiActions = [
 ];
 
 const translateActions = [
-  { id: 'translate-en', label: 'English', flag: '🇬🇧' },
-  { id: 'translate-fr', label: 'Français', flag: '🇫🇷' },
-  { id: 'translate-es', label: 'Español', flag: '🇪🇸' },
-  { id: 'translate-de', label: 'Deutsch', flag: '🇩🇪' },
+  { id: 'translate-en', label: 'English', code: 'en' },
+  { id: 'translate-fr', label: 'Francais', code: 'fr' },
+  { id: 'translate-es', label: 'Espanol', code: 'es' },
+  { id: 'translate-de', label: 'Deutsch', code: 'de' },
 ];
 
 // AI Menu Component for bubble selection
@@ -442,7 +522,7 @@ function AIMenu({
                 onClick={() => handleAction(action.id)}
                 className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent text-left"
               >
-                <span className="text-base">{action.flag}</span>
+                <FlagIcon code={action.code} size="sm" />
                 <span>{action.label}</span>
               </button>
             ))}
@@ -967,6 +1047,27 @@ export function ArticleEditor({
         class: "rounded-md bg-muted p-4 font-mono text-sm overflow-x-auto",
       },
     }),
+    Table.configure({
+      resizable: true,
+      HTMLAttributes: {
+        class: "border-collapse table-auto w-full my-4",
+      },
+    }),
+    TableRow.configure({
+      HTMLAttributes: {
+        class: "border-b border-border",
+      },
+    }),
+    TableHeader.configure({
+      HTMLAttributes: {
+        class: "border border-border bg-muted px-4 py-2 text-left font-semibold",
+      },
+    }),
+    TableCell.configure({
+      HTMLAttributes: {
+        class: "border border-border px-4 py-2",
+      },
+    }),
   ], []);
 
   const handleSave = useCallback(async () => {
@@ -1044,6 +1145,10 @@ export function ArticleEditor({
                 "prose-li:my-2 prose-ul:my-4 prose-ol:my-4",
                 // Images and other elements
                 "prose-img:my-6 prose-hr:my-8",
+                // Tables
+                "prose-table:border-collapse prose-table:w-full prose-table:my-4",
+                "prose-th:border prose-th:border-border prose-th:bg-muted prose-th:px-4 prose-th:py-2 prose-th:text-left prose-th:font-semibold",
+                "prose-td:border prose-td:border-border prose-td:px-4 prose-td:py-2",
                 "min-h-[400px]"
               ),
             },
@@ -1074,7 +1179,7 @@ export function ArticleEditor({
           <span>
             Type <kbd className="px-1 py-0.5 rounded bg-muted font-mono">/</kbd> for commands
           </span>
-          <span>Select text for <span className="text-violet-600 dark:text-violet-400">✨ AI</span> &amp; formatting</span>
+          <span className="inline-flex items-center gap-1">Select text for <Sparkles className="inline h-3 w-3 text-violet-500" /><span className="text-violet-600 dark:text-violet-400">AI</span> &amp; formatting</span>
           <span>
             <kbd className="px-1 py-0.5 rounded bg-muted font-mono">⌘S</kbd> to save
           </span>
