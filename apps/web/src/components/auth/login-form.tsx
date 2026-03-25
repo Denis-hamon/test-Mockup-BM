@@ -20,13 +20,13 @@ export function LoginForm() {
 
   async function onSubmit(data: LoginInput) {
     setServerError(null);
-    const result = await signIn("credentials", {
-      email: data.email,
-      password: data.password,
-      redirectTo: "/dashboard",
-    });
-
-    if (result?.error) {
+    try {
+      await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirectTo: "/dashboard",
+      });
+    } catch (error: unknown) {
       setServerError("Email ou mot de passe incorrect.");
     }
   }

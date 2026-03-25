@@ -8,7 +8,7 @@ import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: DrizzleAdapter(db),
+  adapter: DrizzleAdapter(db) as any,
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days per D-05

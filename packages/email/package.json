@@ -8,5 +8,8 @@
     "react-email": "latest",
     "resend": "latest",
     "react": "latest"
+  },
+  "devDependencies": {
+    "@types/react": "latest"
   }
 }

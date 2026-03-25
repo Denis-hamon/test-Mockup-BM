@@ -6,7 +6,7 @@ export const registerSchema = z.object({
     .string()
     .min(8, "Le mot de passe doit contenir au moins 8 caracteres"),
   role: z.enum(["avocat", "client"], {
-    required_error: "Veuillez choisir un type de compte",
+    message: "Veuillez choisir un type de compte",
   }),
 });
 
