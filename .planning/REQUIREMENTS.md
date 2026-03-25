@@ -9,12 +9,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Authentication & Security
 
-- [ ] **AUTH-01**: User can create account with email and password
+- [x] **AUTH-01**: User can create account with email and password
 - [ ] **AUTH-02**: User receives email verification after signup
-- [ ] **AUTH-03**: User can log in and stay logged in across sessions
+- [x] **AUTH-03**: User can log in and stay logged in across sessions
 - [ ] **AUTH-04**: User can reset password via email link
-- [ ] **SECU-01**: All data encrypted end-to-end using libsodium (client-side key management)
-- [ ] **SECU-02**: RGPD compliance (consent management, data export, deletion rights)
+- [x] **SECU-01**: All data encrypted end-to-end using libsodium (client-side key management)
+- [x] **SECU-02**: RGPD compliance (consent management, data export, deletion rights)
 - [ ] **SECU-03**: Visual security indicators displayed at every sensitive interaction (padlock icons, encryption badges, contextual reminders)
 
 ### Intake & Forms
@@ -96,12 +96,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
+| AUTH-01 | Phase 1 | Complete |
 | AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
+| AUTH-03 | Phase 1 | Complete |
 | AUTH-04 | Phase 1 | Pending |
-| SECU-01 | Phase 1 | Pending |
-| SECU-02 | Phase 1 | Pending |
+| SECU-01 | Phase 1 | Complete |
+| SECU-02 | Phase 1 | Complete |
 | SECU-03 | Phase 2 | Pending |
 | INTK-01 | Phase 2 | Pending |
 | INTK-02 | Phase 4 | Pending |
