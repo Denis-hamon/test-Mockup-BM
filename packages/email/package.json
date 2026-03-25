@@ -5,6 +5,7 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "dependencies": {
+    "@react-email/components": "latest",
     "react-email": "latest",
     "resend": "latest",
     "react": "latest"
