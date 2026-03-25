@@ -40,7 +40,7 @@ Plans:
 - [x] 01-01-PLAN.md — Monorepo scaffolding, Docker infra, database schemas, Zod validation schemas
 - [x] 01-02-PLAN.md — Auth system (Auth.js v5, registration, login, email verification, password reset, UI pages)
 - [x] 01-03-PLAN.md — E2E encryption primitives (keypair, XChaCha20-Poly1305, BIP39 recovery, Argon2id KDF)
-- [ ] 01-04-PLAN.md — Recovery passphrase flow + RGPD compliance (consent, export, deletion)
+- [x] 01-04-PLAN.md — Recovery passphrase flow + RGPD compliance (consent, export, deletion)
 
 ### Phase 2: Intake Form & Trust UX
 **Goal**: A client can describe their legal situation through a guided multi-step form, upload supporting documents, and feel reassured by visible security indicators throughout
