@@ -2,12 +2,13 @@
 phase: 1
 slug: auth-encryption
 status: draft
-nyquist_compliant: false
-wave_0_complete: false
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-03-25
+updated: 2026-03-25
 ---
 
-# Phase 1 — Validation Strategy
+# Phase 1 -- Validation Strategy
 
 > Per-phase validation contract for feedback sampling during execution.
 
@@ -18,7 +19,7 @@ created: 2026-03-25
 | Property | Value |
 |----------|-------|
 | **Framework** | Vitest 4.1.1 |
-| **Config file** | none — Wave 0 installs |
+| **Config file** | `vitest.config.ts` (root, created in Plan 02 Task 2) + `packages/crypto/vitest.config.ts` (created in Plan 03 Task 1) |
 | **Quick run command** | `pnpm vitest run --changed` |
 | **Full suite command** | `pnpm vitest run` |
 | **Estimated runtime** | ~15 seconds |
@@ -36,30 +37,42 @@ created: 2026-03-25
 
 ## Per-Task Verification Map
 
-| Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 01-01-01 | 01 | 1 | AUTH-01 | integration | `pnpm vitest run tests/auth/register.test.ts` | ❌ W0 | ⬜ pending |
-| 01-02-01 | 02 | 1 | AUTH-02 | unit | `pnpm vitest run tests/auth/verification.test.ts` | ❌ W0 | ⬜ pending |
-| 01-02-02 | 02 | 1 | AUTH-03 | integration | `pnpm vitest run tests/auth/login.test.ts` | ❌ W0 | ⬜ pending |
-| 01-02-03 | 02 | 1 | AUTH-04 | integration | `pnpm vitest run tests/auth/reset-password.test.ts` | ❌ W0 | ⬜ pending |
-| 01-03-01 | 03 | 2 | SECU-01 | unit | `pnpm vitest run tests/crypto/encryption.test.ts` | ❌ W0 | ⬜ pending |
-| 01-04-01 | 04 | 2 | SECU-02 | integration | `pnpm vitest run tests/rgpd/compliance.test.ts` | ❌ W0 | ⬜ pending |
+| Task ID | Plan | Wave | Requirement | Test Type | Automated Command | Created By | Status |
+|---------|------|------|-------------|-----------|-------------------|------------|--------|
+| 01-01-01 | 01 | 1 | AUTH-01 | scaffolding | `pnpm install && pnpm --filter web exec -- npx next --version` | Plan 01 T1 | pending |
+| 01-01-02 | 01 | 1 | AUTH-01 | integration | `docker compose up -d && pnpm --filter web db:push` | Plan 01 T2 | pending |
+| 01-02-01 | 02 | 2 | AUTH-01..04 | typecheck | `pnpm tsc --noEmit` | Plan 02 T1 | pending |
+| 01-02-02 | 02 | 2 | AUTH-01..04 | behavioral | `pnpm vitest run tests/auth/` | Plan 02 T2 | pending |
+| 01-03-01 | 03 | 2 | SECU-01 | unit | `pnpm --filter @legalconnect/crypto test` | Plan 03 T1 | pending |
+| 01-03-02 | 03 | 2 | SECU-01 | unit | `pnpm --filter @legalconnect/crypto test` | Plan 03 T2 | pending |
+| 01-04-01 | 04 | 3 | SECU-01,02 | typecheck | `pnpm tsc --noEmit` | Plan 04 T1 | pending |
+| 01-04-02 | 04 | 3 | SECU-02 | behavioral | `pnpm vitest run tests/rgpd/` | Plan 04 T2 | pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+*Status: pending -- green -- red -- flaky*
 
 ---
 
-## Wave 0 Requirements
+## Test Creation Ownership
 
-- [ ] `vitest.config.ts` — root config with path aliases
-- [ ] `packages/crypto/vitest.config.ts` — crypto package config
-- [ ] `tests/auth/register.test.ts` — stubs for AUTH-01
-- [ ] `tests/auth/verification.test.ts` — stubs for AUTH-02
-- [ ] `tests/auth/login.test.ts` — stubs for AUTH-03
-- [ ] `tests/auth/reset-password.test.ts` — stubs for AUTH-04
-- [ ] `tests/crypto/encryption.test.ts` — stubs for SECU-01
-- [ ] `tests/rgpd/compliance.test.ts` — stubs for SECU-02
-- [ ] `tests/setup.ts` — shared test setup (DB, mocks)
+| Test File | Created By | Requirement |
+|-----------|-----------|-------------|
+| `vitest.config.ts` (root) | Plan 02, Task 2 | Infrastructure |
+| `tests/setup.ts` | Plan 02, Task 2 | Infrastructure |
+| `tests/auth/register.test.ts` | Plan 02, Task 2 | AUTH-01 |
+| `tests/auth/login.test.ts` | Plan 02, Task 2 | AUTH-03 |
+| `tests/auth/verification.test.ts` | Plan 02, Task 2 | AUTH-02 |
+| `tests/auth/reset-password.test.ts` | Plan 02, Task 2 | AUTH-04 |
+| `packages/crypto/vitest.config.ts` | Plan 03, Task 1 | SECU-01 |
+| `packages/crypto/src/__tests__/*.test.ts` | Plan 03, Tasks 1-2 | SECU-01 |
+| `tests/rgpd/compliance.test.ts` | Plan 04, Task 2 | SECU-02 |
+
+---
+
+## Nyquist Compliance
+
+- No 3 consecutive tasks without behavioral tests (Plan 02 T2 runs auth tests after T1 typecheck; Plan 03 has crypto tests; Plan 04 T2 runs RGPD tests)
+- All `<verify>` blocks use `pnpm tsc --noEmit` or `pnpm vitest run` (no `pnpm build` -- feedback latency < 15s)
+- Wave 0 test stubs integrated into Plans 02 and 04 (no separate Wave 0 plan needed)
 
 ---
 
@@ -74,11 +87,11 @@ created: 2026-03-25
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 15s
+- [x] All tasks have `<automated>` verify commands
+- [x] Sampling continuity: no 3 consecutive tasks without automated behavioral verify
+- [x] Test stubs created by Plans 02 and 04 (integrated, no separate Wave 0)
+- [x] No watch-mode flags
+- [x] Feedback latency < 15s (tsc --noEmit + vitest run, not pnpm build)
 - [ ] `nyquist_compliant: true` set in frontmatter
 
 **Approval:** pending
