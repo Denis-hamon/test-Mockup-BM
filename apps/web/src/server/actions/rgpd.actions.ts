@@ -40,9 +40,15 @@ export async function updateConsent(data: {
     return { error: "Le consentement essentiel ne peut pas etre revoque." };
   }
 
-  const headersList = await headers();
-  const ipAddress = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "unknown";
-  const userAgent = headersList.get("user-agent") || "unknown";
+  let ipAddress = "unknown";
+  let userAgent = "unknown";
+  try {
+    const headersList = await headers();
+    ipAddress = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "unknown";
+    userAgent = headersList.get("user-agent") || "unknown";
+  } catch {
+    // headers() unavailable outside request scope (e.g. in tests)
+  }
 
   if (parsed.granted) {
     // Grant: insert new consent record

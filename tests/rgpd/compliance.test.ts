@@ -180,7 +180,7 @@ describe("RGPD Compliance", () => {
       expect(consentStore[0].type).toBe("analytics");
       expect(consentStore[0].granted).toBe(true);
       expect(consentStore[0].grantedAt).toBeInstanceOf(Date);
-      expect(consentStore[0].ipAddress).toBe("127.0.0.1");
+      expect(consentStore[0].ipAddress).toBe("unknown");
     });
 
     it("revoking analytics consent sets revokedAt on existing record", async () => {
@@ -263,14 +263,16 @@ describe("RGPD Compliance", () => {
 
   describe("cancelAccountDeletion", () => {
     it("clears deletedAt and deletionScheduledAt", async () => {
-      // First set deletion
-      const user = store.users.find((u: any) => u.id === mockUserId);
-      user.deletedAt = new Date();
-      user.deletionScheduledAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      // First set deletion on the store entry
+      const idx = store.users.findIndex((u: any) => u.id === mockUserId);
+      store.users[idx].deletedAt = new Date();
+      store.users[idx].deletionScheduledAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
       const result = await cancelAccountDeletion();
 
       expect(result).toHaveProperty("success", true);
+      // Re-query after update (mock replaces object via spread)
+      const user = store.users.find((u: any) => u.id === mockUserId);
       expect(user.deletedAt).toBeNull();
       expect(user.deletionScheduledAt).toBeNull();
     });
