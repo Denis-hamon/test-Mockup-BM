@@ -11,6 +11,11 @@
     "db:generate": "pnpm --filter web db:generate"
   },
   "devDependencies": {
-    "turbo": "latest"
+    "turbo": "latest",
+    "vitest": "latest",
+    "@vitest/coverage-v8": "latest",
+    "bcryptjs": "latest",
+    "@types/bcryptjs": "latest",
+    "drizzle-orm": "latest"
   }
 }

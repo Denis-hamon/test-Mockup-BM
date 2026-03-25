@@ -25,6 +25,8 @@
     "react-email": "latest",
     "resend": "latest",
     "zxcvbn": "latest",
+    "clsx": "latest",
+    "tailwind-merge": "latest",
     "@legalconnect/shared": "workspace:*",
     "@legalconnect/crypto": "workspace:*",
     "@legalconnect/email": "workspace:*"
@@ -36,6 +38,7 @@
     "typescript": "latest",
     "@types/node": "latest",
     "@types/react": "latest",
-    "@types/react-dom": "latest"
+    "@types/react-dom": "latest",
+    "@types/zxcvbn": "latest"
   }
 }
