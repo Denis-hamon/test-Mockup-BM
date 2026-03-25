@@ -96,41 +96,41 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | — | Pending |
-| AUTH-02 | — | Pending |
-| AUTH-03 | — | Pending |
-| AUTH-04 | — | Pending |
-| SECU-01 | — | Pending |
-| SECU-02 | — | Pending |
-| SECU-03 | — | Pending |
-| INTK-01 | — | Pending |
-| INTK-02 | — | Pending |
-| INTK-03 | — | Pending |
-| INTK-04 | — | Pending |
-| INTK-05 | — | Pending |
-| INTK-06 | — | Pending |
-| AI-01 | — | Pending |
-| AI-02 | — | Pending |
-| AI-03 | — | Pending |
-| AI-04 | — | Pending |
-| AI-05 | — | Pending |
-| AI-06 | — | Pending |
-| DASH-01 | — | Pending |
-| DASH-02 | — | Pending |
-| DASH-03 | — | Pending |
-| DASH-04 | — | Pending |
-| PORT-01 | — | Pending |
-| PORT-02 | — | Pending |
-| PORT-03 | — | Pending |
-| PORT-04 | — | Pending |
-| DIST-01 | — | Pending |
-| DIST-02 | — | Pending |
+| AUTH-01 | Phase 1 | Pending |
+| AUTH-02 | Phase 1 | Pending |
+| AUTH-03 | Phase 1 | Pending |
+| AUTH-04 | Phase 1 | Pending |
+| SECU-01 | Phase 1 | Pending |
+| SECU-02 | Phase 1 | Pending |
+| SECU-03 | Phase 2 | Pending |
+| INTK-01 | Phase 2 | Pending |
+| INTK-02 | Phase 4 | Pending |
+| INTK-03 | Phase 2 | Pending |
+| INTK-04 | Phase 2 | Pending |
+| INTK-05 | Phase 8 | Pending |
+| INTK-06 | Phase 8 | Pending |
+| AI-01 | Phase 4 | Pending |
+| AI-02 | Phase 5 | Pending |
+| AI-03 | Phase 5 | Pending |
+| AI-04 | Phase 5 | Pending |
+| AI-05 | Phase 3 | Pending |
+| AI-06 | Phase 3 | Pending |
+| DASH-01 | Phase 6 | Pending |
+| DASH-02 | Phase 6 | Pending |
+| DASH-03 | Phase 6 | Pending |
+| DASH-04 | Phase 6 | Pending |
+| PORT-01 | Phase 7 | Pending |
+| PORT-02 | Phase 7 | Pending |
+| PORT-03 | Phase 7 | Pending |
+| PORT-04 | Phase 7 | Pending |
+| DIST-01 | Phase 9 | Pending |
+| DIST-02 | Phase 9 | Pending |
 
 **Coverage:**
 - v1 requirements: 29 total
-- Mapped to phases: 0
-- Unmapped: 29 ⚠️
+- Mapped to phases: 29
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-25*
-*Last updated: 2026-03-25 after initial definition*
+*Last updated: 2026-03-25 after roadmap creation*
