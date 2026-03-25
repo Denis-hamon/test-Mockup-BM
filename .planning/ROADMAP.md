@@ -34,13 +34,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. All user data is encrypted client-side with libsodium before reaching the server (E2E encryption functional)
   4. User can exercise RGPD rights: export their data and request deletion
   5. Key recovery works: user on a new device can restore access via passphrase
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 01-01: Project scaffolding, monorepo, database schema with RLS
-- [ ] 01-02: Auth system (signup, login, email verification, password reset)
-- [ ] 01-03: E2E encryption primitives and key management
-- [ ] 01-04: RGPD compliance infrastructure (consent, export, deletion)
+- [ ] 01-01-PLAN.md — Monorepo scaffolding, Docker infra, database schemas, Zod validation schemas
+- [ ] 01-02-PLAN.md — Auth system (Auth.js v5, registration, login, email verification, password reset, UI pages)
+- [ ] 01-03-PLAN.md — E2E encryption primitives (keypair, XChaCha20-Poly1305, BIP39 recovery, Argon2id KDF)
+- [ ] 01-04-PLAN.md — Recovery passphrase flow + RGPD compliance (consent, export, deletion)
 
 ### Phase 2: Intake Form & Trust UX
 **Goal**: A client can describe their legal situation through a guided multi-step form, upload supporting documents, and feel reassured by visible security indicators throughout
@@ -173,7 +173,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Auth & Encryption | 0/4 | Not started | - |
+| 1. Auth & Encryption | 0/4 | Planned | - |
 | 2. Intake Form & Trust UX | 0/3 | Not started | - |
 | 3. AI Engine Foundation | 0/2 | Not started | - |
 | 4. Empathetic AI Intake | 0/2 | Not started | - |
