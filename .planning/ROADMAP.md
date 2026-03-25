@@ -38,8 +38,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 - [x] 01-01-PLAN.md — Monorepo scaffolding, Docker infra, database schemas, Zod validation schemas
-- [ ] 01-02-PLAN.md — Auth system (Auth.js v5, registration, login, email verification, password reset, UI pages)
-- [ ] 01-03-PLAN.md — E2E encryption primitives (keypair, XChaCha20-Poly1305, BIP39 recovery, Argon2id KDF)
+- [x] 01-02-PLAN.md — Auth system (Auth.js v5, registration, login, email verification, password reset, UI pages)
+- [x] 01-03-PLAN.md — E2E encryption primitives (keypair, XChaCha20-Poly1305, BIP39 recovery, Argon2id KDF)
 - [ ] 01-04-PLAN.md — Recovery passphrase flow + RGPD compliance (consent, export, deletion)
 
 ### Phase 2: Intake Form & Trust UX
