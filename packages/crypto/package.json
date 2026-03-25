@@ -1,0 +1,17 @@
+{
+  "name": "@legalconnect/crypto",
+  "version": "0.0.1",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@scure/bip39": "latest",
+    "libsodium-wrappers-sumo": "latest"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.1"
+  }
+}

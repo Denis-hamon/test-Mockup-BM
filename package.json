@@ -1,25 +1,16 @@
 {
-  "name": "content-pipeline-ovh",
-  "version": "1.0.0",
-  "description": "Content Intelligence Pipeline - Outil interne OVHcloud pour le scraping et la transformation de contenu",
+  "name": "legalconnect",
   "private": true,
+  "packageManager": "pnpm@10.24.0",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@mendable/firecrawl-js": "^1.21.1",
-    "cors": "^2.8.6",
-    "express": "^5.2.1",
-    "openai": "^6.17.0",
-    "pg": "^8.18.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "redis": "^5.10.0"
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "test": "turbo test",
+    "lint": "turbo lint",
+    "db:push": "pnpm --filter web db:push",
+    "db:generate": "pnpm --filter web db:generate"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.2.1",
-    "vite": "^5.0.0"
+    "turbo": "latest"
   }
 }

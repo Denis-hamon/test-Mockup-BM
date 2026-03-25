@@ -1,0 +1,41 @@
+{
+  "name": "@legalconnect/web",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "db:push": "drizzle-kit push",
+    "db:generate": "drizzle-kit generate"
+  },
+  "dependencies": {
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "next-auth": "beta",
+    "@auth/drizzle-adapter": "latest",
+    "drizzle-orm": "latest",
+    "libsodium-wrappers-sumo": "latest",
+    "@scure/bip39": "latest",
+    "bcryptjs": "latest",
+    "zod": "latest",
+    "react-hook-form": "latest",
+    "@hookform/resolvers": "latest",
+    "react-email": "latest",
+    "resend": "latest",
+    "zxcvbn": "latest",
+    "@legalconnect/shared": "workspace:*",
+    "@legalconnect/crypto": "workspace:*",
+    "@legalconnect/email": "workspace:*"
+  },
+  "devDependencies": {
+    "drizzle-kit": "latest",
+    "@types/bcryptjs": "latest",
+    "@types/libsodium-wrappers-sumo": "latest",
+    "typescript": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest"
+  }
+}
