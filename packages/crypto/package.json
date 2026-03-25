@@ -4,8 +4,14 @@
   "private": true,
   "main": "src/index.ts",
   "types": "src/index.ts",
+  "scripts": {
+    "test": "vitest run"
+  },
   "dependencies": {
-    "libsodium-wrappers-sumo": "latest",
-    "@scure/bip39": "latest"
+    "@scure/bip39": "latest",
+    "libsodium-wrappers-sumo": "latest"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.1"
   }
 }
