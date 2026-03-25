@@ -1,42 +1,31 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
+# Dependencies
 node_modules
-dist
-dist-ssr
-*.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
+# Build outputs
+.next
+dist
+*.tsbuildinfo
+
+# Environment
+.env.local
+.env
+
+# Turborepo
+.turbo
+
+# Docker volumes
+postgres_data
+valkey_data
+
+# Editor
+.vscode
 .idea
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
 *.sw?
-test-results/
-*.tsbuildinfo
-playwright-report/
 
-# Utility scripts and patches
-*.py
-check-*.js
-cleanup-*.js
-diagnose-*.js
-edit-*.js
-fix-*.js
-js-*.js
-patch-*.py
-patch-*.js
-score-*.js
-auth-endpoints.js
-update-ai-guidelines.sql
-debug-*.png
+# Logs
+*.log
+
+# Test
+test-results/
+playwright-report/
