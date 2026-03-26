@@ -15,11 +15,11 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **AUTH-04**: User can reset password via email link
 - [x] **SECU-01**: All data encrypted end-to-end using libsodium (client-side key management)
 - [x] **SECU-02**: RGPD compliance (consent management, data export, deletion rights)
-- [ ] **SECU-03**: Visual security indicators displayed at every sensitive interaction (padlock icons, encryption badges, contextual reminders)
+- [x] **SECU-03**: Visual security indicators displayed at every sensitive interaction (padlock icons, encryption badges, contextual reminders)
 
 ### Intake & Forms
 
-- [ ] **INTK-01**: Client completes multi-step intake form to describe their legal situation
+- [x] **INTK-01**: Client completes multi-step intake form to describe their legal situation
 - [ ] **INTK-02**: AI asks empathetic follow-up questions adapted to legal domain and emotional context
 - [ ] **INTK-03**: Client can upload documents (PDF, images, screenshots) during intake
 - [ ] **INTK-04**: Client can upload video files as evidence
@@ -102,8 +102,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-04 | Phase 1 | Complete |
 | SECU-01 | Phase 1 | Complete |
 | SECU-02 | Phase 1 | Complete |
-| SECU-03 | Phase 2 | Pending |
-| INTK-01 | Phase 2 | Pending |
+| SECU-03 | Phase 2 | Complete |
+| INTK-01 | Phase 2 | Complete |
 | INTK-02 | Phase 4 | Pending |
 | INTK-03 | Phase 2 | Pending |
 | INTK-04 | Phase 2 | Pending |

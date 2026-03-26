@@ -55,7 +55,7 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 02-01-PLAN.md — shadcn/ui init, next-intl FR config, Zod + Drizzle intake schemas, trust indicator components
+- [x] 02-01-PLAN.md — shadcn/ui init, next-intl FR config, Zod + Drizzle intake schemas, trust indicator components
 - [ ] 02-02-PLAN.md — Multi-step intake form (4-step stepper, validation, localStorage auto-save, submit action)
 - [ ] 02-03-PLAN.md — File upload with client-side encryption (drag & drop, XChaCha20-Poly1305, S3 upload, progress UI)
 
