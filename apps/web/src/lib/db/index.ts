@@ -3,7 +3,8 @@ import * as authSchema from "./schema/auth";
 import * as encryptionSchema from "./schema/encryption";
 import * as consentSchema from "./schema/consent";
 import * as intakeSchema from "./schema/intake";
+import * as caseIntelligenceSchema from "./schema/case-intelligence";
 
 export const db = drizzle(process.env.DATABASE_URL!, {
-  schema: { ...authSchema, ...encryptionSchema, ...consentSchema, ...intakeSchema },
+  schema: { ...authSchema, ...encryptionSchema, ...consentSchema, ...intakeSchema, ...caseIntelligenceSchema },
 });
