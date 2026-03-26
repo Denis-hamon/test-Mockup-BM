@@ -81,12 +81,12 @@ Plans:
   1. AI asks contextual follow-up questions adapted to the legal domain and the client's emotional state during intake
   2. AI tone is warm, supportive, and encouraging — never cold or bureaucratic
   3. AI extracts dates, parties, amounts, and key clauses from uploaded PDF/image documents automatically
-**Plans**: TBD
+**Plans**: 2 plans
 **UI hint**: yes
 
 Plans:
-- [ ] 04-01: AI conversational follow-ups in intake flow
-- [ ] 04-02: Document extraction pipeline (Docling sidecar + AI vision)
+- [ ] 04-01-PLAN.md — AI conversational follow-ups (chat zone between steps, emotion detection, sensitive case alerts, DB persistence)
+- [ ] 04-02-PLAN.md — Document extraction pipeline (BullMQ workers, Docling sidecar, AI Vision, editable extraction cards)
 
 ### Phase 5: Case Intelligence
 **Goal**: The system generates a complete, structured case file from intake data and documents — ready for lawyer review
