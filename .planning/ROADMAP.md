@@ -55,10 +55,10 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 02-01-PLAN.md — shadcn/ui init, next-intl FR config, Zod + Drizzle intake schemas, trust indicator components
-- [ ] 02-02-PLAN.md — Multi-step intake form (4-step stepper, validation, localStorage auto-save, submit action)
+- [x] 02-01-PLAN.md — shadcn/ui init, next-intl FR config, Zod + Drizzle intake schemas, trust indicator components
+- [x] 02-02-PLAN.md — Multi-step intake form (4-step stepper, validation, localStorage auto-save, submit action)
 - [x] 02-03-PLAN.md — File upload with client-side encryption (drag & drop, XChaCha20-Poly1305, S3 upload, progress UI)
-- [ ] 02-04-PLAN.md — Gap closure: rewire intake-stepper.tsx to connect all orphaned step components
+- [x] 02-04-PLAN.md — Gap closure: rewire intake-stepper.tsx to connect all orphaned step components
 
 ### Phase 3: AI Engine Foundation
 **Goal**: The AI subsystem is operational with a provider-agnostic architecture and strict guardrails preventing any legal advice
