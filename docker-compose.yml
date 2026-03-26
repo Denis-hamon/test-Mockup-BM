@@ -17,6 +17,15 @@ services:
     volumes:
       - valkey_data:/data
 
+  docling-serve:
+    image: quay.io/docling-project/docling-serve
+    ports:
+      - "5001:5001"
+    deploy:
+      resources:
+        limits:
+          memory: 4g
+
 volumes:
   postgres_data:
   valkey_data:

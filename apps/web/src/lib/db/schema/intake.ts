@@ -51,6 +51,34 @@ export const intakeDocuments = pgTable("intake_documents", {
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
 
+export const extractionResults = pgTable("extraction_results", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  documentId: text("document_id")
+    .notNull()
+    .references(() => intakeDocuments.id),
+  status: text("status", {
+    enum: ["pending", "processing", "done", "failed"],
+  })
+    .default("pending")
+    .notNull(),
+  extractionMethod: text("extraction_method", {
+    enum: ["docling", "vision"],
+  }),
+  dates: text("dates"), // JSON array of extracted dates
+  parties: text("parties"), // JSON array of party names
+  amounts: text("amounts"), // JSON array of {value, currency}
+  keyClauses: text("key_clauses"), // JSON array of clause strings
+  documentType: text("document_type"), // detected document type
+  summary: text("summary"), // 2-3 sentence summary
+  rawOutput: text("raw_output"), // Full extraction JSON for debugging
+  userEdited: integer("user_edited").default(0).notNull(), // 1 if client modified
+  error: text("error"), // Error message if failed
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+});
+
 export const intakeSubmissionsRelations = relations(
   intakeSubmissions,
   ({ one, many }) => ({
@@ -64,10 +92,21 @@ export const intakeSubmissionsRelations = relations(
 
 export const intakeDocumentsRelations = relations(
   intakeDocuments,
-  ({ one }) => ({
+  ({ one, many }) => ({
     submission: one(intakeSubmissions, {
       fields: [intakeDocuments.submissionId],
       references: [intakeSubmissions.id],
+    }),
+    extractionResults: many(extractionResults),
+  })
+);
+
+export const extractionResultsRelations = relations(
+  extractionResults,
+  ({ one }) => ({
+    document: one(intakeDocuments, {
+      fields: [extractionResults.documentId],
+      references: [intakeDocuments.id],
     }),
   })
 );
