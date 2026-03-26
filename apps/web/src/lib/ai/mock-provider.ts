@@ -8,7 +8,7 @@
 
 import { type LanguageModelV1 } from "ai";
 import type { AIProviderInfo } from "./provider";
-import type { CaseSummaryOutput } from "@legalconnect/shared";
+import type { CaseSummaryOutput, TimelineOutput, QualificationScoreOutput } from "@legalconnect/shared";
 
 const MOCK_SUMMARIES: Record<string, CaseSummaryOutput> = {
   travail: {
@@ -136,4 +136,155 @@ export function getMockProvider(): AIProviderInfo {
  */
 export function getMockSummary(problemType: string): CaseSummaryOutput {
   return MOCK_SUMMARIES[problemType] ?? MOCK_SUMMARIES.default;
+}
+
+// ---------------------------------------------------------------------------
+// Mock Timelines (AI-03)
+// ---------------------------------------------------------------------------
+
+const MOCK_TIMELINES: Record<string, TimelineOutput> = {
+  travail: {
+    events: [
+      {
+        date: "2016-09-01",
+        description: "Embauche en CDI au poste de responsable logistique",
+        source: "recit",
+        confidence: "high",
+      },
+      {
+        date: "~2023-06-01",
+        description: "Premiers incidents signales avec le nouveau directeur de site",
+        source: "recit",
+        confidence: "low",
+      },
+      {
+        date: "2024-01-15",
+        description: "Entretien prealable au licenciement convoque par lettre recommandee",
+        source: "recit",
+        confidence: "high",
+      },
+      {
+        date: "2024-02-01",
+        description: "Notification du licenciement pour motif personnel",
+        source: "recit",
+        confidence: "high",
+      },
+      {
+        date: "2024-02-15",
+        description: "Reception de la lettre de licenciement avec solde de tout compte",
+        source: "document",
+        confidence: "high",
+      },
+    ],
+    undatedEvents: [
+      {
+        description: "Plusieurs avertissements verbaux contestes par le salarie selon son recit",
+        source: "recit",
+      },
+    ],
+  },
+  famille: {
+    events: [
+      {
+        date: "2015-06-20",
+        description: "Mariage civil celebre a la mairie du 5e arrondissement de Paris",
+        source: "recit",
+        confidence: "high",
+      },
+      {
+        date: "~2017-01-01",
+        description: "Naissance du premier enfant (date approximative)",
+        source: "recit",
+        confidence: "low",
+      },
+      {
+        date: "~2019-06-01",
+        description: "Naissance du deuxieme enfant (date approximative)",
+        source: "recit",
+        confidence: "low",
+      },
+      {
+        date: "2024-03-01",
+        description: "Separation effective du couple et depart du domicile conjugal",
+        source: "recit",
+        confidence: "high",
+      },
+    ],
+    undatedEvents: [
+      {
+        description: "Acquisition d'un bien immobilier commun dont la valeur est en cours d'estimation",
+        source: "recit",
+      },
+    ],
+  },
+  default: {
+    events: [
+      {
+        date: "~2024-01-01",
+        description: "Debut de la situation litigieuse selon le recit du client",
+        source: "recit",
+        confidence: "low",
+      },
+      {
+        date: "~2024-03-01",
+        description: "Premiere demarche du client pour resoudre le litige",
+        source: "recit",
+        confidence: "low",
+      },
+    ],
+    undatedEvents: [
+      {
+        description: "Elements complementaires a preciser lors de la consultation avec l'avocat",
+        source: "recit",
+      },
+    ],
+  },
+};
+
+/**
+ * Returns a mock timeline based on the problem type.
+ */
+export function getMockTimeline(problemType: string): TimelineOutput {
+  return MOCK_TIMELINES[problemType] ?? MOCK_TIMELINES.default;
+}
+
+// ---------------------------------------------------------------------------
+// Mock Qualification Scores (AI-04)
+// ---------------------------------------------------------------------------
+
+const MOCK_SCORES: Record<string, QualificationScoreOutput> = {
+  travail: {
+    urgencyScore: 75,
+    completenessScore: 60,
+    complexityScore: 45,
+    rationale:
+      "Urgence elevee (75/100) : licenciement recent avec delai de contestation aux prud'hommes en cours. " +
+      "Completude correcte (60/100) : description detaillee mais documents partiels (contrat et lettre de licenciement fournis, pas de bulletins de salaire). " +
+      "Complexite moderee (45/100) : litige bilateral classique en droit du travail, pas de dimension internationale.",
+  },
+  famille: {
+    urgencyScore: 40,
+    completenessScore: 50,
+    complexityScore: 65,
+    rationale:
+      "Urgence moderee (40/100) : pas de delai legal imminent, divorce a l'amiable envisage. " +
+      "Completude moyenne (50/100) : situation decrite de maniere generale, peu de documents fournis a ce stade. " +
+      "Complexite notable (65/100) : bien immobilier a partager, deux enfants mineurs avec question de garde, necessitant expertise en droit patrimonial et droit de la famille.",
+  },
+  default: {
+    urgencyScore: 50,
+    completenessScore: 40,
+    complexityScore: 50,
+    rationale:
+      "Urgence standard (50/100) : pas d'element d'urgence particulier identifie dans le recit. " +
+      "Completude insuffisante (40/100) : informations de base fournies mais details et documents manquants pour une evaluation complete. " +
+      "Complexite moyenne (50/100) : dossier a qualifier plus precisement lors de la consultation.",
+  },
+};
+
+/**
+ * Returns a mock qualification score based on the problem type.
+ */
+export function getMockQualificationScore(problemType: string): QualificationScoreOutput {
+  return MOCK_SCORES[problemType] ?? MOCK_SCORES.default;
 }
