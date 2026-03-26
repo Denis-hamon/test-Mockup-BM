@@ -48,14 +48,14 @@ Exceptions: Chat bubble horizontal padding uses 12px (3 * 4) for tighter convers
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px | 400 (regular) | 1.5 |
-| Label | 14px | 500 (medium) | 1.4 |
+| Label | 14px | 600 (semibold) | 1.4 |
 | Heading | 20px | 600 (semibold) | 1.2 |
 | Display | 28px | 600 (semibold) | 1.2 |
 
 Phase 4 specifics:
 - AI chat bubble text: 14px / 400 / 1.5 (same as body)
 - Chat zone section label ("Questions complementaires"): 14px / 400 / 1.4, color `muted-foreground`
-- Extraction card field labels: 12px / 500 / 1.4, color `muted-foreground`, uppercase tracking-wide
+- Extraction card field labels: 12px / 600 / 1.4, color `muted-foreground`, uppercase tracking-wide
 - Extraction card field values: 14px / 400 / 1.5
 - Emergency numbers (sensitive case message): 14px / 600 / 1.5
 
