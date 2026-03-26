@@ -29,7 +29,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### AI Intelligence
 
 - [ ] **AI-01**: AI extracts key information from uploaded documents (dates, parties, amounts, clauses)
-- [ ] **AI-02**: AI generates structured case summary (fiche synthétique) from intake data and documents
+- [x] **AI-02**: AI generates structured case summary (fiche synthétique) from intake data and documents
 - [ ] **AI-03**: AI builds chronological timeline of events from client narrative and documents
 - [ ] **AI-04**: AI produces qualification score to help lawyer prioritize cases by urgency/quality
 - [ ] **AI-05**: AI architecture is LLM-agnostic (supports Claude, GPT, Mistral via unified provider interface)
@@ -110,7 +110,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INTK-05 | Phase 8 | Pending |
 | INTK-06 | Phase 8 | Pending |
 | AI-01 | Phase 4 | Pending |
-| AI-02 | Phase 5 | Pending |
+| AI-02 | Phase 5 | Complete |
 | AI-03 | Phase 5 | Pending |
 | AI-04 | Phase 5 | Pending |
 | AI-05 | Phase 3 | Pending |
