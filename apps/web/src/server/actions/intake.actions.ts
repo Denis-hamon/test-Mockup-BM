@@ -3,7 +3,7 @@
 import { db } from "@/lib/db";
 import { intakeSubmissions } from "@/lib/db/schema/intake";
 import { intakeSchema } from "@legalconnect/shared";
-import { generateCaseSummary } from "@/lib/ai/generate-case-summary";
+import { triggerCaseIntelligence } from "./case-intelligence.actions";
 
 export async function submitIntake(data: unknown): Promise<{
   success: boolean;
@@ -30,11 +30,11 @@ export async function submitIntake(data: unknown): Promise<{
       })
       .returning({ id: intakeSubmissions.id });
 
-    // Fire-and-forget: trigger AI case summary generation
-    // Do not await — summary generation runs in background
-    generateCaseSummary(result.id).catch((err) => {
-      console.error("[intake] Background case summary generation failed:", err);
-    });
+    // Trigger case intelligence generation (non-blocking per D-02)
+    // Fire-and-forget: don't await — submission should not be blocked by AI generation
+    triggerCaseIntelligence(result.id).catch((err) =>
+      console.error("Failed to trigger case intelligence:", err)
+    );
 
     return { success: true, id: result.id };
   } catch {
