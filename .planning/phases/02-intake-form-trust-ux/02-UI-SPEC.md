@@ -55,11 +55,11 @@ Exceptions: Touch target minimum 44px height for all interactive elements (butto
 | Role | Size | Weight | Line Height | Usage |
 |------|------|--------|-------------|-------|
 | Body | 16px | 400 (regular) | 1.5 | Form field values, description textarea, help text |
-| Label | 14px | 500 (medium) | 1.4 | Field labels, badge text, security indicator text |
+| Label | 14px | 400 (regular) | 1.4 | Field labels, badge text, security indicator text |
 | Heading | 20px | 600 (semibold) | 1.3 | Step titles ("Decrivez votre situation"), trust banner heading |
 | Display | 28px | 600 (semibold) | 1.2 | Intake page title ("Nouvelle demande juridique") |
 
-Font weights: 400 (regular) and 600 (semibold). Weight 500 is used only for labels as a shadcn default -- it does not count as a third declared weight since it comes from the component library.
+Font weights: 400 (regular) and 600 (semibold). Two weights only. Label and Body are distinguished by size (14px vs 16px), not by weight.
 
 ---
 
@@ -100,12 +100,12 @@ All copy in French, vouvoiement. Tone: warm, supportive, encouraging. Never cold
 
 ### Step Introduction Messages
 
-| Step | Heading | Intro Message |
-|------|---------|---------------|
-| 1 — Type de probleme | Quel est votre probleme juridique ? | Nous allons vous guider pour decrire votre situation. Toutes vos reponses sont confidentielles et chiffrees. |
-| 2 — Description | Decrivez votre situation | Prenez votre temps pour expliquer ce qui vous arrive. Il n'y a pas de mauvaise reponse. Plus vous etes precis, mieux votre avocat pourra vous aider. |
-| 3 — Pieces justificatives | Ajoutez vos documents | Si vous avez des documents en rapport avec votre situation (contrats, courriers, captures d'ecran, videos), ajoutez-les ici. Ils seront chiffres avant envoi. |
-| 4 — Coordonnees | Vos coordonnees | Derniere etape. Ces informations permettront a votre avocat de vous recontacter. |
+| Step | Heading | Intro Message | Focal Point |
+|------|---------|---------------|-------------|
+| 1 — Type de probleme | Quel est votre probleme juridique ? | Nous allons vous guider pour decrire votre situation. Toutes vos reponses sont confidentielles et chiffrees. | Problem type ToggleGroup |
+| 2 — Description | Decrivez votre situation | Prenez votre temps pour expliquer ce qui vous arrive. Il n'y a pas de mauvaise reponse. Plus vous etes precis, mieux votre avocat pourra vous aider. | Description Textarea |
+| 3 — Pieces justificatives | Ajoutez vos documents | Si vous avez des documents en rapport avec votre situation (contrats, courriers, captures d'ecran, videos), ajoutez-les ici. Ils seront chiffres avant envoi. | FileDropzone upload area |
+| 4 — Coordonnees | Vos coordonnees | Derniere etape. Ces informations permettront a votre avocat de vous recontacter. | "Soumettre ma demande" CTA button |
 
 ### Primary CTAs
 
