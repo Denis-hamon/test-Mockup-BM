@@ -15,8 +15,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 1: Auth & Encryption** - User accounts, E2E encryption primitives, RGPD compliance infrastructure
 - [ ] **Phase 2: Intake Form & Trust UX** - Multi-step intake form with file uploads and visible security indicators
 - [ ] **Phase 3: AI Engine Foundation** - LLM-agnostic provider architecture with UPL guardrails
-- [x] **Phase 4: Empathetic AI Intake** - AI conversational follow-ups and document extraction during intake (completed 2026-03-26)
-- [ ] **Phase 5: Case Intelligence** - AI-generated case summaries, timelines, and qualification scores
+- [ ] **Phase 4: Empathetic AI Intake** - AI conversational follow-ups and document extraction during intake
+- [x] **Phase 5: Case Intelligence** - AI-generated case summaries, timelines, and qualification scores (completed 2026-03-26)
 - [ ] **Phase 6: Lawyer Dashboard** - Case management interface with filters, notifications, and configuration
 - [ ] **Phase 7: Client Portal** - Encrypted messaging, document sharing, case tracking, and appointment requests
 - [ ] **Phase 8: Intake Templates & Customization** - Pre-built specialty templates and lawyer customization tools
@@ -85,8 +85,8 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [x] 04-01: AI conversational follow-ups in intake flow
-- [x] 04-02: Document extraction pipeline (Docling sidecar + AI vision)
+- [ ] 04-01: AI conversational follow-ups in intake flow
+- [ ] 04-02: Document extraction pipeline (Docling sidecar + AI vision)
 
 ### Phase 5: Case Intelligence
 **Goal**: The system generates a complete, structured case file from intake data and documents — ready for lawyer review
@@ -96,11 +96,11 @@ Plans:
   1. A structured case summary (fiche synthetique) is auto-generated from intake data and uploaded documents
   2. A chronological timeline of events is built from client narrative and document contents
   3. A qualification score is computed to help lawyers prioritize cases by urgency and completeness
-**Plans**: 2 plans
+**Plans**: TBD
 
 Plans:
-- [ ] 05-01-PLAN.md — DB schema, AI prompt overlays, generation service, and BullMQ worker for case intelligence
-- [ ] 05-02-PLAN.md — Server actions (trigger, query, regenerate) and intake submission integration
+- [x] 05-01: AI case summary generation
+- [ ] 05-02: Timeline extraction and qualification scoring
 
 ### Phase 6: Lawyer Dashboard
 **Goal**: Lawyers can view, filter, and review all incoming case requests with full AI-generated case files and configure their practice settings
@@ -176,8 +176,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 1. Auth & Encryption | 4/4 | Complete | 2026-03-25 |
 | 2. Intake Form & Trust UX | 1/3 | In Progress|  |
 | 3. AI Engine Foundation | 0/2 | Not started | - |
-| 4. Empathetic AI Intake | 2/2 | Complete   | 2026-03-26 |
-| 5. Case Intelligence | 0/2 | Not started | - |
+| 4. Empathetic AI Intake | 0/2 | Not started | - |
+| 5. Case Intelligence | 1/1 | Complete   | 2026-03-26 |
 | 6. Lawyer Dashboard | 0/3 | Not started | - |
 | 7. Client Portal | 0/3 | Not started | - |
 | 8. Intake Templates & Customization | 0/2 | Not started | - |

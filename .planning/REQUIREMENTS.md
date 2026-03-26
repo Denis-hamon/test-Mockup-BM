@@ -20,7 +20,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Intake & Forms
 
 - [x] **INTK-01**: Client completes multi-step intake form to describe their legal situation
-- [x] **INTK-02**: AI asks empathetic follow-up questions adapted to legal domain and emotional context
+- [ ] **INTK-02**: AI asks empathetic follow-up questions adapted to legal domain and emotional context
 - [x] **INTK-03**: Client can upload documents (PDF, images, screenshots) during intake
 - [x] **INTK-04**: Client can upload video files as evidence
 - [ ] **INTK-05**: Pre-built intake templates available per legal specialty (family law, labor law, criminal defense, etc.)
@@ -28,11 +28,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### AI Intelligence
 
-- [x] **AI-01**: AI extracts key information from uploaded documents (dates, parties, amounts, clauses)
-- [ ] **AI-02**: AI generates structured case summary (fiche synthétique) from intake data and documents
+- [ ] **AI-01**: AI extracts key information from uploaded documents (dates, parties, amounts, clauses)
+- [x] **AI-02**: AI generates structured case summary (fiche synthétique) from intake data and documents
 - [ ] **AI-03**: AI builds chronological timeline of events from client narrative and documents
 - [ ] **AI-04**: AI produces qualification score to help lawyer prioritize cases by urgency/quality
-- [x] **AI-05**: AI architecture is LLM-agnostic (supports Claude, GPT, Mistral via unified provider interface)
+- [ ] **AI-05**: AI architecture is LLM-agnostic (supports Claude, GPT, Mistral via unified provider interface)
 - [ ] **AI-06**: AI never provides legal advice — UPL guardrails enforced in all interactions
 
 ### Lawyer Dashboard
@@ -104,16 +104,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SECU-02 | Phase 1 | Complete |
 | SECU-03 | Phase 2 | Pending |
 | INTK-01 | Phase 2 | Complete |
-| INTK-02 | Phase 4 | Complete |
+| INTK-02 | Phase 4 | Pending |
 | INTK-03 | Phase 2 | Complete |
 | INTK-04 | Phase 2 | Complete |
 | INTK-05 | Phase 8 | Pending |
 | INTK-06 | Phase 8 | Pending |
-| AI-01 | Phase 4 | Complete |
-| AI-02 | Phase 5 | Pending |
+| AI-01 | Phase 4 | Pending |
+| AI-02 | Phase 5 | Complete |
 | AI-03 | Phase 5 | Pending |
 | AI-04 | Phase 5 | Pending |
-| AI-05 | Phase 3 | Complete |
+| AI-05 | Phase 3 | Pending |
 | AI-06 | Phase 3 | Pending |
 | DASH-01 | Phase 6 | Pending |
 | DASH-02 | Phase 6 | Pending |
