@@ -96,11 +96,11 @@ Plans:
   1. A structured case summary (fiche synthetique) is auto-generated from intake data and uploaded documents
   2. A chronological timeline of events is built from client narrative and document contents
   3. A qualification score is computed to help lawyers prioritize cases by urgency and completeness
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: AI case summary generation
-- [ ] 05-02: Timeline extraction and qualification scoring
+- [ ] 05-01-PLAN.md — DB schema, AI prompt overlays, generation service, and BullMQ worker for case intelligence
+- [ ] 05-02-PLAN.md — Server actions (trigger, query, regenerate) and intake submission integration
 
 ### Phase 6: Lawyer Dashboard
 **Goal**: Lawyers can view, filter, and review all incoming case requests with full AI-generated case files and configure their practice settings
