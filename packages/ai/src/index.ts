@@ -27,3 +27,6 @@ export { createMistralModel } from "./providers/mistral";
 
 // Streaming
 export { streamAIResponse, buildSystemPrompt } from "./stream";
+
+// Prompt overlays
+export { INTAKE_FOLLOWUP_OVERLAY } from "./prompts/overlays";

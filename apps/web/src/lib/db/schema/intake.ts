@@ -79,6 +79,21 @@ export const extractionResults = pgTable("extraction_results", {
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });
 
+export const aiFollowUps = pgTable("ai_follow_ups", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  submissionId: text("submission_id")
+    .notNull()
+    .references(() => intakeSubmissions.id),
+  stepIndex: integer("step_index").notNull(),
+  question: text("question").notNull(),
+  answer: text("answer"),
+  skipped: integer("skipped").default(0).notNull(),
+  emotionMarkers: text("emotion_markers"),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+});
+
 export const intakeSubmissionsRelations = relations(
   intakeSubmissions,
   ({ one, many }) => ({
@@ -87,6 +102,7 @@ export const intakeSubmissionsRelations = relations(
       references: [users.id],
     }),
     documents: many(intakeDocuments),
+    aiFollowUps: many(aiFollowUps),
   })
 );
 
@@ -107,6 +123,16 @@ export const extractionResultsRelations = relations(
     document: one(intakeDocuments, {
       fields: [extractionResults.documentId],
       references: [intakeDocuments.id],
+    }),
+  })
+);
+
+export const aiFollowUpsRelations = relations(
+  aiFollowUps,
+  ({ one }) => ({
+    submission: one(intakeSubmissions, {
+      fields: [aiFollowUps.submissionId],
+      references: [intakeSubmissions.id],
     }),
   })
 );
