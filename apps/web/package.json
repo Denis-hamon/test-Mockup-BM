@@ -27,6 +27,9 @@
     "zxcvbn": "latest",
     "clsx": "latest",
     "tailwind-merge": "latest",
+    "@aws-sdk/client-s3": "latest",
+    "react-dropzone": "latest",
+    "lucide-react": "latest",
     "@legalconnect/shared": "workspace:*",
     "@legalconnect/crypto": "workspace:*",
     "@legalconnect/email": "workspace:*"
