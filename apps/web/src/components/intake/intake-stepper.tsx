@@ -1,105 +1,173 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { intakeSchema, type IntakeFormData } from "@legalconnect/shared";
+import { useIntakeForm } from "@/hooks/use-intake-form";
+import { StepProblemType } from "@/components/intake/step-problem-type";
+import { StepDescription } from "@/components/intake/step-description";
 import { StepDocuments } from "@/components/intake/step-documents";
+import { StepContact } from "@/components/intake/step-contact";
+import { TrustBanner } from "@/components/trust/trust-banner";
+import { submitIntake } from "@/server/actions/intake.actions";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
+import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 
 const STEPS = [
-  { label: "Probleme juridique" },
-  { label: "Description" },
-  { label: "Documents" },
-  { label: "Coordonnees" },
-];
+  { key: "1" },
+  { key: "2" },
+  { key: "3" },
+  { key: "4" },
+] as const;
 
 export function IntakeStepper() {
-  const [currentStep, setCurrentStep] = useState(0);
+  const {
+    form,
+    currentStep,
+    nextStep,
+    prevStep,
+    hasDraft,
+    storageFull,
+    clearDraft,
+  } = useIntakeForm();
 
-  const form = useForm<IntakeFormData>({
-    resolver: zodResolver(intakeSchema),
-    defaultValues: {
-      documents: [],
-    },
-  });
+  const t = useTranslations("intake");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitResult, setSubmitResult] = useState<{
+    success: boolean;
+    id?: string;
+    error?: string;
+  } | null>(null);
+
+  async function handleSubmit() {
+    const valid = await form.trigger();
+    if (!valid) return;
+    setIsSubmitting(true);
+    try {
+      const result = await submitIntake(form.getValues());
+      setSubmitResult(result);
+      if (result.success) {
+        clearDraft();
+      }
+    } catch {
+      setSubmitResult({ success: false, error: "submission_failed" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  if (submitResult?.success) {
+    return (
+      <Alert className="border-[hsl(var(--trust))]/30 bg-[hsl(var(--trust))]/5">
+        <CheckCircle2 className="text-[hsl(var(--trust))]" />
+        <AlertTitle>{t("success.title")}</AlertTitle>
+        <AlertDescription>{t("success.body")}</AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
+      {/* Progress bar */}
+      <Progress value={((currentStep + 1) / STEPS.length) * 100} className="h-2" />
+
       {/* Step indicator */}
-      <nav aria-label="Progression du formulaire" className="flex items-center gap-2">
+      <nav aria-label="Progression du formulaire" className="flex items-center">
         {STEPS.map((step, index) => (
-          <div key={step.label} className="flex items-center gap-2">
-            <div
-              className={cn(
-                "flex size-8 items-center justify-center rounded-full text-sm font-medium",
-                index === currentStep && "bg-primary text-primary-foreground",
-                index < currentStep && "bg-primary/20 text-primary",
-                index > currentStep && "bg-muted text-muted-foreground",
+          <div key={step.key} className="flex items-center">
+            <div className="flex items-center gap-2">
+              {index < currentStep ? (
+                <Badge variant="secondary">
+                  <CheckCircle2 className="size-3" />
+                </Badge>
+              ) : index === currentStep ? (
+                <Badge variant="default">{index + 1}</Badge>
+              ) : (
+                <Badge variant="outline">{index + 1}</Badge>
               )}
-            >
-              {index + 1}
+              <span
+                className={cn(
+                  "hidden text-sm sm:inline",
+                  index === currentStep && "font-medium",
+                  index !== currentStep && "text-muted-foreground",
+                )}
+              >
+                {t(`steps.${step.key}`)}
+              </span>
             </div>
-            <span
-              className={cn(
-                "hidden text-sm sm:inline",
-                index === currentStep && "font-medium",
-                index !== currentStep && "text-muted-foreground",
-              )}
-            >
-              {step.label}
-            </span>
             {index < STEPS.length - 1 && (
-              <div className="mx-2 h-px w-8 bg-border" />
+              <div className="mx-2 h-px flex-1 bg-border" />
             )}
           </div>
         ))}
       </nav>
 
+      {/* Draft restoration alert */}
+      {hasDraft && currentStep === 0 && (
+        <Alert>
+          <AlertCircle className="size-4" />
+          <AlertTitle>{t("empty.draftRestored")}</AlertTitle>
+          <AlertDescription className="flex items-center gap-4">
+            {t("empty.draftRestoredBody")}
+            <Button variant="outline" size="sm" onClick={clearDraft}>
+              {t("destructive.clear")}
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Storage full warning */}
+      {storageFull && (
+        <p className="text-sm text-amber-600">{t("errors.storageFull")}</p>
+      )}
+
+      {/* TrustBanner on first step */}
+      {currentStep === 0 && <TrustBanner className="mb-4" />}
+
       {/* Step content */}
       <div className="min-h-[300px]">
-        {currentStep === 0 && (
-          <div className="text-muted-foreground">
-            {/* Step 1: Problem type - placeholder for plan 02-02 */}
-            Etape 1 : Type de probleme juridique
-          </div>
-        )}
-
-        {currentStep === 1 && (
-          <div className="text-muted-foreground">
-            {/* Step 2: Description - placeholder for plan 02-02 */}
-            Etape 2 : Description de la situation
-          </div>
-        )}
-
+        {currentStep === 0 && <StepProblemType form={form} />}
+        {currentStep === 1 && <StepDescription form={form} />}
         {currentStep === 2 && <StepDocuments form={form} />}
-
-        {currentStep === 3 && (
-          <div className="text-muted-foreground">
-            {/* Step 4: Contact info - placeholder for plan 02-02 */}
-            Etape 4 : Coordonnees et preferences
-          </div>
-        )}
+        {currentStep === 3 && <StepContact form={form} />}
       </div>
+
+      {/* Submit error */}
+      {submitResult?.error && (
+        <Alert variant="destructive">
+          <AlertCircle className="size-4" />
+          <AlertTitle>{t("errors.submissionFailed")}</AlertTitle>
+        </Alert>
+      )}
 
       {/* Navigation buttons */}
       <div className="flex justify-between">
         <Button
           type="button"
           variant="outline"
-          onClick={() => setCurrentStep((s) => Math.max(0, s - 1))}
-          disabled={currentStep === 0}
+          onClick={prevStep}
+          disabled={currentStep === 0 || isSubmitting}
         >
-          Precedent
+          {t("nav.prev")}
         </Button>
-        <Button
-          type="button"
-          onClick={() => setCurrentStep((s) => Math.min(STEPS.length - 1, s + 1))}
-          disabled={currentStep === STEPS.length - 1}
-        >
-          Suivant
-        </Button>
+
+        {currentStep < STEPS.length - 1 ? (
+          <Button type="button" onClick={nextStep}>
+            {t("nav.next")}
+          </Button>
+        ) : (
+          <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {isSubmitting ? t("nav.submit") : t("nav.submit")}
+          </Button>
+        )}
       </div>
     </div>
   );
