@@ -1,0 +1,100 @@
+{
+  "intake": {
+    "title": "Nouvelle demande juridique",
+    "step1": {
+      "heading": "Quel est votre probleme juridique ?",
+      "intro": "Nous allons vous guider pour decrire votre situation. Toutes vos reponses sont confidentielles et chiffrees."
+    },
+    "step2": {
+      "heading": "Decrivez votre situation",
+      "intro": "Prenez votre temps pour expliquer ce qui vous arrive. Il n'y a pas de mauvaise reponse. Plus vous etes precis, mieux votre avocat pourra vous aider."
+    },
+    "step3": {
+      "heading": "Ajoutez vos documents",
+      "intro": "Si vous avez des documents en rapport avec votre situation (contrats, courriers, captures d'ecran, videos), ajoutez-les ici. Ils seront chiffres avant envoi."
+    },
+    "step4": {
+      "heading": "Vos coordonnees",
+      "intro": "Derniere etape. Ces informations permettront a votre avocat de vous recontacter."
+    },
+    "nav": {
+      "next": "Continuer",
+      "prev": "Retour",
+      "submit": "Soumettre ma demande",
+      "browse": "Parcourir vos fichiers"
+    },
+    "steps": {
+      "1": "Probleme",
+      "2": "Situation",
+      "3": "Documents",
+      "4": "Contact"
+    },
+    "problemTypes": {
+      "famille": "Droit de la famille",
+      "travail": "Droit du travail",
+      "penal": "Droit penal",
+      "immobilier": "Droit immobilier",
+      "commercial": "Droit commercial",
+      "autre": "Autre"
+    },
+    "fields": {
+      "problemType": "Type de probleme",
+      "problemSubType": "Precision (optionnel)",
+      "description": "Decrivez votre situation",
+      "urgency": "Degre d'urgence",
+      "opposingParty": "Partie adverse (optionnel)",
+      "desiredOutcome": "Issue souhaitee (optionnel)",
+      "fullName": "Nom complet",
+      "phone": "Telephone (optionnel)",
+      "preferredContact": "Mode de contact prefere",
+      "availabilities": "Disponibilites (optionnel)"
+    },
+    "urgency": {
+      "normal": "Normal",
+      "urgent": "Urgent",
+      "tres_urgent": "Tres urgent"
+    },
+    "contact": {
+      "email": "Par email",
+      "telephone": "Par telephone",
+      "les_deux": "Les deux"
+    },
+    "empty": {
+      "noDocuments": "Aucun document ajoute",
+      "noDocumentsBody": "Glissez vos fichiers ici ou cliquez sur \"Parcourir\" pour les selectionner. Formats acceptes : PDF, images (JPG, PNG, HEIC), videos (MP4, MOV, WebM).",
+      "draftRestored": "Brouillon retrouve",
+      "draftRestoredBody": "Nous avons retrouve votre demande en cours. Vous pouvez reprendre ou vous en etiez."
+    },
+    "errors": {
+      "required": "Ce champ est requis.",
+      "descriptionTooShort": "Decrivez votre situation en au moins 20 caracteres pour que votre avocat puisse comprendre votre besoin.",
+      "fileTooLarge": "Ce fichier depasse la limite de 50 Mo. Essayez de le compresser ou de le diviser.",
+      "totalSizeExceeded": "La taille totale des fichiers depasse 200 Mo. Retirez un fichier avant d'en ajouter un nouveau.",
+      "fileTypeRejected": "Ce type de fichier n'est pas accepte. Formats acceptes : PDF, JPG, PNG, HEIC, MP4, MOV, WebM.",
+      "uploadFailed": "L'envoi du fichier a echoue. Verifiez votre connexion et reessayez.",
+      "encryptionFailed": "Le chiffrement du fichier a echoue. Actualisez la page et reessayez. Si le probleme persiste, contactez le support.",
+      "submissionFailed": "Votre demande n'a pas pu etre envoyee. Vos donnees ont ete sauvegardees. Reessayez dans quelques instants.",
+      "storageFull": "L'espace de sauvegarde automatique est plein. Vos donnees sont conservees mais la sauvegarde automatique est temporairement desactivee."
+    },
+    "trust": {
+      "banner": "Vos donnees sont protegees par un chiffrement de bout en bout. Ni nous, ni personne d'autre ne peut y acceder.",
+      "tooltipDescription": "Votre message est chiffre de bout en bout avant d'etre envoye.",
+      "tooltipUpload": "Vos fichiers sont chiffres sur votre appareil avant d'etre transmis.",
+      "encrypted": "Chiffre",
+      "shieldAlt": "Donnees protegees"
+    },
+    "destructive": {
+      "removeFileConfirm": "Supprimer ?",
+      "yes": "Oui",
+      "no": "Non",
+      "clearDraftTitle": "Effacer le brouillon ?",
+      "clearDraftBody": "Toutes les donnees saisies et les fichiers uploades seront supprimes. Cette action est irreversible.",
+      "cancel": "Annuler",
+      "clear": "Effacer"
+    },
+    "success": {
+      "title": "Demande envoyee",
+      "body": "Votre demande a bien ete transmise. Votre avocat reviendra vers vous rapidement."
+    }
+  }
+}
