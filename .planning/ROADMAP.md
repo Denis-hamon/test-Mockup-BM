@@ -51,13 +51,14 @@ Plans:
   2. Client can upload PDF, images, and screenshots during intake, and files are encrypted before upload
   3. Client can upload video files as evidence during intake
   4. Padlock icons, encryption badges, and contextual security reminders are visible at every sensitive interaction
-**Plans**: 3 plans
+**Plans**: 4 plans
 **UI hint**: yes
 
 Plans:
 - [ ] 02-01-PLAN.md — shadcn/ui init, next-intl FR config, Zod + Drizzle intake schemas, trust indicator components
 - [ ] 02-02-PLAN.md — Multi-step intake form (4-step stepper, validation, localStorage auto-save, submit action)
 - [x] 02-03-PLAN.md — File upload with client-side encryption (drag & drop, XChaCha20-Poly1305, S3 upload, progress UI)
+- [ ] 02-04-PLAN.md — Gap closure: rewire intake-stepper.tsx to connect all orphaned step components
 
 ### Phase 3: AI Engine Foundation
 **Goal**: The AI subsystem is operational with a provider-agnostic architecture and strict guardrails preventing any legal advice
@@ -174,7 +175,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Auth & Encryption | 4/4 | Complete | 2026-03-25 |
-| 2. Intake Form & Trust UX | 1/3 | In Progress|  |
+| 2. Intake Form & Trust UX | 1/4 | In Progress|  |
 | 3. AI Engine Foundation | 0/2 | Not started | - |
 | 4. Empathetic AI Intake | 0/2 | Not started | - |
 | 5. Case Intelligence | 0/2 | Not started | - |
