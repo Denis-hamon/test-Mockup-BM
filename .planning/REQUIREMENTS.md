@@ -32,7 +32,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **AI-02**: AI generates structured case summary (fiche synthétique) from intake data and documents
 - [ ] **AI-03**: AI builds chronological timeline of events from client narrative and documents
 - [ ] **AI-04**: AI produces qualification score to help lawyer prioritize cases by urgency/quality
-- [ ] **AI-05**: AI architecture is LLM-agnostic (supports Claude, GPT, Mistral via unified provider interface)
+- [x] **AI-05**: AI architecture is LLM-agnostic (supports Claude, GPT, Mistral via unified provider interface)
 - [ ] **AI-06**: AI never provides legal advice — UPL guardrails enforced in all interactions
 
 ### Lawyer Dashboard
@@ -113,7 +113,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AI-02 | Phase 5 | Pending |
 | AI-03 | Phase 5 | Pending |
 | AI-04 | Phase 5 | Pending |
-| AI-05 | Phase 3 | Pending |
+| AI-05 | Phase 3 | Complete |
 | AI-06 | Phase 3 | Pending |
 | DASH-01 | Phase 6 | Pending |
 | DASH-02 | Phase 6 | Pending |

@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to plan
+status: Phase complete — ready for verification
 stopped_at: Phase 2 execution complete, pending verification
-last_updated: "2026-03-26T12:52:32.931Z"
+last_updated: "2026-03-26T19:21:15.933Z"
 progress:
   total_phases: 9
-  completed_phases: 2
-  total_plans: 7
-  completed_plans: 7
+  completed_phases: 3
+  total_plans: 8
+  completed_plans: 8
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Le client doit pouvoir exprimer sa situation juridique de maniere complete et structuree, guide par une IA empathique, dans un environnement percu comme totalement securise — pour que l'avocat recoive un dossier parfaitement qualifie des le premier contact.
-**Current focus:** Phase 02 — intake-form-trust-ux
+**Current focus:** Phase 03 — ai-engine-foundation
 
 ## Current Position
 
-Phase: 2
-Plan: 3 of 3 complete
+Phase: 3
+Plan: 1 of 2 complete
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Plan: 3 of 3 complete
 | Phase 01 P02 | 17min | 2 tasks | 31 files |
 | Phase 01 P04 | 15min | 2 tasks | 20 files |
 | Phase 02 P03 | 3min | 2 tasks | 10 files |
+| Phase 03 P01 | 4min | 2 tasks | 17 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,10 @@ Recent decisions affecting current work:
 - [Phase 02]: Ephemeral keypair in sessionStorage for anonymous file encryption — re-encrypt at registration
 - [Phase 02]: SSE-C key derived deterministically from file key via crypto_generichash
 - [Phase 02]: HEIC files show generic ImageIcon — no client-side conversion
+- [Phase 03]: Vercel AI SDK 6 as LLM abstraction layer (provider-agnostic, TypeScript-native)
+- [Phase 03]: maxOutputTokens (AI SDK 6 API) instead of deprecated maxTokens
+- [Phase 03]: Legal disclaimer injected by default in all streaming responses (AI-06)
+- [Phase 03]: Config reads env vars on each call for runtime provider switching
 
 ### Pending Todos
 
@@ -87,6 +92,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-26T12:52:32.917Z
-Stopped at: Phase 2 execution complete, pending verification
-Resume file: .planning/phases/02-intake-form-trust-ux/02-CONTEXT.md
+Last session: 2026-03-26T19:20:11Z
+Stopped at: Completed 03-01-PLAN.md (LLM-agnostic provider interface)
+Resume file: .planning/phases/03-ai-engine-foundation/03-01-SUMMARY.md
