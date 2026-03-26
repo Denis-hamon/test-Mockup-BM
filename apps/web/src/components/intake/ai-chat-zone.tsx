@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useIntakeChat } from "@/hooks/use-intake-chat";
+import { saveFollowUp } from "@/server/actions/ai-followup.actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MessageCircle, SkipForward, Loader2, Heart } from "lucide-react";
@@ -10,6 +11,7 @@ import { cn } from "@/lib/utils";
 interface AIChatZoneProps {
   stepIndex: number;
   stepData: Record<string, unknown>;
+  submissionId?: string | null;
   onComplete: () => void;
   onSkip: () => void;
 }
@@ -25,6 +27,7 @@ function isSensitiveAlert(text: string): boolean {
 export function AIChatZone({
   stepIndex,
   stepData,
+  submissionId = null,
   onComplete,
   onSkip,
 }: AIChatZoneProps) {
@@ -40,6 +43,47 @@ export function AIChatZone({
   const [visible, setVisible] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const hasSentInitial = useRef(false);
+
+  /**
+   * Persist all Q&A pairs from this chat zone to the database.
+   * Extracts assistant questions and user answers from the messages array.
+   */
+  const persistFollowUps = useCallback(
+    async (skipped: boolean) => {
+      const assistantMessages = messages.filter((m) => m.role === "assistant");
+      const userMessages = messages.filter(
+        (m) =>
+          m.role === "user" &&
+          !m.parts?.[0]?.text?.startsWith("L'utilisateur vient de completer")
+      );
+
+      for (let i = 0; i < assistantMessages.length; i++) {
+        const question =
+          assistantMessages[i].parts
+            ?.filter(
+              (p): p is { type: "text"; text: string } => p.type === "text"
+            )
+            .map((p) => p.text)
+            .join("") ?? "";
+        const answer =
+          userMessages[i]?.parts
+            ?.filter(
+              (p): p is { type: "text"; text: string } => p.type === "text"
+            )
+            .map((p) => p.text)
+            .join("") ?? null;
+
+        await saveFollowUp({
+          submissionId,
+          stepIndex,
+          question,
+          answer: skipped ? null : answer,
+          skipped,
+        });
+      }
+    },
+    [messages, submissionId, stepIndex]
+  );
 
   // Fade in on mount
   useEffect(() => {
@@ -190,13 +234,23 @@ export function AIChatZone({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={onSkip}
+          onClick={async () => {
+            await persistFollowUps(true);
+            onSkip();
+          }}
           aria-label="Passer les questions complementaires"
         >
           <SkipForward className="mr-1 size-3" />
           Passer
         </Button>
-        <Button type="button" size="sm" onClick={onComplete}>
+        <Button
+          type="button"
+          size="sm"
+          onClick={async () => {
+            await persistFollowUps(false);
+            onComplete();
+          }}
+        >
           Continuer
         </Button>
       </div>
