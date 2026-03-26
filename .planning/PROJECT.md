@@ -17,6 +17,8 @@ Le client doit pouvoir exprimer sa situation juridique de manière complète et 
 - [x] Indicateurs visuels de sécurité omniprésents (cadenas, badges, rappels contextuels) — Validated in Phase 2: Intake Form & Trust UX
 - [x] Formulaire multi-étapes guidé pour décrire la situation juridique — Validated in Phase 2: Intake Form & Trust UX
 - [x] Upload de documents (PDF, images, vidéos) avec chiffrement client-side — Validated in Phase 2: Intake Form & Trust UX
+- [x] Architecture IA LLM-agnostique (Claude, GPT, Mistral via interface unifiée) — Validated in Phase 3: AI Engine Foundation
+- [x] Guardrails UPL empêchant tout conseil juridique dans les réponses IA — Validated in Phase 3: AI Engine Foundation
 
 ### Active
 
