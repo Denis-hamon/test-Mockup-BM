@@ -12,7 +12,11 @@ Le client doit pouvoir exprimer sa situation juridique de manière complète et 
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Authentification email/mot de passe avec confirmation email — Validated in Phase 1: Auth & Encryption
+- [x] Chiffrement bout en bout des données client — Validated in Phase 1: Auth & Encryption
+- [x] Indicateurs visuels de sécurité omniprésents (cadenas, badges, rappels contextuels) — Validated in Phase 2: Intake Form & Trust UX
+- [x] Formulaire multi-étapes guidé pour décrire la situation juridique — Validated in Phase 2: Intake Form & Trust UX
+- [x] Upload de documents (PDF, images, vidéos) avec chiffrement client-side — Validated in Phase 2: Intake Form & Trust UX
 
 ### Active
 
