@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 2: Intake Form & Trust UX** - Multi-step intake form with file uploads and visible security indicators
 - [ ] **Phase 3: AI Engine Foundation** - LLM-agnostic provider architecture with UPL guardrails
 - [ ] **Phase 4: Empathetic AI Intake** - AI conversational follow-ups and document extraction during intake
-- [x] **Phase 5: Case Intelligence** - AI-generated case summaries, timelines, and qualification scores (completed 2026-03-26)
+- [ ] **Phase 5: Case Intelligence** - AI-generated case summaries, timelines, and qualification scores
 - [ ] **Phase 6: Lawyer Dashboard** - Case management interface with filters, notifications, and configuration
 - [ ] **Phase 7: Client Portal** - Encrypted messaging, document sharing, case tracking, and appointment requests
 - [ ] **Phase 8: Intake Templates & Customization** - Pre-built specialty templates and lawyer customization tools
@@ -96,11 +96,12 @@ Plans:
   1. A structured case summary (fiche synthetique) is auto-generated from intake data and uploaded documents
   2. A chronological timeline of events is built from client narrative and document contents
   3. A qualification score is computed to help lawyers prioritize cases by urgency and completeness
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [x] 05-01: AI case summary generation
-- [x] 05-02: Timeline extraction and qualification scoring
+- [x] 05-01-PLAN.md — AI case summary generation
+- [x] 05-02-PLAN.md — Server actions and intake integration
+- [ ] 05-03-PLAN.md — Gap closure: timeline extraction (AI-03) and qualification scoring (AI-04)
 
 ### Phase 6: Lawyer Dashboard
 **Goal**: Lawyers can view, filter, and review all incoming case requests with full AI-generated case files and configure their practice settings
@@ -177,7 +178,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 2. Intake Form & Trust UX | 1/3 | In Progress|  |
 | 3. AI Engine Foundation | 0/2 | Not started | - |
 | 4. Empathetic AI Intake | 0/2 | Not started | - |
-| 5. Case Intelligence | 2/2 | Complete   | 2026-03-26 |
+| 5. Case Intelligence | 2/3 | Gap closure | - |
 | 6. Lawyer Dashboard | 0/3 | Not started | - |
 | 7. Client Portal | 0/3 | Not started | - |
 | 8. Intake Templates & Customization | 0/2 | Not started | - |
