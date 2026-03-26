@@ -56,7 +56,7 @@ Plans:
 
 Plans:
 - [ ] 02-01-PLAN.md — shadcn/ui init, next-intl FR config, Zod + Drizzle intake schemas, trust indicator components
-- [ ] 02-02-PLAN.md — Multi-step intake form (4-step stepper, validation, localStorage auto-save, submit action)
+- [x] 02-02-PLAN.md — Multi-step intake form (4-step stepper, validation, localStorage auto-save, submit action)
 - [ ] 02-03-PLAN.md — File upload with client-side encryption (drag & drop, XChaCha20-Poly1305, S3 upload, progress UI)
 
 ### Phase 3: AI Engine Foundation
@@ -174,7 +174,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Auth & Encryption | 4/4 | Complete | 2026-03-25 |
-| 2. Intake Form & Trust UX | 0/3 | Planned | - |
+| 2. Intake Form & Trust UX | 1/3 | In Progress|  |
 | 3. AI Engine Foundation | 0/2 | Not started | - |
 | 4. Empathetic AI Intake | 0/2 | Not started | - |
 | 5. Case Intelligence | 0/2 | Not started | - |
