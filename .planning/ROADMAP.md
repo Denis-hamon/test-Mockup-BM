@@ -100,7 +100,7 @@ Plans:
 
 Plans:
 - [x] 05-01: AI case summary generation
-- [ ] 05-02: Timeline extraction and qualification scoring
+- [x] 05-02: Timeline extraction and qualification scoring
 
 ### Phase 6: Lawyer Dashboard
 **Goal**: Lawyers can view, filter, and review all incoming case requests with full AI-generated case files and configure their practice settings
@@ -177,7 +177,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 2. Intake Form & Trust UX | 1/3 | In Progress|  |
 | 3. AI Engine Foundation | 0/2 | Not started | - |
 | 4. Empathetic AI Intake | 0/2 | Not started | - |
-| 5. Case Intelligence | 1/1 | Complete   | 2026-03-26 |
+| 5. Case Intelligence | 2/2 | Complete   | 2026-03-26 |
 | 6. Lawyer Dashboard | 0/3 | Not started | - |
 | 7. Client Portal | 0/3 | Not started | - |
 | 8. Intake Templates & Customization | 0/2 | Not started | - |
