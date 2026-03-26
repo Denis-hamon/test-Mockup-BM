@@ -8,6 +8,7 @@ import { StepDocuments } from "@/components/intake/step-documents";
 import { StepContact } from "@/components/intake/step-contact";
 import { TrustBanner } from "@/components/trust/trust-banner";
 import { submitIntake } from "@/server/actions/intake.actions";
+import { AIChatZone } from "@/components/intake/ai-chat-zone";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -20,6 +21,8 @@ import {
 import { cn } from "@/lib/utils";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 
+type IntakePhase = "step" | "chatting";
+
 const STEPS = [
   { key: "1" },
   { key: "2" },
@@ -31,6 +34,7 @@ export function IntakeStepper() {
   const {
     form,
     currentStep,
+    validateStep,
     nextStep,
     prevStep,
     hasDraft,
@@ -39,12 +43,33 @@ export function IntakeStepper() {
   } = useIntakeForm();
 
   const t = useTranslations("intake");
+  const [phase, setPhase] = useState<IntakePhase>("step");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitResult, setSubmitResult] = useState<{
     success: boolean;
     id?: string;
     error?: string;
   } | null>(null);
+
+  async function handleStepComplete() {
+    const valid = await validateStep(currentStep);
+    if (!valid) return;
+    if (currentStep < 3) {
+      setPhase("chatting");
+    } else {
+      nextStep();
+    }
+  }
+
+  function handleChatComplete() {
+    nextStep();
+    setPhase("step");
+  }
+
+  function handleChatSkip() {
+    nextStep();
+    setPhase("step");
+  }
 
   async function handleSubmit() {
     const valid = await form.trigger();
@@ -139,6 +164,16 @@ export function IntakeStepper() {
         {currentStep === 3 && <StepContact form={form} />}
       </div>
 
+      {/* AI Chat Zone — shown between steps 0-2 when phase is chatting */}
+      {phase === "chatting" && currentStep < 3 && (
+        <AIChatZone
+          stepIndex={currentStep}
+          stepData={form.getValues() as Record<string, unknown>}
+          onComplete={handleChatComplete}
+          onSkip={handleChatSkip}
+        />
+      )}
+
       {/* Submit error */}
       {submitResult?.error && (
         <Alert variant="destructive">
@@ -147,28 +182,30 @@ export function IntakeStepper() {
         </Alert>
       )}
 
-      {/* Navigation buttons */}
-      <div className="flex justify-between">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={prevStep}
-          disabled={currentStep === 0 || isSubmitting}
-        >
-          {t("nav.prev")}
-        </Button>
+      {/* Navigation buttons — hidden during AI chatting phase */}
+      {phase !== "chatting" && (
+        <div className="flex justify-between">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={prevStep}
+            disabled={currentStep === 0 || isSubmitting}
+          >
+            {t("nav.prev")}
+          </Button>
 
-        {currentStep < STEPS.length - 1 ? (
-          <Button type="button" onClick={nextStep}>
-            {t("nav.next")}
-          </Button>
-        ) : (
-          <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
-            {isSubmitting ? t("nav.submit") : t("nav.submit")}
-          </Button>
-        )}
-      </div>
+          {currentStep < STEPS.length - 1 ? (
+            <Button type="button" onClick={handleStepComplete}>
+              {t("nav.next")}
+            </Button>
+          ) : (
+            <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
+              {isSubmitting ? t("nav.submit") : t("nav.submit")}
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
