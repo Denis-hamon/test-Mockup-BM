@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to plan
-stopped_at: Phase 2 context gathered
-last_updated: "2026-03-25T23:42:23.873Z"
+stopped_at: Completed 02-03-PLAN.md
+last_updated: "2026-03-26T11:43:45Z"
 progress:
   total_phases: 9
   completed_phases: 1
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Le client doit pouvoir exprimer sa situation juridique de maniere complete et structuree, guide par une IA empathique, dans un environnement percu comme totalement securise — pour que l'avocat recoive un dossier parfaitement qualifie des le premier contact.
-**Current focus:** Phase 01 — auth-encryption
+**Current focus:** Phase 02 — intake-form-trust-ux
 
 ## Current Position
 
 Phase: 2
-Plan: Not started
+Plan: 3 of 3 complete
 
 ## Performance Metrics
 
@@ -50,6 +50,7 @@ Plan: Not started
 | Phase 01 P03 | 4min | 2 tasks | 12 files |
 | Phase 01 P02 | 17min | 2 tasks | 31 files |
 | Phase 01 P04 | 15min | 2 tasks | 20 files |
+| Phase 02 P03 | 3min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,9 @@ Recent decisions affecting current work:
 - [Phase 01]: drizzle-orm at workspace root devDep for pnpm strict module resolution in tests
 - [Phase 01]: IndexedDB for client-side private key storage (legalconnect_private_key)
 - [Phase 01]: ZIP export deferred to Phase 2; Phase 1 returns JSON only
+- [Phase 02]: Ephemeral keypair in sessionStorage for anonymous file encryption — re-encrypt at registration
+- [Phase 02]: SSE-C key derived deterministically from file key via crypto_generichash
+- [Phase 02]: HEIC files show generic ImageIcon — no client-side conversion
 
 ### Pending Todos
 
@@ -83,6 +87,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-25T23:42:23.868Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-intake-form-trust-ux/02-CONTEXT.md
+Last session: 2026-03-26T11:43:45Z
+Stopped at: Completed 02-03-PLAN.md
+Resume file: .planning/phases/02-intake-form-trust-ux/02-03-SUMMARY.md
