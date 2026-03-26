@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 1: Auth & Encryption** - User accounts, E2E encryption primitives, RGPD compliance infrastructure
 - [ ] **Phase 2: Intake Form & Trust UX** - Multi-step intake form with file uploads and visible security indicators
 - [ ] **Phase 3: AI Engine Foundation** - LLM-agnostic provider architecture with UPL guardrails
-- [ ] **Phase 4: Empathetic AI Intake** - AI conversational follow-ups and document extraction during intake
+- [x] **Phase 4: Empathetic AI Intake** - AI conversational follow-ups and document extraction during intake (completed 2026-03-26)
 - [ ] **Phase 5: Case Intelligence** - AI-generated case summaries, timelines, and qualification scores
 - [ ] **Phase 6: Lawyer Dashboard** - Case management interface with filters, notifications, and configuration
 - [ ] **Phase 7: Client Portal** - Encrypted messaging, document sharing, case tracking, and appointment requests
@@ -85,7 +85,7 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 04-01: AI conversational follow-ups in intake flow
+- [x] 04-01: AI conversational follow-ups in intake flow
 - [x] 04-02: Document extraction pipeline (Docling sidecar + AI vision)
 
 ### Phase 5: Case Intelligence
@@ -176,7 +176,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 1. Auth & Encryption | 4/4 | Complete | 2026-03-25 |
 | 2. Intake Form & Trust UX | 1/3 | In Progress|  |
 | 3. AI Engine Foundation | 0/2 | Not started | - |
-| 4. Empathetic AI Intake | 1/2 | In Progress|  |
+| 4. Empathetic AI Intake | 2/2 | Complete   | 2026-03-26 |
 | 5. Case Intelligence | 0/2 | Not started | - |
 | 6. Lawyer Dashboard | 0/3 | Not started | - |
 | 7. Client Portal | 0/3 | Not started | - |
