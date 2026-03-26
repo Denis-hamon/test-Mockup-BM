@@ -67,10 +67,10 @@ Plans:
   1. AI requests can be routed to Claude, GPT, or Mistral via a unified provider interface without code changes
   2. AI never provides legal advice in any interaction — UPL guardrails reject or rewrite any response containing advice
   3. All AI responses include appropriate disclaimers
-**Plans**: 2 plans
+**Plans**: TBD
 
 Plans:
-- [x] 03-01-PLAN.md — LLM-agnostic provider interface (Vercel AI SDK)
+- [ ] 03-01: LLM-agnostic provider interface (Vercel AI SDK)
 - [ ] 03-02: UPL guardrails, output filtering, and red-team test suite
 
 ### Phase 4: Empathetic AI Intake
@@ -81,12 +81,12 @@ Plans:
   1. AI asks contextual follow-up questions adapted to the legal domain and the client's emotional state during intake
   2. AI tone is warm, supportive, and encouraging — never cold or bureaucratic
   3. AI extracts dates, parties, amounts, and key clauses from uploaded PDF/image documents automatically
-**Plans**: 2 plans
+**Plans**: TBD
 **UI hint**: yes
 
 Plans:
-- [ ] 04-01-PLAN.md — AI conversational follow-ups (chat zone between steps, emotion detection, sensitive case alerts, DB persistence)
-- [ ] 04-02-PLAN.md — Document extraction pipeline (BullMQ workers, Docling sidecar, AI Vision, editable extraction cards)
+- [ ] 04-01: AI conversational follow-ups in intake flow
+- [x] 04-02: Document extraction pipeline (Docling sidecar + AI vision)
 
 ### Phase 5: Case Intelligence
 **Goal**: The system generates a complete, structured case file from intake data and documents — ready for lawyer review
@@ -175,8 +175,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 |-------|----------------|--------|-----------|
 | 1. Auth & Encryption | 4/4 | Complete | 2026-03-25 |
 | 2. Intake Form & Trust UX | 1/3 | In Progress|  |
-| 3. AI Engine Foundation | 1/2 | In Progress | - |
-| 4. Empathetic AI Intake | 0/2 | Not started | - |
+| 3. AI Engine Foundation | 0/2 | Not started | - |
+| 4. Empathetic AI Intake | 1/2 | In Progress|  |
 | 5. Case Intelligence | 0/2 | Not started | - |
 | 6. Lawyer Dashboard | 0/3 | Not started | - |
 | 7. Client Portal | 0/3 | Not started | - |
