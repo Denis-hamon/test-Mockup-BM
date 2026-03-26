@@ -86,7 +86,7 @@ Plans:
 
 Plans:
 - [ ] 04-01: AI conversational follow-ups in intake flow
-- [ ] 04-02: Document extraction pipeline (Docling sidecar + AI vision)
+- [x] 04-02: Document extraction pipeline (Docling sidecar + AI vision)
 
 ### Phase 5: Case Intelligence
 **Goal**: The system generates a complete, structured case file from intake data and documents — ready for lawyer review
@@ -176,7 +176,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 1. Auth & Encryption | 4/4 | Complete | 2026-03-25 |
 | 2. Intake Form & Trust UX | 1/3 | In Progress|  |
 | 3. AI Engine Foundation | 0/2 | Not started | - |
-| 4. Empathetic AI Intake | 0/2 | Not started | - |
+| 4. Empathetic AI Intake | 1/2 | In Progress|  |
 | 5. Case Intelligence | 0/2 | Not started | - |
 | 6. Lawyer Dashboard | 0/3 | Not started | - |
 | 7. Client Portal | 0/3 | Not started | - |
