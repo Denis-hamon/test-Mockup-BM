@@ -12,9 +12,7 @@ export const intakeSubmissions = pgTable("intake_submissions", {
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   userId: text("user_id").references(() => users.id),
-  problemType: text("problem_type", {
-    enum: ["famille", "travail", "penal", "immobilier", "commercial", "autre"],
-  }).notNull(),
+  problemType: text("problem_type").notNull(),
   problemSubType: text("problem_sub_type"),
   description: text("description").notNull(),
   descriptionNonce: text("description_nonce"),

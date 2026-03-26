@@ -37,6 +37,18 @@
       "commercial": "Droit commercial",
       "autre": "Autre"
     },
+    "fields": {
+      "problemType": "Type de probleme",
+      "problemSubType": "Precision (optionnel)",
+      "description": "Decrivez votre situation",
+      "urgency": "Degre d'urgence",
+      "opposingParty": "Partie adverse (optionnel)",
+      "desiredOutcome": "Issue souhaitee (optionnel)",
+      "fullName": "Nom complet",
+      "phone": "Telephone (optionnel)",
+      "preferredContact": "Mode de contact prefere",
+      "availabilities": "Disponibilites (optionnel)"
+    },
     "urgency": {
       "normal": "Normal",
       "urgent": "Urgent",
@@ -79,6 +91,10 @@
       "clearDraftBody": "Toutes les donnees saisies et les fichiers uploades seront supprimes. Cette action est irreversible.",
       "cancel": "Annuler",
       "clear": "Effacer"
+    },
+    "success": {
+      "title": "Demande envoyee",
+      "body": "Votre demande a bien ete transmise. Votre avocat reviendra vers vous rapidement."
     }
   }
 }

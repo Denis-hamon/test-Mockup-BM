@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { ReactNode } from "react";
 
 export function TrustTooltip({
   content,
@@ -14,26 +15,26 @@ export function TrustTooltip({
   className,
 }: {
   content: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
   className?: string;
 }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         {children ?? (
-          <button
-            type="button"
-            className={cn("inline-flex items-center", className)}
-            aria-label={content}
+          <span
+            className={cn(
+              "inline-flex cursor-help text-[hsl(var(--trust))]",
+              className
+            )}
           >
-            <Lock
-              data-icon="inline-start"
-              className="text-[hsl(var(--trust))]"
-            />
-          </button>
+            <Lock data-icon className="h-4 w-4" />
+          </span>
         )}
       </TooltipTrigger>
-      <TooltipContent>{content}</TooltipContent>
+      <TooltipContent>
+        <p>{content}</p>
+      </TooltipContent>
     </Tooltip>
   );
 }

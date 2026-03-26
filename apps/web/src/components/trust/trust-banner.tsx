@@ -1,10 +1,13 @@
 "use client";
 
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export function TrustBanner({ className }: { className?: string }) {
+  const t = useTranslations("intake");
+
   return (
     <Alert
       className={cn(
@@ -13,9 +16,10 @@ export function TrustBanner({ className }: { className?: string }) {
       )}
     >
       <ShieldCheck className="text-[hsl(var(--trust))]" />
-      <AlertTitle>Donnees protegees</AlertTitle>
+      <AlertTitle>{t("trust.shieldAlt")}</AlertTitle>
       <AlertDescription>
-        {"Vos donnees sont protegees par un chiffrement de bout en bout. Ni nous, ni personne d'autre ne peut y acceder."}
+        Vos donnees sont protegees par un chiffrement de bout en bout. Ni nous,
+        ni personne d&apos;autre ne peut y acceder.
       </AlertDescription>
     </Alert>
   );

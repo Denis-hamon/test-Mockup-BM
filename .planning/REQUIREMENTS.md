@@ -102,7 +102,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-04 | Phase 1 | Complete |
 | SECU-01 | Phase 1 | Complete |
 | SECU-02 | Phase 1 | Complete |
-| SECU-03 | Phase 2 | Complete |
+| SECU-03 | Phase 2 | Pending |
 | INTK-01 | Phase 2 | Complete |
 | INTK-02 | Phase 4 | Pending |
 | INTK-03 | Phase 2 | Pending |

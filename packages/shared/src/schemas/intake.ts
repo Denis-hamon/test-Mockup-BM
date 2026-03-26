@@ -13,9 +13,7 @@ export const stepProblemTypeSchema = z.object({
 });
 
 export const stepDescriptionSchema = z.object({
-  description: z
-    .string()
-    .min(20, "Decrivez votre situation en au moins 20 caracteres"),
+  description: z.string().min(20),
   urgency: z
     .enum(["normal", "urgent", "tres_urgent"])
     .default("normal"),
@@ -40,7 +38,7 @@ export const stepDocumentsSchema = z.object({
 });
 
 export const stepContactSchema = z.object({
-  fullName: z.string().min(2, "Le nom doit contenir au moins 2 caracteres"),
+  fullName: z.string().min(2),
   phone: z.string().optional(),
   preferredContact: z
     .enum(["email", "telephone", "les_deux"])
