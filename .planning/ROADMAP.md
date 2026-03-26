@@ -68,11 +68,11 @@ Plans:
   1. AI requests can be routed to Claude, GPT, or Mistral via a unified provider interface without code changes
   2. AI never provides legal advice in any interaction — UPL guardrails reject or rewrite any response containing advice
   3. All AI responses include appropriate disclaimers
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: LLM-agnostic provider interface (Vercel AI SDK)
-- [ ] 03-02: UPL guardrails, output filtering, and red-team test suite
+- [ ] 03-01-PLAN.md — Provider registry, use-case routing, composable prompts (packages/ai scaffold)
+- [ ] 03-02-PLAN.md — UPL guardrail middleware, disclaimer injection, rate limiter, red-team test suite
 
 ### Phase 4: Empathetic AI Intake
 **Goal**: The intake form is enhanced with AI that asks empathetic follow-up questions and extracts key information from uploaded documents
