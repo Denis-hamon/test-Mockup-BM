@@ -112,13 +112,13 @@ Plans:
   2. Lawyer receives email notifications for new cases, messages, and appointment requests
   3. Lawyer can open a complete case file showing AI summary, uploaded documents, timeline, and qualification score
   4. Lawyer can configure their available specialties and practice areas
-**Plans**: TBD
+**Plans**: 3 plans
 **UI hint**: yes
 
 Plans:
-- [ ] 06-01: Case list view with filters and search
-- [ ] 06-02: Case detail view (AI summary, documents, timeline, score)
-- [ ] 06-03: Email notifications and lawyer configuration
+- [ ] 06-01-PLAN.md — DB schemas (lawyer_profiles, lawyer_notes), server actions (list/detail/status/notes), email notification template
+- [ ] 06-02-PLAN.md — Case list page with DataTable, filters, sorting, pagination, responsive layout
+- [ ] 06-03-PLAN.md — Case detail page (tabs: synthese/documents/timeline/echanges IA, notes, status dropdown) + settings page + email wiring
 
 ### Phase 7: Client Portal
 **Goal**: Client and lawyer have a secure shared space for ongoing communication, document exchange, case tracking, and appointment scheduling
