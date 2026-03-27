@@ -118,7 +118,7 @@ Plans:
 Plans:
 - [x] 06-01-PLAN.md — DB schemas (lawyer_profiles, lawyer_notes), server actions (list/detail/status/notes), email notification template
 - [ ] 06-02-PLAN.md — Case list page with DataTable, filters, sorting, pagination, responsive layout
-- [ ] 06-03-PLAN.md — Case detail page (tabs: synthese/documents/timeline/echanges IA, notes, status dropdown) + settings page + email wiring
+- [x] 06-03-PLAN.md — Case detail page (tabs: synthese/documents/timeline/echanges IA, notes, status dropdown) + settings page + email wiring
 
 ### Phase 7: Client Portal
 **Goal**: Client and lawyer have a secure shared space for ongoing communication, document exchange, case tracking, and appointment scheduling
