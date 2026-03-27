@@ -25,7 +25,7 @@ import { conversations, messages } from "@/lib/db/schema/messaging";
 import { lawyerProfiles } from "@/lib/db/schema/lawyer";
 import { messageEmitter, type SSEEvent } from "@/lib/sse/message-emitter";
 import { requireAuth } from "./portal.actions";
-import { sendEmail } from "@legalconnect/email";
+import { sendNewMessageNotification } from "@legalconnect/email";
 import { eq, and, sql, desc, lt, ne, isNull, or } from "drizzle-orm";
 
 // ---------------------------------------------------------------------------
@@ -354,15 +354,28 @@ export async function sendMessage(
     // Fire-and-forget email notification (D-05: NEVER include message content)
     void (async () => {
       try {
-        const otherUser = await db.query.users.findFirst({
-          where: eq(users.id, otherUserId),
-          columns: { email: true, name: true },
-        });
+        const [otherUser, senderUser, submission] = await Promise.all([
+          db.query.users.findFirst({
+            where: eq(users.id, otherUserId),
+            columns: { email: true, name: true },
+          }),
+          db.query.users.findFirst({
+            where: eq(users.id, userId),
+            columns: { name: true },
+          }),
+          db.query.intakeSubmissions.findFirst({
+            where: eq(intakeSubmissions.id, conversation.submissionId),
+            columns: { problemType: true },
+          }),
+        ]);
         if (otherUser?.email) {
-          await sendEmail({
-            to: otherUser.email,
-            subject: "Nouveau message - LegalConnect",
-            text: `Bonjour${otherUser.name ? ` ${otherUser.name}` : ""},\n\nVous avez recu un nouveau message sur LegalConnect.\n\nConnectez-vous pour le consulter.\n\nCordialement,\nL'equipe LegalConnect`,
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.legalconnect.fr";
+          await sendNewMessageNotification(otherUser.email, {
+            recipientName: otherUser.name || "Utilisateur",
+            senderName: senderUser?.name || "Votre interlocuteur",
+            problemType: submission?.problemType || "Dossier",
+            conversationId,
+            baseUrl,
           });
         }
       } catch (emailError) {

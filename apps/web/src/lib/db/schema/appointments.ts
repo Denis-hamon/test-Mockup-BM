@@ -35,8 +35,27 @@ export const appointments = pgTable("appointments", {
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });
 
+export const reminderLogs = pgTable("reminder_logs", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  appointmentId: text("appointment_id")
+    .notNull()
+    .references(() => appointments.id),
+  type: text("type", { enum: ["j-1", "j-0"] }).notNull(),
+  sentAt: timestamp("sent_at", { mode: "date" }).defaultNow().notNull(),
+});
+
 // Relations
-export const appointmentsRelations = relations(appointments, ({ one }) => ({
+export const reminderLogsRelations = relations(reminderLogs, ({ one }) => ({
+  appointment: one(appointments, {
+    fields: [reminderLogs.appointmentId],
+    references: [appointments.id],
+  }),
+}));
+
+export const appointmentsRelations = relations(appointments, ({ one, many }) => ({
+  reminders: many(reminderLogs),
   submission: one(intakeSubmissions, {
     fields: [appointments.submissionId],
     references: [intakeSubmissions.id],

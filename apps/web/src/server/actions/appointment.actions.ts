@@ -16,7 +16,11 @@ import { users } from "@/lib/db/schema/auth";
 import { intakeSubmissions } from "@/lib/db/schema/intake";
 import { appointments } from "@/lib/db/schema/appointments";
 import { requireClient, requireAuth } from "./portal.actions";
-import { sendEmail } from "@legalconnect/email";
+import {
+  sendAppointmentRequestNotification,
+  sendAppointmentConfirmedNotification,
+  sendAppointmentRefusedNotification,
+} from "@legalconnect/email";
 import { eq, and, desc, ne } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { z } from "zod";
@@ -115,7 +119,7 @@ export async function requestAppointment(input: {
       })
       .returning();
 
-    // D-05: send email notification to avocat
+    // D-05: send email notification to avocat (React Email template)
     void (async () => {
       try {
         if (avocat.email) {
@@ -123,10 +127,15 @@ export async function requestAppointment(input: {
             where: eq(users.id, clientId),
             columns: { name: true },
           });
-          await sendEmail({
-            to: avocat.email,
-            subject: "Nouvelle demande de rendez-vous - LegalConnect",
-            text: `Bonjour${avocat.name ? ` ${avocat.name}` : ""},\n\n${client?.name ?? "Un client"} a fait une demande de rendez-vous (${parsed.data.type}).\n\nConnectez-vous pour consulter les details et confirmer.\n\nCordialement,\nL'equipe LegalConnect`,
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.legalconnect.fr";
+          await sendAppointmentRequestNotification(avocat.email, {
+            lawyerName: avocat.name || "Avocat",
+            clientName: client?.name || "Un client",
+            problemType: submission?.problemType || "Dossier",
+            appointmentType: parsed.data.type,
+            preferredDates: parsed.data.preferredDates,
+            submissionId: parsed.data.submissionId,
+            baseUrl,
           });
         }
       } catch (emailError) {
@@ -295,20 +304,29 @@ export async function confirmAppointment(
       })
       .where(eq(appointments.id, appointmentId));
 
-    // Send confirmation email to client
+    // Send confirmation email to client (React Email template)
     void (async () => {
       try {
-        const client = await db.query.users.findFirst({
-          where: eq(users.id, appointment.clientId),
-          columns: { email: true, name: true },
-        });
+        const [client, lawyer] = await Promise.all([
+          db.query.users.findFirst({
+            where: eq(users.id, appointment.clientId),
+            columns: { email: true, name: true },
+          }),
+          db.query.users.findFirst({
+            where: eq(users.id, authResult.userId),
+            columns: { name: true },
+          }),
+        ]);
         if (client?.email) {
-          const typeLabel =
-            appointment.type === "visio" ? "visioconference" : "en cabinet";
-          await sendEmail({
-            to: client.email,
-            subject: "Rendez-vous confirme - LegalConnect",
-            text: `Bonjour${client.name ? ` ${client.name}` : ""},\n\nVotre rendez-vous ${typeLabel} a ete confirme.\n\nDate : ${new Date(confirmedDate).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}${finalVisioLink ? `\nLien visio : ${finalVisioLink}` : ""}${cabinetAddress ? `\nAdresse : ${cabinetAddress}` : ""}\n\nCordialement,\nL'equipe LegalConnect`,
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.legalconnect.fr";
+          await sendAppointmentConfirmedNotification(client.email, {
+            clientName: client.name || "Client",
+            lawyerName: lawyer?.name || "Votre avocat",
+            confirmedDate: new Date(confirmedDate),
+            type: appointment.type as "visio" | "presentiel",
+            visioLink: finalVisioLink ?? undefined,
+            cabinetAddress: cabinetAddress ?? undefined,
+            baseUrl,
           });
         }
       } catch (emailError) {
@@ -361,18 +379,26 @@ export async function refuseAppointment(
       })
       .where(eq(appointments.id, appointmentId));
 
-    // Send refusal email to client
+    // Send refusal email to client (React Email template)
     void (async () => {
       try {
-        const client = await db.query.users.findFirst({
-          where: eq(users.id, appointment.clientId),
-          columns: { email: true, name: true },
-        });
+        const [client, lawyer] = await Promise.all([
+          db.query.users.findFirst({
+            where: eq(users.id, appointment.clientId),
+            columns: { email: true, name: true },
+          }),
+          db.query.users.findFirst({
+            where: eq(users.id, authResult.userId),
+            columns: { name: true },
+          }),
+        ]);
         if (client?.email) {
-          await sendEmail({
-            to: client.email,
-            subject: "Rendez-vous non disponible - LegalConnect",
-            text: `Bonjour${client.name ? ` ${client.name}` : ""},\n\nNous sommes desoles, votre demande de rendez-vous n'a pas pu etre honoree.\n\nN'hesitez pas a soumettre une nouvelle demande avec d'autres disponibilites.\n\nCordialement,\nL'equipe LegalConnect`,
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.legalconnect.fr";
+          await sendAppointmentRefusedNotification(client.email, {
+            clientName: client.name || "Client",
+            lawyerName: lawyer?.name || "Votre avocat",
+            rejectionReason: rejectionReason ?? undefined,
+            baseUrl,
           });
         }
       } catch (emailError) {
