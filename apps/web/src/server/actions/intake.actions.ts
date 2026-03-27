@@ -6,16 +6,26 @@ import { users } from "@/lib/db/schema/auth";
 import { lawyerProfiles } from "@/lib/db/schema/lawyer";
 import { intakeSchema } from "@legalconnect/shared";
 import { triggerCaseIntelligence } from "./case-intelligence.actions";
+import { createTemplateSnapshot } from "./template.actions";
 import { sendNewCaseNotification } from "@legalconnect/email";
 import { eq } from "drizzle-orm";
 
-export async function submitIntake(data: unknown): Promise<{
+export async function submitIntake(
+  data: unknown,
+  options?: { templateId?: string; templateAnswers?: Record<string, unknown> }
+): Promise<{
   success: boolean;
   id?: string;
   error?: string;
 }> {
   try {
     const parsed = intakeSchema.parse(data);
+
+    // Create template snapshot if submitting from a template
+    let templateSnapshotId: string | undefined;
+    if (options?.templateId) {
+      templateSnapshotId = await createTemplateSnapshot(options.templateId);
+    }
 
     const [result] = await db
       .insert(intakeSubmissions)
@@ -31,6 +41,11 @@ export async function submitIntake(data: unknown): Promise<{
         preferredContact: parsed.preferredContact,
         availabilities: parsed.availabilities,
         status: "submitted",
+        templateId: options?.templateId ?? null,
+        templateSnapshotId: templateSnapshotId ?? null,
+        templateAnswers: options?.templateAnswers
+          ? JSON.stringify(options.templateAnswers)
+          : null,
       })
       .returning({ id: intakeSubmissions.id });
 
