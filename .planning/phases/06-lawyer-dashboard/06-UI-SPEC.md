@@ -48,11 +48,11 @@ Exceptions: 44px minimum touch target for mobile status dropdown and filter chip
 | Role | Size | Weight | Line Height | Usage |
 |------|------|--------|-------------|-------|
 | Body | 14px | 400 (regular) | 1.5 | Table cells, descriptions, notes content |
-| Label | 14px | 500 (medium) | 1.4 | Column headers, filter labels, field labels, tab labels |
+| Label | 14px | 600 (semibold) | 1.4 | Column headers, filter labels, field labels, tab labels |
 | Heading | 20px | 600 (semibold) | 1.2 | Page titles ("Dossiers", "Parametres"), case detail client name |
 | Display | 28px | 600 (semibold) | 1.2 | Not used in this phase (reserved for landing) |
 
-Note: Weights 400 and 600 are primary. Weight 500 is used only for labels (inherited from shadcn base-nova DataTable header pattern).
+Note: Only 2 weights used — 400 (regular) for body/content, 600 (semibold) for labels/headings/emphasis.
 
 ---
 
