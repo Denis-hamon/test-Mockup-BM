@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 07-01-PLAN.md
-last_updated: "2026-03-27T20:03:11.521Z"
+stopped_at: Completed 07-02-PLAN.md
+last_updated: "2026-03-27T20:18:43.183Z"
 progress:
   total_phases: 9
   completed_phases: 5
   total_plans: 22
-  completed_plans: 18
+  completed_plans: 19
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-25)
 ## Current Position
 
 Phase: 07 (client-portal) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 
 ## Performance Metrics
 
@@ -57,6 +57,7 @@ Plan: 2 of 4
 | Phase 06 P03 | 8min | 3 tasks | 23 files |
 | Phase 06 P02 | 7min | 2 tasks | 18 files |
 | Phase 07 P01 | 8min | 2 tasks | 15 files |
+| Phase 07 P02 | 1min | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,8 @@ Recent decisions affecting current work:
 - [Phase 07]: crypto_kx_client/server_session_keys for per-conversation E2E key derivation from existing X25519 keypairs
 - [Phase 07]: SSE via Next.js Route Handler for unidirectional real-time push (not WebSocket/tRPC)
 - [Phase 07]: initiatorId in conversation record determines crypto_kx client/server role
+- [Phase 07]: Role-conditional sidebar: both avocat and client get sidebar layout, content differs by role
+- [Phase 07]: Case detail uses tab-based navigation (Suivi, Documents, Messages) with Messages placeholder for Plan 03
 
 ### Pending Todos
 
@@ -108,6 +111,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-27T20:03:11.517Z
-Stopped at: Completed 07-01-PLAN.md
+Last session: 2026-03-27T20:18:43.179Z
+Stopped at: Completed 07-02-PLAN.md
 Resume file: None
