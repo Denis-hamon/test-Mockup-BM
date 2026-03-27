@@ -6,3 +6,4 @@ export * from "./case-intelligence";
 export * from "./lawyer";
 export * from "./messaging";
 export * from "./appointments";
+export * from "./intake-templates";

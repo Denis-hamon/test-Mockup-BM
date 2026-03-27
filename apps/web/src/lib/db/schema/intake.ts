@@ -6,6 +6,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { users } from "./auth";
+import { intakeTemplates, intakeTemplateSnapshots } from "./intake-templates";
 
 export const intakeSubmissions = pgTable("intake_submissions", {
   id: text("id")
@@ -27,6 +28,9 @@ export const intakeSubmissions = pgTable("intake_submissions", {
     enum: ["email", "telephone", "les_deux"],
   }).default("email"),
   availabilities: text("availabilities"),
+  templateId: text("template_id").references(() => intakeTemplates.id),
+  templateSnapshotId: text("template_snapshot_id").references(() => intakeTemplateSnapshots.id),
+  templateAnswers: text("template_answers"), // JSON string of dynamic form answers
   status: text("status", {
     enum: ["draft", "submitted", "en_cours", "termine", "archive"],
   }).default("draft"),
@@ -100,6 +104,14 @@ export const intakeSubmissionsRelations = relations(
     user: one(users, {
       fields: [intakeSubmissions.userId],
       references: [users.id],
+    }),
+    template: one(intakeTemplates, {
+      fields: [intakeSubmissions.templateId],
+      references: [intakeTemplates.id],
+    }),
+    templateSnapshot: one(intakeTemplateSnapshots, {
+      fields: [intakeSubmissions.templateSnapshotId],
+      references: [intakeTemplateSnapshots.id],
     }),
     documents: many(intakeDocuments),
     aiFollowUps: many(aiFollowUps),
