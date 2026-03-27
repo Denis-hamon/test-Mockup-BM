@@ -21,6 +21,7 @@ export const lawyerProfiles = pgTable("lawyer_profiles", {
   specialties: text("specialties").notNull().default("[]"), // JSON string[] e.g. ["famille","travail"]
   notifyNewCase: integer("notify_new_case").default(1).notNull(), // 1=on, 0=off
   notifyNewMessage: integer("notify_new_message").default(1).notNull(), // 1=on, 0=off
+  readReceiptsEnabled: integer("read_receipts_enabled").default(1).notNull(), // 1=on, 0=off
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });

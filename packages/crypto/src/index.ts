@@ -8,4 +8,5 @@ export {
   selectRandomWordIndices,
   verifyPassphraseWords,
 } from "./recovery";
+export * from "./key-exchange";
 export type { KeyPair, EncryptedData, RecoveryBundle } from "./types";
