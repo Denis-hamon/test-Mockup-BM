@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to plan
-stopped_at: Phase 6 UI-SPEC approved
-last_updated: "2026-03-27T11:35:31.689Z"
+status: Ready to execute
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-03-27T13:08:18.516Z"
 progress:
   total_phases: 9
   completed_phases: 4
-  total_plans: 15
-  completed_plans: 14
+  total_plans: 18
+  completed_plans: 15
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Le client doit pouvoir exprimer sa situation juridique de maniere complete et structuree, guide par une IA empathique, dans un environnement percu comme totalement securise — pour que l'avocat recoive un dossier parfaitement qualifie des le premier contact.
-**Current focus:** Phase 02 — intake-form-trust-ux
+**Current focus:** Phase 06 — lawyer-dashboard
 
 ## Current Position
 
-Phase: 6
-Plan: Not started
+Phase: 06 (lawyer-dashboard) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Plan: Not started
 | Phase 02 P03 | 3min | 2 tasks | 10 files |
 | Phase 05 P01 | 6min | 3 tasks | 11 files |
 | Phase 05 P02 | 4min | 2 tasks | 2 files |
+| Phase 06 P01 | 6min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -79,6 +80,9 @@ Recent decisions affecting current work:
 - [Phase 05]: Fire-and-forget pattern for AI summary generation after intake submission
 - [Phase 05]: UPL guardrails embedded in system prompt - AI never provides legal advice
 - [Phase 05]: Adapted case intelligence actions to actual single-table schema (caseSummaries only) with CaseIntelligenceResult interface future-proofed for timeline and score tables
+- [Phase 06]: requireAvocat() helper centralizes role=avocat auth check across all dashboard actions
+- [Phase 06]: Status enum replaced assigned/reviewed with en_cours/termine/archive for lawyer workflow
+- [Phase 06]: Archive status is terminal - no transition back from archive
 
 ### Pending Todos
 
@@ -93,6 +97,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-27T11:35:31.676Z
-Stopped at: Phase 6 UI-SPEC approved
-Resume file: .planning/phases/06-lawyer-dashboard/06-UI-SPEC.md
+Last session: 2026-03-27T13:08:18.513Z
+Stopped at: Completed 06-01-PLAN.md
+Resume file: None

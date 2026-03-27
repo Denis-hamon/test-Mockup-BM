@@ -37,10 +37,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Lawyer Dashboard
 
-- [ ] **DASH-01**: Lawyer views all incoming requests in list view with filters by status and specialty
-- [ ] **DASH-02**: Lawyer receives email notifications for new cases, messages, and appointment requests
-- [ ] **DASH-03**: Lawyer can review complete case file (AI summary, uploaded documents, timeline, qualification score)
-- [ ] **DASH-04**: Lawyer configures available specialties and practice areas
+- [x] **DASH-01**: Lawyer views all incoming requests in list view with filters by status and specialty
+- [x] **DASH-02**: Lawyer receives email notifications for new cases, messages, and appointment requests
+- [x] **DASH-03**: Lawyer can review complete case file (AI summary, uploaded documents, timeline, qualification score)
+- [x] **DASH-04**: Lawyer configures available specialties and practice areas
 
 ### Client Portal
 
@@ -115,10 +115,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AI-04 | Phase 5 | Complete |
 | AI-05 | Phase 3 | Pending |
 | AI-06 | Phase 3 | Pending |
-| DASH-01 | Phase 6 | Pending |
-| DASH-02 | Phase 6 | Pending |
-| DASH-03 | Phase 6 | Pending |
-| DASH-04 | Phase 6 | Pending |
+| DASH-01 | Phase 6 | Complete |
+| DASH-02 | Phase 6 | Complete |
+| DASH-03 | Phase 6 | Complete |
+| DASH-04 | Phase 6 | Complete |
 | PORT-01 | Phase 7 | Pending |
 | PORT-02 | Phase 7 | Pending |
 | PORT-03 | Phase 7 | Pending |
