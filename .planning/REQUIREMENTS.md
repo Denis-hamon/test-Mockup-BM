@@ -23,8 +23,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **INTK-02**: AI asks empathetic follow-up questions adapted to legal domain and emotional context
 - [x] **INTK-03**: Client can upload documents (PDF, images, screenshots) during intake
 - [x] **INTK-04**: Client can upload video files as evidence
-- [ ] **INTK-05**: Pre-built intake templates available per legal specialty (family law, labor law, criminal defense, etc.)
-- [ ] **INTK-06**: Lawyer can customize intake questions, flow, and branding
+- [x] **INTK-05**: Pre-built intake templates available per legal specialty (family law, labor law, criminal defense, etc.)
+- [x] **INTK-06**: Lawyer can customize intake questions, flow, and branding
 
 ### AI Intelligence
 
@@ -107,8 +107,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INTK-02 | Phase 4 | Pending |
 | INTK-03 | Phase 2 | Complete |
 | INTK-04 | Phase 2 | Complete |
-| INTK-05 | Phase 8 | Pending |
-| INTK-06 | Phase 8 | Pending |
+| INTK-05 | Phase 8 | Complete |
+| INTK-06 | Phase 8 | Complete |
 | AI-01 | Phase 4 | Pending |
 | AI-02 | Phase 5 | Complete |
 | AI-03 | Phase 5 | Complete |

@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to plan
-stopped_at: Phase 8 UI-SPEC approved
-last_updated: "2026-03-27T21:32:11.460Z"
+status: Ready to execute
+stopped_at: Completed 08-01-PLAN.md
+last_updated: "2026-03-27T22:02:19.320Z"
 progress:
   total_phases: 9
   completed_phases: 6
-  total_plans: 22
-  completed_plans: 21
+  total_plans: 25
+  completed_plans: 22
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Le client doit pouvoir exprimer sa situation juridique de maniere complete et structuree, guide par une IA empathique, dans un environnement percu comme totalement securise — pour que l'avocat recoive un dossier parfaitement qualifie des le premier contact.
-**Current focus:** Phase 07 — client-portal
+**Current focus:** Phase 08 — intake-templates-customization
 
 ## Current Position
 
-Phase: 03
-Plan: Not started
+Phase: 08 (intake-templates-customization) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -60,6 +60,7 @@ Plan: Not started
 | Phase 07 P02 | 1min | 2 tasks | 13 files |
 | Phase 07 P03 | 10min | 2 tasks | 8 files |
 | Phase 07 P04 | 12min | 2 tasks | 18 files |
+| Phase 08 P01 | 5min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -103,6 +104,9 @@ Recent decisions affecting current work:
 - [Phase 07]: Email templates in packages/email/src/templates/ subdirectory for organized plan-04 additions
 - [Phase 07]: reminderLogs table for cron dedup, CRON_SECRET auth for scheduled endpoint
 - [Phase 07]: Base UI triggers styled inline (no asChild) in shadcn v4
+- [Phase 08]: jsonb column type for template schema storage — flexible JSON without separate table per field
+- [Phase 08]: Template snapshot at submission time — preserves exact form structure even if lawyer edits template later
+- [Phase 08]: base-ui Select onValueChange accepts (string | null) — adapted DynamicField handler
 
 ### Pending Todos
 
@@ -117,6 +121,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-27T21:32:11.449Z
-Stopped at: Phase 8 UI-SPEC approved
-Resume file: .planning/phases/08-intake-templates-customization/08-UI-SPEC.md
+Last session: 2026-03-27T22:02:19.315Z
+Stopped at: Completed 08-01-PLAN.md
+Resume file: None

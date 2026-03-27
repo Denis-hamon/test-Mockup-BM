@@ -150,7 +150,7 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 08-01-PLAN.md — Template engine: Zod schema, DB tables (intakeTemplates + snapshots), server actions, 3 seed templates, DynamicField/DynamicStep components
+- [x] 08-01-PLAN.md — Template engine: Zod schema, DB tables (intakeTemplates + snapshots), server actions, 3 seed templates, DynamicField/DynamicStep components
 - [ ] 08-02-PLAN.md — Lawyer customization UI: template selector, split-view editor with @dnd-kit drag & drop, branding editor, live preview
 - [ ] 08-03-PLAN.md — Client-facing dynamic intake: /intake/[slug] route, DynamicStepper, lawyer branding via CSS variables, co-branding footer
 
