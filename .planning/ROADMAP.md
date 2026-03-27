@@ -129,13 +129,14 @@ Plans:
   2. Client and lawyer can share documents securely through the portal
   3. Client can see their case status and progress updates at any time
   4. Client can request an appointment with availability preferences, and the lawyer confirms or declines manually
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: yes
 
 Plans:
-- [ ] 07-01: E2E encrypted messaging system
-- [ ] 07-02: Document sharing and case status tracking
-- [ ] 07-03: Appointment request and manual confirmation flow
+- [ ] 07-01-PLAN.md — Backend foundation: crypto key exchange, DB schemas (messaging, appointments), SSE infrastructure, all server actions
+- [ ] 07-02-PLAN.md — Portal shell UI: role-conditional layout, sidebar, dashboard, cases, documents, settings pages
+- [ ] 07-03-PLAN.md — E2E encrypted chat UI: chat components, messages page, SSE real-time delivery + visual verification
+- [ ] 07-04-PLAN.md — Appointments UI, 5 email templates, cron reminder scheduling (J-1/J-0), lawyer read receipt settings
 
 ### Phase 8: Intake Templates & Customization
 **Goal**: Lawyers can select from pre-built intake templates per legal specialty and customize questions, flow, and branding to match their practice
@@ -180,6 +181,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 4. Empathetic AI Intake | 0/2 | Not started | - |
 | 5. Case Intelligence | 2/3 | Gap closure | - |
 | 6. Lawyer Dashboard | 0/3 | Not started | - |
-| 7. Client Portal | 0/3 | Not started | - |
+| 7. Client Portal | 0/4 | Not started | - |
 | 8. Intake Templates & Customization | 0/2 | Not started | - |
 | 9. Distribution & Embedding | 0/2 | Not started | - |

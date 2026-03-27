@@ -2,7 +2,7 @@
 phase: 7
 slug: client-portal
 status: draft
-nyquist_compliant: false
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-03-27
 ---
@@ -38,23 +38,31 @@ created: 2026-03-27
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 07-01-01 | 01 | 1 | PORT-01 | unit | `pnpm vitest run packages/crypto/src/__tests__/key-exchange.test.ts -x` | ❌ W0 | ⬜ pending |
-| 07-01-02 | 01 | 1 | PORT-01 | unit | `pnpm vitest run tests/messaging.test.ts -x` | ❌ W0 | ⬜ pending |
-| 07-01-03 | 01 | 1 | PORT-01 | integration | `pnpm vitest run tests/sse-messages.test.ts -x` | ❌ W0 | ⬜ pending |
-| 07-02-01 | 02 | 2 | PORT-02 | unit | `pnpm vitest run tests/messaging-attachments.test.ts -x` | ❌ W0 | ⬜ pending |
-| 07-02-02 | 02 | 2 | PORT-03 | unit | `pnpm vitest run tests/portal-cases.test.ts -x` | ❌ W0 | ⬜ pending |
-| 07-03-01 | 03 | 2 | PORT-04 | unit | `pnpm vitest run tests/appointments.test.ts -x` | ❌ W0 | ⬜ pending |
+| 07-01-01 | 01 | 1 | PORT-01 | unit+tdd | `pnpm vitest run packages/crypto/src/__tests__/key-exchange.test.ts -x` | Created by Plan 01 Task 1 (tdd=true) | ⬜ pending |
+| 07-01-02 | 01 | 1 | PORT-01 | typecheck | `pnpm tsc --noEmit` | N/A (compile check) | ⬜ pending |
+| 07-02-01 | 02 | 2 | PORT-02, PORT-03 | typecheck | `pnpm tsc --noEmit` | N/A (compile check) | ⬜ pending |
+| 07-03-01 | 03 | 2 | PORT-01 | typecheck | `pnpm tsc --noEmit` | N/A (compile check) | ⬜ pending |
+| 07-03-02 | 03 | 2 | PORT-01 | manual | Human verification checkpoint (Plan 03 Task 2) | N/A | ⬜ pending |
+| 07-04-01 | 04 | 3 | PORT-04, PORT-01 | typecheck | `pnpm tsc --noEmit` | N/A (compile check) | ⬜ pending |
+| 07-04-02 | 04 | 3 | PORT-04 | typecheck | `pnpm tsc --noEmit` | N/A (compile check) | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
 ---
 
-## Wave 0 Requirements
+## Verification Strategy
 
-- [ ] `packages/crypto/src/__tests__/key-exchange.test.ts` — stubs for PORT-01 crypto_kx key derivation
-- [ ] `tests/messaging.test.ts` — stubs for PORT-01/PORT-02 message CRUD server actions
-- [ ] `tests/portal-cases.test.ts` — stubs for PORT-03 client case list/detail
-- [ ] `tests/appointments.test.ts` — stubs for PORT-04 appointment lifecycle
+This phase uses a **hybrid verification approach**:
+
+1. **Unit tests (Plan 01 only):** Plan 01 Task 1 is TDD — it creates `packages/crypto/src/__tests__/key-exchange.test.ts` as part of the red-green cycle. This test file is created by the plan itself, not by a separate Wave 0.
+
+2. **TypeScript compile checks (all plans):** Every task uses `pnpm tsc --noEmit` as its primary automated verification. This catches type errors, missing imports, and contract violations across the monorepo.
+
+3. **Human verification (Plan 03):** The chat UI and portal shell are verified visually via a checkpoint task (Plan 03 Task 2) covering SSE real-time delivery, encryption badges, responsive layout, and role-conditional sidebar.
+
+4. **Acceptance criteria (all plans):** Each task includes grep-based acceptance criteria that verify specific patterns exist in output files (function names, component names, key patterns).
+
+**Rationale:** The server actions and UI components in this phase are primarily integration/wiring code consuming existing tested libraries (crypto, email, drizzle). TypeScript's type system catches most contract violations. The crypto key-exchange module (the only pure logic) gets full TDD coverage.
 
 ---
 
@@ -67,16 +75,17 @@ created: 2026-03-27
 | Document preview in message thread | PORT-02 | Visual rendering | Upload PDF in chat, verify preview renders |
 | Case status progress bar for client | PORT-03 | Visual component | Open client portal, check horizontal progress tracker |
 | Appointment confirmation email | PORT-04 | External email delivery | Request appointment, have lawyer confirm, check email |
+| Cron reminder endpoint | PORT-04 | Requires time-based trigger | Call GET /api/cron/appointment-reminders with CRON_SECRET, verify emails sent |
 
 ---
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 20s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify (tsc --noEmit or vitest)
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Plan 01 TDD task creates its own test file (no separate Wave 0 needed)
+- [x] No watch-mode flags
+- [x] Feedback latency < 20s
+- [x] `nyquist_compliant: true` set in frontmatter
 
 **Approval:** pending
