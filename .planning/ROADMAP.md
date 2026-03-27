@@ -133,7 +133,7 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 07-01-PLAN.md — Backend foundation: crypto key exchange, DB schemas (messaging, appointments), SSE infrastructure, all server actions
+- [x] 07-01-PLAN.md — Backend foundation: crypto key exchange, DB schemas (messaging, appointments), SSE infrastructure, all server actions
 - [ ] 07-02-PLAN.md — Portal shell UI: role-conditional layout, sidebar, dashboard, cases, documents, settings pages
 - [ ] 07-03-PLAN.md — E2E encrypted chat UI: chat components, messages page, SSE real-time delivery + visual verification
 - [ ] 07-04-PLAN.md — Appointments UI, 5 email templates, cron reminder scheduling (J-1/J-0), lawyer read receipt settings
@@ -181,6 +181,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 4. Empathetic AI Intake | 0/2 | Not started | - |
 | 5. Case Intelligence | 2/3 | Gap closure | - |
 | 6. Lawyer Dashboard | 0/3 | Not started | - |
-| 7. Client Portal | 0/4 | Not started | - |
+| 7. Client Portal | 1/4 | In Progress|  |
 | 8. Intake Templates & Customization | 0/2 | Not started | - |
 | 9. Distribution & Embedding | 0/2 | Not started | - |

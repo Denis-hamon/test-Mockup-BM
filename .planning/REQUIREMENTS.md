@@ -44,10 +44,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Client Portal
 
-- [ ] **PORT-01**: Client and lawyer can exchange end-to-end encrypted messages
-- [ ] **PORT-02**: Client and lawyer can share documents securely within the portal
-- [ ] **PORT-03**: Client can track case status and progress updates
-- [ ] **PORT-04**: Client can request appointment with availability preferences, lawyer confirms manually
+- [x] **PORT-01**: Client and lawyer can exchange end-to-end encrypted messages
+- [x] **PORT-02**: Client and lawyer can share documents securely within the portal
+- [x] **PORT-03**: Client can track case status and progress updates
+- [x] **PORT-04**: Client can request appointment with availability preferences, lawyer confirms manually
 
 ### Distribution
 
@@ -119,10 +119,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DASH-02 | Phase 6 | Complete |
 | DASH-03 | Phase 6 | Complete |
 | DASH-04 | Phase 6 | Complete |
-| PORT-01 | Phase 7 | Pending |
-| PORT-02 | Phase 7 | Pending |
-| PORT-03 | Phase 7 | Pending |
-| PORT-04 | Phase 7 | Pending |
+| PORT-01 | Phase 7 | Complete |
+| PORT-02 | Phase 7 | Complete |
+| PORT-03 | Phase 7 | Complete |
+| PORT-04 | Phase 7 | Complete |
 | DIST-01 | Phase 9 | Pending |
 | DIST-02 | Phase 9 | Pending |
 
