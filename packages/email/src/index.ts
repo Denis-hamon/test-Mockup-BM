@@ -4,11 +4,13 @@ import { VerificationEmail } from "./verification";
 import { PasswordResetEmail } from "./password-reset";
 import { WelcomeEmail } from "./welcome";
 import { DeletionConfirmationEmail } from "./deletion-confirmation";
+import { NewCaseNotification } from "./new-case-notification";
 
 export { VerificationEmail } from "./verification";
 export { PasswordResetEmail } from "./password-reset";
 export { WelcomeEmail } from "./welcome";
 export { DeletionConfirmationEmail } from "./deletion-confirmation";
+export { NewCaseNotification } from "./new-case-notification";
 export { sendEmail } from "./send";
 
 export async function sendVerificationEmail(to: string, token: string) {
@@ -43,5 +45,22 @@ export async function sendDeletionConfirmationEmail(
     to,
     subject: "Confirmation de suppression de compte - LegalConnect",
     react: React.createElement(DeletionConfirmationEmail, { scheduledDate }),
+  });
+}
+
+export async function sendNewCaseNotification(
+  to: string,
+  data: {
+    lawyerName?: string;
+    clientName: string;
+    problemType: string;
+    submissionDate: string;
+    caseUrl: string;
+  },
+) {
+  return sendEmail({
+    to,
+    subject: `Nouveau dossier : ${data.clientName} - LegalConnect`,
+    react: React.createElement(NewCaseNotification, data),
   });
 }
