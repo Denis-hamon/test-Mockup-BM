@@ -152,7 +152,7 @@ Plans:
 Plans:
 - [x] 08-01-PLAN.md — Template engine: Zod schema, DB tables (intakeTemplates + snapshots), server actions, 3 seed templates, DynamicField/DynamicStep components
 - [ ] 08-02-PLAN.md — Lawyer customization UI: template selector, split-view editor with @dnd-kit drag & drop, branding editor, live preview
-- [ ] 08-03-PLAN.md — Client-facing dynamic intake: /intake/[slug] route, DynamicStepper, lawyer branding via CSS variables, co-branding footer
+- [x] 08-03-PLAN.md — Client-facing dynamic intake: /intake/[slug] route, DynamicStepper, lawyer branding via CSS variables, co-branding footer
 
 ### Phase 9: Distribution & Embedding
 **Goal**: Lawyers can embed the intake flow on their own website via a single script tag, and each lawyer has a hosted page as a standalone entry point
