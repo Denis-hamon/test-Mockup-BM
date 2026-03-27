@@ -12,6 +12,7 @@ import {
   CardTitle,
   CardContent,
 } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { SpecialtySelector } from "@/components/dashboard/specialty-selector";
 import { NotificationSettings } from "@/components/dashboard/notification-settings";
 
@@ -22,6 +23,7 @@ interface CabinetSettingsFormProps {
     specialties: string[];
     notifyNewCase: boolean;
     notifyNewMessage: boolean;
+    readReceiptsEnabled: boolean;
   };
   email: string;
 }
@@ -42,6 +44,9 @@ export function CabinetSettingsForm({
   const [notifyNewMessage, setNotifyNewMessage] = useState(
     initialProfile.notifyNewMessage
   );
+  const [readReceiptsEnabled, setReadReceiptsEnabled] = useState(
+    initialProfile.readReceiptsEnabled
+  );
 
   function handleSave() {
     startTransition(async () => {
@@ -51,6 +56,7 @@ export function CabinetSettingsForm({
         specialties,
         notifyNewCase,
         notifyNewMessage,
+        readReceiptsEnabled,
       });
       if (result.success) {
         toast.success("Modifications enregistrees");
@@ -125,6 +131,27 @@ export function CabinetSettingsForm({
             notifyNewMessage={notifyNewMessage}
             onChange={handleNotificationChange}
           />
+        </CardContent>
+      </Card>
+
+      {/* Card 4: Messagerie */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Messagerie</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Accuses de lecture</Label>
+              <p className="text-xs text-muted-foreground">
+                Indiquer a vos clients quand vous avez lu leurs messages
+              </p>
+            </div>
+            <Switch
+              checked={readReceiptsEnabled}
+              onCheckedChange={setReadReceiptsEnabled}
+            />
+          </div>
         </CardContent>
       </Card>
 

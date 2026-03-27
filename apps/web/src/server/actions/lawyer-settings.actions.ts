@@ -56,6 +56,7 @@ export async function getLawyerProfile() {
         specialties: safeJsonParse<string[]>(profile.specialties, []),
         notifyNewCase: !!profile.notifyNewCase,
         notifyNewMessage: !!profile.notifyNewMessage,
+        readReceiptsEnabled: !!profile.readReceiptsEnabled,
       },
     };
   } catch (error) {
@@ -74,6 +75,7 @@ export interface UpdateLawyerProfileData {
   specialties?: string[];
   notifyNewCase?: boolean;
   notifyNewMessage?: boolean;
+  readReceiptsEnabled?: boolean;
 }
 
 export async function updateLawyerProfile(data: UpdateLawyerProfileData) {
@@ -96,6 +98,7 @@ export async function updateLawyerProfile(data: UpdateLawyerProfileData) {
     if (data.specialties !== undefined) updateSet.specialties = JSON.stringify(data.specialties);
     if (data.notifyNewCase !== undefined) updateSet.notifyNewCase = data.notifyNewCase ? 1 : 0;
     if (data.notifyNewMessage !== undefined) updateSet.notifyNewMessage = data.notifyNewMessage ? 1 : 0;
+    if (data.readReceiptsEnabled !== undefined) updateSet.readReceiptsEnabled = data.readReceiptsEnabled ? 1 : 0;
 
     // Check if profile exists
     const existing = await db.query.lawyerProfiles.findFirst({
@@ -115,6 +118,7 @@ export async function updateLawyerProfile(data: UpdateLawyerProfileData) {
         specialties: data.specialties ? JSON.stringify(data.specialties) : "[]",
         notifyNewCase: data.notifyNewCase === false ? 0 : 1,
         notifyNewMessage: data.notifyNewMessage === false ? 0 : 1,
+        readReceiptsEnabled: data.readReceiptsEnabled === false ? 0 : 1,
       });
     }
 

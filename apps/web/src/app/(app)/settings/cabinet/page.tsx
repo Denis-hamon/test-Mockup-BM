@@ -16,6 +16,7 @@ export default async function CabinetSettingsPage() {
     specialties: [],
     notifyNewCase: true,
     notifyNewMessage: true,
+    readReceiptsEnabled: true,
   };
 
   return (
