@@ -14,9 +14,11 @@
  */
 
 import { db } from "@/lib/db";
-import { caseSummaries } from "@/lib/db/schema/case-intelligence";
+import { caseSummaries, caseTimelines, qualificationScores } from "@/lib/db/schema/case-intelligence";
 import { intakeSubmissions } from "@/lib/db/schema/intake";
 import { generateCaseSummary } from "@/lib/ai/generate-case-summary";
+import { generateTimeline } from "@/lib/ai/generate-timeline";
+import { generateQualificationScore } from "@/lib/ai/generate-qualification-score";
 import { eq, and, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 
@@ -127,22 +129,39 @@ export async function triggerCaseIntelligence(
       return { success: false, error: "max_attempts_reached" };
     }
 
-    // If regeneration (version > 1): remove previous summary
-    // so generateCaseSummary won't short-circuit on existing check
+    // If regeneration (version > 1): remove all previous intelligence
+    // so generation functions won't short-circuit on existing check
     if (existingCount > 0) {
-      await db
-        .delete(caseSummaries)
-        .where(eq(caseSummaries.submissionId, submissionId));
+      await Promise.all([
+        db.delete(caseSummaries).where(eq(caseSummaries.submissionId, submissionId)),
+        db.delete(caseTimelines).where(eq(caseTimelines.submissionId, submissionId)),
+        db.delete(qualificationScores).where(eq(qualificationScores.submissionId, submissionId)),
+      ]);
     }
 
-    // Trigger generation
-    const result = await generateCaseSummary(submissionId);
+    // Trigger all three generations in parallel (summary, timeline, score)
+    const [summaryResult, timelineResult, scoreResult] = await Promise.allSettled([
+      generateCaseSummary(submissionId),
+      generateTimeline(submissionId),
+      generateQualificationScore(submissionId),
+    ]);
 
-    if (!result.success) {
-      return { success: false, version, error: result.error };
+    const errors: string[] = [];
+    if (summaryResult.status === "rejected" || (summaryResult.status === "fulfilled" && !summaryResult.value.success)) {
+      errors.push("summary");
+    }
+    if (timelineResult.status === "rejected" || (timelineResult.status === "fulfilled" && !timelineResult.value.success)) {
+      errors.push("timeline");
+    }
+    if (scoreResult.status === "rejected" || (scoreResult.status === "fulfilled" && !scoreResult.value.success)) {
+      errors.push("score");
     }
 
-    return { success: true, version };
+    if (errors.length === 3) {
+      return { success: false, version, error: "all_generations_failed" };
+    }
+
+    return { success: true, version, ...(errors.length > 0 ? { error: `partial_failure: ${errors.join(",")}` } : {}) };
   } catch (error) {
     console.error("[case-intelligence] Trigger failed:", error);
     return {
@@ -159,8 +178,8 @@ export async function triggerCaseIntelligence(
  *
  * Returns a CaseIntelligenceResult with:
  * - summary: parsed from caseSummaries table with safe JSON parsing
- * - timeline: null (future caseTimelines table)
- * - score: null (future qualificationScores table)
+ * - timeline: from caseTimelines table (events, undatedEvents)
+ * - score: from qualificationScores table (overall, urgency, completeness, complexity)
  */
 export async function getCaseIntelligence(
   submissionId: string
@@ -188,10 +207,18 @@ export async function getCaseIntelligence(
       return { success: false, error: "submission_not_found" };
     }
 
-    // Get latest summary
-    const caseSummary = await db.query.caseSummaries.findFirst({
-      where: eq(caseSummaries.submissionId, submissionId),
-    });
+    // Get latest summary, timeline, and score in parallel
+    const [caseSummary, caseTimeline, caseScore] = await Promise.all([
+      db.query.caseSummaries.findFirst({
+        where: eq(caseSummaries.submissionId, submissionId),
+      }),
+      db.query.caseTimelines.findFirst({
+        where: eq(caseTimelines.submissionId, submissionId),
+      }),
+      db.query.qualificationScores.findFirst({
+        where: eq(qualificationScores.submissionId, submissionId),
+      }),
+    ]);
 
     const result: CaseIntelligenceResult = {
       summary: caseSummary
@@ -210,9 +237,29 @@ export async function getCaseIntelligence(
             updatedAt: caseSummary.updatedAt,
           }
         : null,
-      // Timeline and score sections prepared for future tables
-      timeline: null,
-      score: null,
+      timeline: caseTimeline
+        ? {
+            status: "done" as const,
+            events: safeJsonParse<CaseIntelligenceResult["timeline"] extends null ? never : NonNullable<CaseIntelligenceResult["timeline"]>["events"]>(caseTimeline.events, []),
+            undatedEvents: safeJsonParse<CaseIntelligenceResult["timeline"] extends null ? never : NonNullable<CaseIntelligenceResult["timeline"]>["undatedEvents"]>(caseTimeline.undatedEvents, []),
+            version: 1,
+            error: null,
+            updatedAt: caseTimeline.updatedAt,
+          }
+        : null,
+      score: caseScore
+        ? {
+            status: "done" as const,
+            overallScore: caseScore.overallScore,
+            urgencyScore: caseScore.urgencyScore,
+            completenessScore: caseScore.completenessScore,
+            complexityScore: caseScore.complexityScore,
+            rationale: caseScore.rationale,
+            version: 1,
+            error: null,
+            updatedAt: caseScore.updatedAt,
+          }
+        : null,
     };
 
     return { success: true, data: result };
