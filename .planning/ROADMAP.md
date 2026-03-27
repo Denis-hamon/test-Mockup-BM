@@ -136,7 +136,7 @@ Plans:
 - [x] 07-01-PLAN.md — Backend foundation: crypto key exchange, DB schemas (messaging, appointments), SSE infrastructure, all server actions
 - [x] 07-02-PLAN.md — Portal shell UI: role-conditional layout, sidebar, dashboard, cases, documents, settings pages
 - [x] 07-03-PLAN.md — E2E encrypted chat UI: chat components, messages page, SSE real-time delivery + visual verification
-- [ ] 07-04-PLAN.md — Appointments UI, 5 email templates, cron reminder scheduling (J-1/J-0), lawyer read receipt settings
+- [x] 07-04-PLAN.md — Appointments UI, 5 email templates, cron reminder scheduling (J-1/J-0), lawyer read receipt settings
 
 ### Phase 8: Intake Templates & Customization
 **Goal**: Lawyers can select from pre-built intake templates per legal specialty and customize questions, flow, and branding to match their practice
