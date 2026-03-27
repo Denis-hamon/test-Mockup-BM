@@ -1,0 +1,373 @@
+/* ================================================================
+   LegalConnect Widget — Shadow DOM scoped styles
+   ================================================================ */
+
+:host {
+  all: initial;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--lc-fg, #1a1a2e);
+}
+
+/* ----------------------------------------------------------------
+   Container
+   ---------------------------------------------------------------- */
+
+.lc-widget {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2147483647;
+  font-family: inherit;
+}
+
+.lc-widget--left {
+  right: auto;
+  left: 24px;
+}
+
+/* ----------------------------------------------------------------
+   Floating button
+   ---------------------------------------------------------------- */
+
+.lc-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--lc-accent, #1a365d);
+  color: var(--lc-accent-fg, #ffffff);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  padding: 0;
+}
+
+.lc-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2), 0 3px 6px rgba(0, 0, 0, 0.12);
+}
+
+.lc-btn:active {
+  transform: scale(0.98);
+}
+
+.lc-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+/* ----------------------------------------------------------------
+   Modal
+   ---------------------------------------------------------------- */
+
+.lc-modal {
+  position: fixed;
+  bottom: 96px;
+  right: 24px;
+  width: 420px;
+  max-height: 640px;
+  background: var(--lc-surface, #ffffff);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--lc-border, #e5e7eb);
+}
+
+.lc-modal--left {
+  right: auto;
+  left: 24px;
+}
+
+.lc-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--lc-border, #e5e7eb);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.lc-modal-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--lc-fg, #1a1a2e);
+}
+
+.lc-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.lc-modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--lc-border, #e5e7eb);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  background: var(--lc-surface, #ffffff);
+}
+
+/* ----------------------------------------------------------------
+   Form elements
+   ---------------------------------------------------------------- */
+
+.lc-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--lc-fg, #1a1a2e);
+  margin-bottom: 6px;
+}
+
+.lc-input,
+.lc-select,
+.lc-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--lc-fg, #1a1a2e);
+  background: var(--lc-surface, #ffffff);
+  border: 1px solid var(--lc-border, #e5e7eb);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.lc-input:focus,
+.lc-select:focus,
+.lc-textarea:focus {
+  border-color: var(--lc-accent, #1a365d);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--lc-accent, #1a365d) 15%, transparent);
+}
+
+.lc-textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.lc-field-error {
+  font-size: 12px;
+  color: #dc2626;
+  margin-top: 4px;
+}
+
+/* ----------------------------------------------------------------
+   Buttons
+   ---------------------------------------------------------------- */
+
+.lc-btn-primary {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background: var(--lc-accent, #1a365d);
+  color: var(--lc-accent-fg, #ffffff);
+  transition: opacity 0.15s ease;
+  font-family: inherit;
+}
+
+.lc-btn-primary:hover {
+  opacity: 0.9;
+}
+
+.lc-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lc-btn-secondary {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  border: 1px solid var(--lc-border, #e5e7eb);
+  cursor: pointer;
+  background: transparent;
+  color: var(--lc-fg, #1a1a2e);
+  transition: background-color 0.15s ease;
+  font-family: inherit;
+}
+
+.lc-btn-secondary:hover {
+  background: var(--lc-muted, #f3f4f6);
+}
+
+/* ----------------------------------------------------------------
+   Step dots (progress indicator)
+   ---------------------------------------------------------------- */
+
+.lc-step-dots {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+}
+
+.lc-step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--lc-border, #e5e7eb);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.lc-step-dot--filled {
+  background: var(--lc-accent, #1a365d);
+}
+
+.lc-step-dot--current {
+  background: var(--lc-accent, #1a365d);
+  transform: scale(1.25);
+}
+
+/* ----------------------------------------------------------------
+   Backdrop (mobile only)
+   ---------------------------------------------------------------- */
+
+.lc-backdrop {
+  display: none;
+}
+
+/* ----------------------------------------------------------------
+   Animations
+   ---------------------------------------------------------------- */
+
+.lc-fade-in {
+  animation: lc-fade-in 300ms ease forwards;
+}
+
+.lc-slide-up {
+  animation: lc-slide-up 300ms ease-out forwards;
+}
+
+.lc-slide-down {
+  animation: lc-slide-down 200ms ease-in forwards;
+}
+
+@keyframes lc-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes lc-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes lc-slide-down {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+/* ----------------------------------------------------------------
+   Mobile responsive
+   ---------------------------------------------------------------- */
+
+@media (max-width: 639px) {
+  .lc-modal {
+    width: 100%;
+    max-height: 90vh;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    border-radius: 12px 12px 0 0;
+    position: fixed;
+  }
+
+  .lc-modal--left {
+    left: 0;
+    right: 0;
+  }
+
+  .lc-widget {
+    bottom: 16px;
+    right: 16px;
+  }
+
+  .lc-widget--left {
+    left: 16px;
+    right: auto;
+  }
+
+  .lc-btn {
+    width: 48px;
+    height: 48px;
+  }
+
+  .lc-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .lc-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2147483646;
+  }
+}
+
+/* ----------------------------------------------------------------
+   Reduced motion
+   ---------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .lc-fade-in,
+  .lc-slide-up,
+  .lc-slide-down {
+    animation: none;
+  }
+
+  .lc-btn {
+    transition: none;
+  }
+
+  .lc-step-dot {
+    transition: none;
+  }
+
+  .lc-input:focus,
+  .lc-select:focus,
+  .lc-textarea:focus {
+    transition: none;
+  }
+}
