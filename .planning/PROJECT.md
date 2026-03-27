@@ -21,6 +21,9 @@ Le client doit pouvoir exprimer sa situation juridique de manière complète et 
 - [x] Guardrails UPL empêchant tout conseil juridique dans les réponses IA — Validated in Phase 3: AI Engine Foundation
 - [x] IA conversationnelle empathique avec follow-ups adaptatifs entre les étapes — Validated in Phase 4: Empathetic AI Intake
 - [x] Extraction automatique d'informations clés depuis les documents uploadés — Validated in Phase 4: Empathetic AI Intake
+- [x] Fiche synthétique structurée auto-générée depuis les données intake — Validated in Phase 5: Case Intelligence
+- [x] Timeline chronologique des événements extraite du récit et documents — Validated in Phase 5: Case Intelligence
+- [x] Score de qualification multi-critères pour priorisation des dossiers — Validated in Phase 5: Case Intelligence
 
 ### Active
 
