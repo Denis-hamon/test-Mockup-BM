@@ -1,3 +1,6 @@
+"use client";
+
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 interface ScoreBadgeProps {
@@ -6,24 +9,19 @@ interface ScoreBadgeProps {
 }
 
 function getScoreConfig(score: number) {
-  if (score >= 70) {
+  if (score >= 70)
     return {
       label: "Eleve",
-      bg: "bg-[hsl(142_71%_45%/15%)]",
-      text: "text-[hsl(142_71%_30%)]",
+      className: "bg-[hsl(142_71%_45%/0.15)] text-[hsl(142_71%_30%)] border-transparent",
     };
-  }
-  if (score >= 40) {
+  if (score >= 40)
     return {
       label: "Moyen",
-      bg: "bg-[hsl(38_92%_50%/15%)]",
-      text: "text-[hsl(38_92%_35%)]",
+      className: "bg-[hsl(38_92%_50%/0.15)] text-[hsl(38_92%_35%)] border-transparent",
     };
-  }
   return {
     label: "Faible",
-    bg: "bg-destructive/15",
-    text: "text-destructive",
+    className: "bg-destructive/15 text-destructive border-transparent",
   };
 }
 
@@ -33,19 +31,9 @@ export function ScoreBadge({ score, className }: ScoreBadgeProps) {
   const config = getScoreConfig(score);
 
   return (
-    <span
-      className={cn(
-        "inline-flex h-5 items-center gap-1 rounded-full px-2 text-xs font-medium",
-        config.bg,
-        config.text,
-        className
-      )}
-    >
-      {score}
-      <span className="sr-only">
-        Score de qualification: {score} sur 100, {config.label.toLowerCase()}
-      </span>
-      <span aria-hidden="true">{config.label}</span>
-    </span>
+    <Badge variant="outline" className={cn("font-medium", config.className, className)}>
+      <span className="sr-only">Score de qualification: {score} sur 100, </span>
+      {score} {config.label}
+    </Badge>
   );
 }

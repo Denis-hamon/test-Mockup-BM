@@ -23,6 +23,12 @@ export default async function AppLayout({
           </Link>
           <div className="flex items-center gap-4">
             <Link
+              href="/dossiers"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              Dossiers
+            </Link>
+            <Link
               href="/settings/privacy"
               className="text-sm text-muted-foreground hover:text-foreground"
             >
