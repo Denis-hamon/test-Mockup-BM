@@ -7,15 +7,18 @@ export async function sendEmail({
   to,
   subject,
   react,
+  text,
 }: {
   to: string;
   subject: string;
-  react: React.ReactElement;
+  react?: React.ReactElement;
+  text?: string;
 }) {
   return resend.emails.send({
     from: process.env.EMAIL_FROM || "LegalConnect <noreply@legalconnect.fr>",
     to,
     subject,
-    react,
+    ...(react ? { react } : {}),
+    ...(text ? { text } : {}),
   });
 }

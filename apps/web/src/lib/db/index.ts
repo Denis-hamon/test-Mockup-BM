@@ -4,7 +4,10 @@ import * as encryptionSchema from "./schema/encryption";
 import * as consentSchema from "./schema/consent";
 import * as intakeSchema from "./schema/intake";
 import * as caseIntelligenceSchema from "./schema/case-intelligence";
+import * as lawyerSchema from "./schema/lawyer";
+import * as messagingSchema from "./schema/messaging";
+import * as appointmentsSchema from "./schema/appointments";
 
 export const db = drizzle(process.env.DATABASE_URL!, {
-  schema: { ...authSchema, ...encryptionSchema, ...consentSchema, ...intakeSchema, ...caseIntelligenceSchema },
+  schema: { ...authSchema, ...encryptionSchema, ...consentSchema, ...intakeSchema, ...caseIntelligenceSchema, ...lawyerSchema, ...messagingSchema, ...appointmentsSchema },
 });
