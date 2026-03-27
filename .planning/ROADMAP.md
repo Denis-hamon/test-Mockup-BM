@@ -146,12 +146,13 @@ Plans:
   1. Pre-built intake templates are available for at least 3 legal specialties (family law, labor law, criminal defense)
   2. Lawyer can customize intake questions, form flow, and branding for their practice
   3. Client sees a specialty-appropriate intake experience that matches the lawyer's branding
-**Plans**: TBD
+**Plans**: 3 plans
 **UI hint**: yes
 
 Plans:
-- [ ] 08-01: Template engine and pre-built specialty templates
-- [ ] 08-02: Lawyer customization UI (questions, flow, branding)
+- [ ] 08-01-PLAN.md — Template engine: Zod schema, DB tables (intakeTemplates + snapshots), server actions, 3 seed templates, DynamicField/DynamicStep components
+- [ ] 08-02-PLAN.md — Lawyer customization UI: template selector, split-view editor with @dnd-kit drag & drop, branding editor, live preview
+- [ ] 08-03-PLAN.md — Client-facing dynamic intake: /intake/[slug] route, DynamicStepper, lawyer branding via CSS variables, co-branding footer
 
 ### Phase 9: Distribution & Embedding
 **Goal**: Lawyers can embed the intake flow on their own website via a single script tag, and each lawyer has a hosted page as a standalone entry point
@@ -182,5 +183,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 5. Case Intelligence | 2/3 | Gap closure | - |
 | 6. Lawyer Dashboard | 0/3 | Not started | - |
 | 7. Client Portal | 2/4 | In Progress|  |
-| 8. Intake Templates & Customization | 0/2 | Not started | - |
+| 8. Intake Templates & Customization | 0/3 | Not started | - |
 | 9. Distribution & Embedding | 0/2 | Not started | - |
