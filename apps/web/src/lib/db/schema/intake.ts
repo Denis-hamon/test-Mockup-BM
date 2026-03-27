@@ -28,7 +28,7 @@ export const intakeSubmissions = pgTable("intake_submissions", {
   }).default("email"),
   availabilities: text("availabilities"),
   status: text("status", {
-    enum: ["draft", "submitted", "assigned", "reviewed"],
+    enum: ["draft", "submitted", "en_cours", "termine", "archive"],
   }).default("draft"),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
