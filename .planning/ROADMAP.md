@@ -162,12 +162,13 @@ Plans:
   1. A single script tag on a lawyer's website launches the full intake flow in an embedded widget (Shadow DOM isolated)
   2. Each lawyer/firm has a hosted page (e.g., app.com/cabinet-dupont) that works as a standalone intake entry point
   3. Widget works correctly across different host websites without CSS conflicts or broken functionality
-**Plans**: 2 plans
+**Plans**: 3 plans
 **UI hint**: yes
 
 Plans:
-- [ ] 09-01-PLAN.md — Embeddable widget: Vite IIFE build, Shadow DOM entry, React components (button, modal, intake form), widget API routes with CORS
-- [ ] 09-02-PLAN.md — Hosted lawyer pages (/cabinet-[slug]) with landing hero + specialties + intake form, OG images, integration settings page with snippet copy
+- [ ] 09-01-PLAN.md — Widget Vite scaffold (Shadow DOM entry, CSS, utilities) + API routes with CORS
+- [ ] 09-02-PLAN.md — Widget React components (button, modal, intake form, confirmation)
+- [ ] 09-03-PLAN.md — Hosted lawyer pages (/cabinet-[slug]) with landing hero + specialties + intake form, OG images, integration settings page with snippet copy
 
 ## Progress
 
@@ -184,4 +185,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 6. Lawyer Dashboard | 0/3 | Not started | - |
 | 7. Client Portal | 2/4 | In Progress|  |
 | 8. Intake Templates & Customization | 0/3 | Not started | - |
-| 9. Distribution & Embedding | 0/2 | Not started | - |
+| 9. Distribution & Embedding | 0/3 | Not started | - |

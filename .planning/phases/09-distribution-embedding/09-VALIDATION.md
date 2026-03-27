@@ -5,6 +5,7 @@ status: draft
 nyquist_compliant: true
 wave_0_complete: false
 created: 2026-03-27
+updated: 2026-03-28
 ---
 
 # Phase 9 — Validation Strategy
@@ -27,9 +28,9 @@ created: 2026-03-27
 
 ## Sampling Rate
 
-- **After every task commit:** Run `pnpm tsc --noEmit`
+- **After every task commit:** Run task-specific `<verify>` command (includes grep pattern checks)
 - **After every plan wave:** Run `pnpm vitest run && pnpm --filter widget build`
-- **Before `/gsd:verify-work`:** Full suite must be green + widget build succeeds
+- **Before `/gsd:verify-work`:** Full suite must be green + widget build succeeds + all grep checks pass
 - **Max feedback latency:** 20 seconds
 
 ---
@@ -38,10 +39,14 @@ created: 2026-03-27
 
 This phase uses a **hybrid verification approach:**
 
-1. **TypeScript compile checks (all plans):** `pnpm tsc --noEmit` catches type errors across monorepo
-2. **Widget build verification (Plan 01):** `pnpm --filter widget build` confirms IIFE bundle generates successfully
-3. **Bundle size check (Plan 01):** Verify widget.js < 150KB gzipped
-4. **Human verification:** Widget embedding on test page, landing page rendering, integration page UX
+1. **Widget build verification (Plans 01, 02):** `pnpm --filter widget build` confirms IIFE bundle generates successfully
+2. **Bundle size check (Plan 02):** Verify widget.js < 150KB gzipped
+3. **Pattern grep checks (all plans):** Each task verifies expected patterns exist in output files:
+   - Plan 01: `attachShadow` in main.tsx, `all: initial` in widget.css, `Access-Control-Allow-Origin` in API routes
+   - Plan 02: `fetchTemplate` in Widget.tsx, `aria-modal` in WidgetModal.tsx, `Soumettre` in WidgetIntakeForm.tsx
+   - Plan 03: `generateMetadata` in page.tsx, `ImageResponse` in opengraph-image.tsx, `clipboard` in snippet-copy-block.tsx
+4. **TypeScript compile checks (Plan 03):** `pnpm tsc --noEmit` catches type errors across monorepo
+5. **Human verification:** Widget embedding on test page, landing page rendering, integration page UX
 
 ---
 
@@ -60,7 +65,7 @@ This phase uses a **hybrid verification approach:**
 
 ## Validation Sign-Off
 
-- [x] All tasks use `pnpm tsc --noEmit` as automated verify
+- [x] All tasks use grep pattern checks in automated verify (not just tsc --noEmit)
 - [x] Widget build step validates IIFE output
 - [x] No watch-mode flags
 - [x] Feedback latency < 20s
