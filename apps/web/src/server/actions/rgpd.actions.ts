@@ -7,7 +7,8 @@ import { auth } from "@/lib/auth";
 import { consentUpdateSchema } from "@legalconnect/shared";
 import { eq, and } from "drizzle-orm";
 import { headers } from "next/headers";
-import { sendDeletionConfirmationEmail } from "@legalconnect/email";
+// Lazy-imported to avoid evaluating @legalconnect/email at SSR time
+// (crashes when RESEND_API_KEY is not set)
 
 export async function getConsents() {
   const session = await auth();
@@ -150,6 +151,7 @@ export async function requestAccountDeletion() {
   });
 
   if (user?.email) {
+    const { sendDeletionConfirmationEmail } = await import("@legalconnect/email");
     await sendDeletionConfirmationEmail(
       user.email,
       scheduledPurgeDate.toLocaleDateString("fr-FR", {
