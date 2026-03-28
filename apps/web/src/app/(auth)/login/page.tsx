@@ -1,6 +1,5 @@
-import { auth, signIn } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { AuthError } from "next-auth";
 import Link from "next/link";
 
 export const metadata = {
@@ -25,24 +24,13 @@ export default async function LoginPage({
     <div className="rounded-lg border bg-card p-6 shadow-sm">
       <h1 className="mb-6 text-center text-2xl font-semibold">Se connecter</h1>
       <form
-        action={async (formData) => {
-          "use server";
-          try {
-            await signIn("credentials", {
-              email: formData.get("email") as string,
-              password: formData.get("password") as string,
-              redirect: false,
-            });
-          } catch (err) {
-            if (err instanceof AuthError) {
-              redirect("/login?error=credentials");
-            }
-            throw err;
-          }
-          redirect("/dashboard");
-        }}
+        action="/api/auth/callback/credentials"
+        method="POST"
         className="flex flex-col gap-4"
       >
+        <input type="hidden" name="callbackUrl" value="/dashboard" />
+        <CsrfToken />
+
         {error && (
           <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
             Email ou mot de passe incorrect.
@@ -99,4 +87,13 @@ export default async function LoginPage({
       </form>
     </div>
   );
+}
+
+async function CsrfToken() {
+  const res = await fetch(
+    `${process.env.NEXTAUTH_URL ?? "http://localhost:3000"}/api/auth/csrf`,
+    { cache: "no-store" }
+  );
+  const data = await res.json();
+  return <input type="hidden" name="csrfToken" value={data.csrfToken} />;
 }
