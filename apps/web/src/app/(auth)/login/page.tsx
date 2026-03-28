@@ -28,18 +28,21 @@ export default async function LoginPage({
         action={async (formData) => {
           "use server";
           try {
-            await signIn("credentials", formData);
+            await signIn("credentials", {
+              email: formData.get("email") as string,
+              password: formData.get("password") as string,
+              redirect: false,
+            });
           } catch (err) {
             if (err instanceof AuthError) {
               redirect("/login?error=credentials");
             }
             throw err;
           }
+          redirect("/dashboard");
         }}
         className="flex flex-col gap-4"
       >
-        <input type="hidden" name="redirectTo" value="/dashboard" />
-
         {error && (
           <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
             Email ou mot de passe incorrect.
