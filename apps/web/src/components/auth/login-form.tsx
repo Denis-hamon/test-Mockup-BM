@@ -1,38 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
 import { loginSchema, type LoginInput } from "@legalconnect/shared";
+import { loginAction } from "@/server/actions/login.action";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
 export function LoginForm() {
   const [serverError, setServerError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
   });
 
-  async function onSubmit(data: LoginInput) {
+  function onSubmit(data: LoginInput) {
     setServerError(null);
-    const result = await signIn("credentials", {
-      email: data.email,
-      password: data.password,
-      redirect: false,
+    startTransition(async () => {
+      const result = await loginAction(data.email, data.password);
+      if (result?.error) {
+        setServerError(result.error);
+      }
+      // On success, signIn throws NEXT_REDIRECT which auto-navigates
     });
-    if (result?.error) {
-      setServerError("Email ou mot de passe incorrect.");
-    } else {
-      window.location.href = "/dashboard";
-    }
   }
 
   return (
@@ -74,8 +72,8 @@ export function LoginForm() {
           )}
         </div>
 
-        <Button type="submit" disabled={isSubmitting} className="mt-2">
-          {isSubmitting ? "Connexion en cours…" : "Se connecter"}
+        <Button type="submit" disabled={isPending} className="mt-2">
+          {isPending ? "Connexion en cours…" : "Se connecter"}
         </Button>
 
         <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
