@@ -126,6 +126,12 @@ Recent decisions affecting current work:
 
 None yet.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260328-h1u | Deploy script v0: docker-compose, env, seed, README | 2026-03-28 | 6d17a1d | [260328-h1u](./quick/260328-h1u-deploy-script-v0-docker-compose-env-exam/) |
+
 ### Blockers/Concerns
 
 - [Research]: Auth.js v5 extended beta — abstract behind service layer for fallback
