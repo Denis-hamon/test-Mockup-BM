@@ -52,7 +52,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Distribution
 
 - [x] **DIST-01**: Embeddable widget (single script tag) for lawyer's website that launches intake flow
-- [ ] **DIST-02**: Hosted page per lawyer/firm (e.g., app.com/cabinet-dupont) as standalone entry point
+- [x] **DIST-02**: Hosted page per lawyer/firm (e.g., app.com/cabinet-dupont) as standalone entry point
 
 ## v2 Requirements
 
@@ -124,7 +124,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PORT-03 | Phase 7 | Complete |
 | PORT-04 | Phase 7 | Complete |
 | DIST-01 | Phase 9 | Complete |
-| DIST-02 | Phase 9 | Pending |
+| DIST-02 | Phase 9 | Complete |
 
 **Coverage:**
 - v1 requirements: 29 total
