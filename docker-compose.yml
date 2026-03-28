@@ -1,31 +1,51 @@
+# LegalConnect — Docker Compose v0
+# Usage: docker compose up -d
+
 services:
-  postgres:
+  db:
     image: postgres:16-alpine
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: legalconnect
-      POSTGRES_PASSWORD: legalconnect_dev
-      POSTGRES_DB: legalconnect
+      POSTGRES_USER: ${POSTGRES_USER:-legalconnect}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_in_production}
+      POSTGRES_DB: ${POSTGRES_DB:-legalconnect}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-legalconnect}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   valkey:
     image: valkey/valkey:9-alpine
     ports:
       - "6379:6379"
     volumes:
-      - valkey_data:/data
+      - valkeydata:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  docling-serve:
-    image: quay.io/docling-project/docling-serve
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
     ports:
-      - "5001:5001"
-    deploy:
-      resources:
-        limits:
-          memory: 4g
+      - "3000:3000"
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-legalconnect}:${POSTGRES_PASSWORD:-change_me_in_production}@db:5432/${POSTGRES_DB:-legalconnect}
+      VALKEY_URL: redis://valkey:6379
+    depends_on:
+      db:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
 
 volumes:
-  postgres_data:
-  valkey_data:
+  pgdata:
+  valkeydata:
