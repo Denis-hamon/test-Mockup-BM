@@ -97,6 +97,7 @@ export async function getTemplateBySlug(slug: string) {
 
     return {
       id: template.id,
+      lawyerId: template.lawyerId,
       specialty: template.specialty,
       schema: template.schema as IntakeTemplate,
       logoUrl: template.logoUrl,
