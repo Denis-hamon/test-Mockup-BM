@@ -48,7 +48,7 @@ export function RecoveryDisplay() {
         // 5. Store secret key in IndexedDB for current session
         await storeKeyInIndexedDB(keypair.secretKey);
       } catch (err) {
-        setError("Erreur lors de la generation des cles de chiffrement.");
+        setError("Erreur lors de la g\u00e9n\u00e9ration des cl\u00e9s de chiffrement.");
         console.error(err);
       } finally {
         setLoading(false);
@@ -64,7 +64,7 @@ export function RecoveryDisplay() {
         <div className="text-center">
           <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto" />
           <p className="text-muted-foreground">
-            Generation de vos cles de chiffrement...
+            G\u00e9n\u00e9ration de vos cl\u00e9s de chiffrement\u2026
           </p>
         </div>
       </div>
@@ -95,15 +95,15 @@ export function RecoveryDisplay() {
   return (
     <div className="mx-auto max-w-lg">
       <h1 className="mb-6 text-center text-2xl font-semibold">
-        Phrase de recuperation
+        Phrase de r\u00e9cup\u00e9ration
       </h1>
 
       {/* D-02: Warning about permanent loss */}
       <div className="mb-6 rounded-lg border border-amber-500 bg-amber-50 p-4 dark:bg-amber-950/30">
         <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">
           IMPORTANT : Notez ces 12 mots dans l&apos;ordre exact. Ils sont votre
-          unique moyen de recuperer vos donnees chiffrees. En cas de perte, vos
-          donnees seront definitivement inaccessibles.
+          unique moyen de r\u00e9cup\u00e9rer vos donn\u00e9es chiffr\u00e9es. En cas de perte, vos
+          donn\u00e9es seront d\u00e9finitivement inaccessibles.
         </p>
       </div>
 
@@ -135,7 +135,7 @@ export function RecoveryDisplay() {
           }}
           className="rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
         >
-          {copied ? "Copie !" : "Copier"}
+          {copied ? "Copi\u00e9 !" : "Copier"}
         </button>
       </div>
 
@@ -145,7 +145,7 @@ export function RecoveryDisplay() {
         onClick={() => setShowVerify(true)}
         className="w-full rounded-md bg-primary px-4 py-3 text-sm font-medium text-primary-foreground"
       >
-        J&apos;ai note ma phrase de recuperation
+        J&apos;ai not\u00e9 ma phrase de r\u00e9cup\u00e9ration
       </button>
     </div>
   );

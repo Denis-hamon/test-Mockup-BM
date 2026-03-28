@@ -152,13 +152,13 @@ export function CaseDataTable({
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
         <p className="text-sm font-medium">
           {hasFilters
-            ? "Aucun dossier ne correspond a vos filtres."
+            ? "Aucun dossier ne correspond \u00e0 vos filtres."
             : "Aucun dossier pour le moment"}
         </p>
         <p className="mt-2 max-w-md text-sm text-muted-foreground">
           {hasFilters
             ? "Essayez d'elargir vos criteres de recherche."
-            : "Les dossiers apparaitront ici des qu'un client soumettra une demande via votre formulaire d'intake."}
+            : "Les dossiers appara\u00eetront ici d\u00e8s qu\u2019un client soumettra une demande via votre formulaire d\u2019intake."}
         </p>
       </div>
     );
@@ -253,7 +253,7 @@ export function CaseDataTable({
             <PaginationItem>
               <PaginationPrevious
                 href={page > 1 ? buildPageUrl(page - 1) : undefined}
-                text="Precedent"
+                text="Pr\u00e9c\u00e9dent"
                 aria-disabled={page <= 1}
                 className={page <= 1 ? "pointer-events-none opacity-50" : ""}
               />

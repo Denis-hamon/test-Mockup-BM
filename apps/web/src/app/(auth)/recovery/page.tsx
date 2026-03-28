@@ -3,9 +3,9 @@ import { redirect } from "next/navigation";
 import { RecoveryDisplay } from "@/components/auth/recovery-display";
 
 export const metadata = {
-  title: "Phrase de recuperation - LegalConnect",
+  title: "Phrase de r\u00e9cup\u00e9ration - LegalConnect",
   description:
-    "Sauvegardez votre phrase de recuperation pour proteger vos donnees chiffrees.",
+    "Sauvegardez votre phrase de r\u00e9cup\u00e9ration pour prot\u00e9ger vos donn\u00e9es chiffr\u00e9es.",
 };
 
 export default async function RecoveryPage() {

@@ -96,7 +96,7 @@ export function CabinetSettingsForm({
             <Input id="email" value={email} disabled />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone">Telephone</Label>
+            <Label htmlFor="phone">T\u00e9l\u00e9phone</Label>
             <Input
               id="phone"
               value={phone}

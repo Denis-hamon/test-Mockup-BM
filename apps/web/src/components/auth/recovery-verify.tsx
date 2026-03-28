@@ -52,12 +52,12 @@ export function RecoveryVerify({ mnemonic, onVerified }: RecoveryVerifyProps) {
   return (
     <div className="mx-auto max-w-md">
       <h2 className="mb-4 text-center text-xl font-semibold">
-        Verification de la phrase de recuperation
+        V\u00e9rification de la phrase de r\u00e9cup\u00e9ration
       </h2>
 
       <p className="mb-6 text-center text-sm text-muted-foreground">
-        Pour confirmer que vous avez bien note votre phrase, entrez les mots
-        demandes ci-dessous.
+        Pour confirmer que vous avez bien not\u00e9 votre phrase, entrez les mots
+        demand\u00e9s ci-dessous.
       </p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">

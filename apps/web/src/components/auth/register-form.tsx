@@ -7,6 +7,9 @@ import Link from "next/link";
 import { registerSchema, type RegisterInput } from "@legalconnect/shared";
 import { registerUser } from "@/server/actions/auth.actions";
 import { PasswordStrength } from "./password-strength";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 export function RegisterForm() {
@@ -44,9 +47,9 @@ export function RegisterForm() {
   if (success) {
     return (
       <div className="rounded-lg border bg-card p-6 text-center shadow-sm">
-        <h2 className="mb-4 text-xl font-semibold">Verifiez votre email</h2>
+        <h2 className="mb-4 text-xl font-semibold">V\u00e9rifiez votre email</h2>
         <p className="text-muted-foreground">
-          Un email de verification vous a ete envoye. Veuillez cliquer sur le
+          Un email de v\u00e9rification vous a \u00e9t\u00e9 envoy\u00e9. Veuillez cliquer sur le
           lien contenu dans cet email pour activer votre compte.
         </p>
       </div>
@@ -56,7 +59,7 @@ export function RegisterForm() {
   return (
     <div className="rounded-lg border bg-card p-6 shadow-sm">
       <h1 className="mb-6 text-center text-2xl font-semibold">
-        Creer mon compte
+        Cr\u00e9er mon compte
       </h1>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         {serverError && (
@@ -66,14 +69,12 @@ export function RegisterForm() {
         )}
 
         <div className="flex flex-col gap-2">
-          <label htmlFor="email" className="text-sm font-medium">
-            Email
-          </label>
-          <input
+          <Label htmlFor="email">Email</Label>
+          <Input
             id="email"
             type="email"
             autoComplete="email"
-            className="rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="nom@exemple.fr"
             {...register("email")}
           />
           {errors.email && (
@@ -82,14 +83,11 @@ export function RegisterForm() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <label htmlFor="password" className="text-sm font-medium">
-            Mot de passe
-          </label>
-          <input
+          <Label htmlFor="password">Mot de passe</Label>
+          <Input
             id="password"
             type="password"
             autoComplete="new-password"
-            className="rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             {...register("password")}
           />
           <PasswordStrength password={password} />
@@ -101,7 +99,7 @@ export function RegisterForm() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium">Type de compte</label>
+          <Label>Type de compte</Label>
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
@@ -133,16 +131,12 @@ export function RegisterForm() {
           )}
         </div>
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="mt-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
-        >
-          {isSubmitting ? "Creation en cours..." : "Creer mon compte"}
-        </button>
+        <Button type="submit" disabled={isSubmitting} className="mt-2">
+          {isSubmitting ? "Cr\u00e9ation en cours\u2026" : "Cr\u00e9er mon compte"}
+        </Button>
 
         <p className="text-center text-sm text-muted-foreground">
-          Deja un compte ?{" "}
+          D\u00e9j\u00e0 un compte ?{" "}
           <Link href="/login" className="text-primary underline">
             Se connecter
           </Link>

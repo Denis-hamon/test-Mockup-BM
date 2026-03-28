@@ -13,11 +13,11 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
     className: "bg-[hsl(220_70%_50%/0.15)] text-[hsl(220_70%_40%)] border-transparent",
   },
   termine: {
-    label: "Termine",
+    label: "Termin\u00e9",
     className: "bg-[hsl(142_71%_45%/0.15)] text-[hsl(142_71%_30%)] border-transparent",
   },
   archive: {
-    label: "Archive",
+    label: "Archiv\u00e9",
     className: "bg-muted text-muted-foreground border-transparent",
   },
 };

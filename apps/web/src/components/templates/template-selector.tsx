@@ -87,14 +87,14 @@ export function TemplateSelector({
       <div>
         <h1 className="text-[20px] font-semibold">Choisir un template</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Selectionnez un modele adapte a votre specialite. Vous pourrez
+          S\u00e9lectionnez un mod\u00e8le adapt\u00e9 \u00e0 votre sp\u00e9cialit\u00e9. Vous pourrez
           personnaliser les questions et l&apos;apparence ensuite.
         </p>
       </div>
 
       <div
         role="radiogroup"
-        aria-label="Choix du template par specialite"
+        aria-label="Choix du template par sp\u00e9cialit\u00e9"
         className="grid grid-cols-1 gap-4 lg:grid-cols-3"
       >
         {specialties.map((s) => {

@@ -37,7 +37,7 @@ export function ExportData() {
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-muted-foreground">
-        Vos donnees vous seront fournies au format JSON. L&apos;export ZIP avec
+        Vos donn\u00e9es vous seront fournies au format JSON. L&apos;export ZIP avec
         fichiers joints sera disponible dans une prochaine version.
       </p>
 
@@ -47,12 +47,12 @@ export function ExportData() {
         disabled={loading}
         className="w-fit rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
       >
-        {loading ? "Export en cours..." : "Exporter mes donnees"}
+        {loading ? "Export en cours\u2026" : "Exporter mes donn\u00e9es"}
       </button>
 
       {exported && (
         <p className="text-sm text-muted-foreground">
-          Export termine. Le fichier a ete telecharge.
+          Export termin\u00e9. Le fichier a \u00e9t\u00e9 t\u00e9l\u00e9charg\u00e9.
         </p>
       )}
     </div>

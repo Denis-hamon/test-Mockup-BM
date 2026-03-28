@@ -549,7 +549,7 @@ export function ChatContainer({
     return (
       <div className={cn("flex flex-1 flex-col items-center justify-center gap-4 p-8", className)}>
         <p className="text-center text-muted-foreground">
-          Cle de chiffrement introuvable. Veuillez restaurer votre phrase de recuperation.
+          Cl\u00e9 de chiffrement introuvable. Veuillez restaurer votre phrase de r\u00e9cup\u00e9ration.
         </p>
       </div>
     );

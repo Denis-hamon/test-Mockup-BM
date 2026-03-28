@@ -18,8 +18,8 @@ export function TrustBanner({ className }: { className?: string }) {
       <ShieldCheck className="text-[hsl(var(--trust))]" />
       <AlertTitle>{t("trust.shieldAlt")}</AlertTitle>
       <AlertDescription>
-        Vos donnees sont protegees par un chiffrement de bout en bout. Ni nous,
-        ni personne d&apos;autre ne peut y acceder.
+        Vos donn\u00e9es sont prot\u00e9g\u00e9es par un chiffrement de bout en bout. Ni nous,
+        ni personne d&apos;autre ne peut y acc\u00e9der.
       </AlertDescription>
     </Alert>
   );

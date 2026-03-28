@@ -68,8 +68,8 @@ function FilterControls({
           <SelectItem value="">Tous</SelectItem>
           <SelectItem value="submitted">Nouveau</SelectItem>
           <SelectItem value="en_cours">En cours</SelectItem>
-          <SelectItem value="termine">Termine</SelectItem>
-          <SelectItem value="archive">Archive</SelectItem>
+          <SelectItem value="termine">Termin\u00e9</SelectItem>
+          <SelectItem value="archive">Archiv\u00e9</SelectItem>
         </SelectContent>
       </Select>
 
@@ -85,7 +85,7 @@ function FilterControls({
           <SelectItem value="">Tous</SelectItem>
           <SelectItem value="faible">Faible</SelectItem>
           <SelectItem value="moyen">Moyen</SelectItem>
-          <SelectItem value="eleve">Eleve</SelectItem>
+          <SelectItem value="eleve">\u00c9lev\u00e9</SelectItem>
         </SelectContent>
       </Select>
 

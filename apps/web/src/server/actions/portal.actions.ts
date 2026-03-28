@@ -66,7 +66,7 @@ export async function requireAuth() {
 const STATUS_LABELS: Record<string, string> = {
   submitted: "Nouveau",
   en_cours: "En cours",
-  termine: "Termine",
+  termine: "Termin\u00e9",
 };
 
 function mapStatus(status: string | null): string {

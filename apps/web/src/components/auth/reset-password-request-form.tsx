@@ -9,6 +9,9 @@ import {
   type ResetPasswordRequestInput,
 } from "@legalconnect/shared";
 import { requestPasswordReset } from "@/server/actions/auth.actions";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 export function ResetPasswordRequestForm() {
   const [submitted, setSubmitted] = useState(false);
@@ -31,13 +34,13 @@ export function ResetPasswordRequestForm() {
   if (submitted) {
     return (
       <div className="rounded-lg border bg-card p-6 text-center shadow-sm">
-        <h2 className="mb-4 text-xl font-semibold">Email envoye</h2>
+        <h2 className="mb-4 text-xl font-semibold">Email envoy\u00e9</h2>
         <p className="mb-4 text-muted-foreground">
           Si un compte existe avec cet email, vous recevrez un lien de
-          reinitialisation.
+          r\u00e9initialisation.
         </p>
         <Link href="/login" className="text-primary underline">
-          Retour a la connexion
+          Retour \u00e0 la connexion
         </Link>
       </div>
     );
@@ -46,21 +49,19 @@ export function ResetPasswordRequestForm() {
   return (
     <div className="rounded-lg border bg-card p-6 shadow-sm">
       <h1 className="mb-2 text-center text-2xl font-semibold">
-        Mot de passe oublie
+        Mot de passe oubli\u00e9
       </h1>
       <p className="mb-6 text-center text-sm text-muted-foreground">
-        Entrez votre adresse email pour recevoir un lien de reinitialisation.
+        Entrez votre adresse email pour recevoir un lien de r\u00e9initialisation.
       </p>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <label htmlFor="email" className="text-sm font-medium">
-            Email
-          </label>
-          <input
+          <Label htmlFor="email">Email</Label>
+          <Input
             id="email"
             type="email"
             autoComplete="email"
-            className="rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="nom@exemple.fr"
             {...register("email")}
           />
           {errors.email && (
@@ -68,17 +69,13 @@ export function ResetPasswordRequestForm() {
           )}
         </div>
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
-        >
-          {isSubmitting ? "Envoi en cours..." : "Envoyer le lien"}
-        </button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Envoi en cours\u2026" : "Envoyer le lien"}
+        </Button>
 
         <p className="text-center text-sm text-muted-foreground">
           <Link href="/login" className="text-primary underline">
-            Retour a la connexion
+            Retour \u00e0 la connexion
           </Link>
         </p>
       </form>

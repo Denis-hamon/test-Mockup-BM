@@ -36,20 +36,20 @@ export function ConsentManager({ initialConsents }: ConsentManagerProps) {
   return (
     <div className="flex flex-col gap-6">
       <p className="text-sm text-muted-foreground">
-        Gerez vos preferences de consentement. Les donnees essentielles sont
-        necessaires au fonctionnement du service.
+        G\u00e9rez vos pr\u00e9f\u00e9rences de consentement. Les donn\u00e9es essentielles sont
+        n\u00e9cessaires au fonctionnement du service.
       </p>
 
       {/* Essential - always ON, disabled */}
       <div className="flex items-center justify-between rounded-lg border p-4">
         <div>
-          <p className="font-medium">Donnees essentielles</p>
+          <p className="font-medium">Donn\u00e9es essentielles</p>
           <p className="text-sm text-muted-foreground">
-            Necessaires au fonctionnement du service (authentification, chiffrement, donnees de session).
+            N\u00e9cessaires au fonctionnement du service (authentification, chiffrement, donn\u00e9es de session).
           </p>
           {essentialConsent?.grantedAt && (
             <p className="mt-1 text-xs text-muted-foreground">
-              Derniere mise a jour : {new Date(essentialConsent.grantedAt).toLocaleDateString("fr-FR")}
+              Derni\u00e8re mise \u00e0 jour : {new Date(essentialConsent.grantedAt).toLocaleDateString("fr-FR")}
             </p>
           )}
         </div>
@@ -57,7 +57,7 @@ export function ConsentManager({ initialConsents }: ConsentManagerProps) {
           type="button"
           disabled
           className="relative h-6 w-11 cursor-not-allowed rounded-full bg-primary opacity-70"
-          title="Le consentement essentiel ne peut pas etre desactive"
+          title="Le consentement essentiel ne peut pas \u00eatre d\u00e9sactiv\u00e9"
         >
           <span className="absolute left-[calc(100%-1.25rem-0.125rem)] top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform" />
         </button>
@@ -66,13 +66,13 @@ export function ConsentManager({ initialConsents }: ConsentManagerProps) {
       {/* Analytics - toggleable */}
       <div className="flex items-center justify-between rounded-lg border p-4">
         <div>
-          <p className="font-medium">Analytics et amelioration</p>
+          <p className="font-medium">Analytics et am\u00e9lioration</p>
           <p className="text-sm text-muted-foreground">
-            Donnees anonymisees pour ameliorer le service (navigation, performance).
+            Donn\u00e9es anonymis\u00e9es pour am\u00e9liorer le service (navigation, performance).
           </p>
           {analyticsConsent?.grantedAt && (
             <p className="mt-1 text-xs text-muted-foreground">
-              Derniere mise a jour : {new Date(analyticsConsent.grantedAt).toLocaleDateString("fr-FR")}
+              Derni\u00e8re mise \u00e0 jour : {new Date(analyticsConsent.grantedAt).toLocaleDateString("fr-FR")}
             </p>
           )}
         </div>

@@ -22,7 +22,7 @@ export default function ParametresClientPage() {
     try {
       // TODO: Wire to server action when available
       await new Promise((resolve) => setTimeout(resolve, 500));
-      toast.success("Parametres enregistres");
+      toast.success("Param\u00e8tres enregistr\u00e9s");
     } catch {
       toast.error("Erreur lors de la sauvegarde");
     } finally {
@@ -32,7 +32,7 @@ export default function ParametresClientPage() {
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
-      <h1 className="text-[20px] font-semibold leading-[1.2]">Parametres</h1>
+      <h1 className="text-[20px] font-semibold leading-[1.2]">Param\u00e8tres</h1>
 
       {/* Personal information */}
       <Card>
@@ -48,8 +48,8 @@ export default function ParametresClientPage() {
               <Input id="lastName" placeholder="Nom" disabled />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="firstName">Prenom</Label>
-              <Input id="firstName" placeholder="Prenom" disabled />
+              <Label htmlFor="firstName">Pr\u00e9nom</Label>
+              <Input id="firstName" placeholder="Pr\u00e9nom" disabled />
             </div>
           </div>
           <div className="flex flex-col gap-2">
@@ -57,8 +57,8 @@ export default function ParametresClientPage() {
             <Input id="email" type="email" placeholder="Email" disabled />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="phone">Telephone</Label>
-            <Input id="phone" type="tel" placeholder="Telephone" disabled />
+            <Label htmlFor="phone">T\u00e9l\u00e9phone</Label>
+            <Input id="phone" type="tel" placeholder="T\u00e9l\u00e9phone" disabled />
           </div>
         </CardContent>
       </Card>
@@ -119,16 +119,16 @@ export default function ParametresClientPage() {
       {/* Security */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-semibold">Securite</CardTitle>
+          <CardTitle className="text-sm font-semibold">S\u00e9curit\u00e9</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-semibold">
-                Phrase de recuperation
+                Phrase de r\u00e9cup\u00e9ration
               </span>
               <span className="text-xs text-muted-foreground">
-                Affichez votre phrase BIP39 pour sauvegarder vos cles
+                Affichez votre phrase BIP39 pour sauvegarder vos cl\u00e9s
               </span>
             </div>
             <Button variant="outline" size="sm" disabled>
@@ -139,10 +139,10 @@ export default function ParametresClientPage() {
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-semibold">
-                Exporter mes donnees
+                Exporter mes donn\u00e9es
               </span>
               <span className="text-xs text-muted-foreground">
-                Exportez toutes vos donnees au format JSON (RGPD)
+                Exportez toutes vos donn\u00e9es au format JSON (RGPD)
               </span>
             </div>
             <Button variant="outline" size="sm" disabled>

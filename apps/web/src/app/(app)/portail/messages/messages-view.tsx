@@ -152,7 +152,7 @@ export function MessagesView({
                   Aucun message pour le moment
                 </p>
                 <p className="text-center text-xs text-muted-foreground">
-                  Les messages apparaitront ici une fois que votre avocat aura
+                  Les messages appara\u00eetront ici une fois que votre avocat aura
                   pris en charge votre dossier.
                 </p>
               </div>

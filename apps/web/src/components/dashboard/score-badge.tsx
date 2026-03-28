@@ -11,7 +11,7 @@ interface ScoreBadgeProps {
 function getScoreConfig(score: number) {
   if (score >= 70)
     return {
-      label: "Eleve",
+      label: "\u00c9lev\u00e9",
       className: "bg-[hsl(142_71%_45%/0.15)] text-[hsl(142_71%_30%)] border-transparent",
     };
   if (score >= 40)

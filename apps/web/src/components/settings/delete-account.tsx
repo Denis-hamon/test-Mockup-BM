@@ -42,7 +42,7 @@ export function DeleteAccount() {
     return (
       <div className="rounded-lg border bg-card p-6">
         <p className="text-sm text-muted-foreground">
-          La suppression de votre compte a ete annulee. Votre compte est de nouveau actif.
+          La suppression de votre compte a \u00e9t\u00e9 annul\u00e9e. Votre compte est de nouveau actif.
         </p>
       </div>
     );
@@ -58,7 +58,7 @@ export function DeleteAccount() {
     return (
       <div className="rounded-lg border bg-card p-6">
         <p className="mb-4 text-sm text-muted-foreground">
-          Suppression prevue le <span className="font-medium text-foreground">{formattedDate}</span>.
+          Suppression pr\u00e9vue le <span className="font-medium text-foreground">{formattedDate}</span>.
           Vous pouvez annuler la suppression avant cette date.
         </p>
         <button
@@ -77,8 +77,8 @@ export function DeleteAccount() {
     <div className="flex flex-col gap-4">
       <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4">
         <p className="text-sm text-muted-foreground">
-          La suppression de votre compte est irreversible apres 30 jours.
-          Pendant cette periode, vous pouvez annuler la suppression.
+          La suppression de votre compte est irr\u00e9versible apr\u00e8s 30 jours.
+          Pendant cette p\u00e9riode, vous pouvez annuler la suppression.
         </p>
       </div>
 
@@ -90,7 +90,7 @@ export function DeleteAccount() {
           className="mt-0.5 h-4 w-4 rounded border"
         />
         <span className="text-sm">
-          Je comprends que mes donnees chiffrees seront definitivement supprimees
+          Je comprends que mes donn\u00e9es chiffr\u00e9es seront d\u00e9finitivement supprim\u00e9es
         </span>
       </label>
 

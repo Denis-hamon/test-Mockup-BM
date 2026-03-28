@@ -3,38 +3,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ClientSidebar } from "@/components/portal/client-sidebar";
 import { SecurityHeader } from "@/components/portal/security-header";
-
-async function LawyerSidebar() {
-  return (
-    <aside className="hidden border-r bg-card lg:block lg:w-60">
-      <div className="flex h-full flex-col gap-6 p-6">
-        <Link href="/dashboard" className="text-lg font-semibold">
-          LegalConnect
-        </Link>
-        <nav className="flex flex-col gap-1">
-          <Link
-            href="/dashboard"
-            className="flex min-h-[44px] items-center rounded-md px-3 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
-          >
-            Dashboard
-          </Link>
-          <Link
-            href="/dossiers"
-            className="flex min-h-[44px] items-center rounded-md px-3 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
-          >
-            Dossiers
-          </Link>
-          <Link
-            href="/settings/privacy"
-            className="flex min-h-[44px] items-center rounded-md px-3 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
-          >
-            Parametres
-          </Link>
-        </nav>
-      </div>
-    </aside>
-  );
-}
+import { LawyerSidebar } from "@/components/dashboard/lawyer-sidebar";
+import { UserMenu } from "@/components/auth/user-menu";
 
 export default async function AppLayout({
   children,
@@ -60,30 +30,29 @@ export default async function AppLayout({
           >
             LegalConnect
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <SecurityHeader />
             {!isClient && (
-              <>
+              <nav className="hidden items-center gap-1 sm:flex">
                 <Link
                   href="/dossiers"
-                  className="text-sm text-muted-foreground hover:text-foreground"
+                  className="rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 >
                   Dossiers
                 </Link>
                 <Link
-                  href="/settings/privacy"
-                  className="text-sm text-muted-foreground hover:text-foreground"
+                  href="/settings/cabinet"
+                  className="rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 >
-                  Parametres
+                  Param&egrave;tres
                 </Link>
-              </>
+              </nav>
             )}
-            <span className="text-sm text-muted-foreground">
-              {session.user.email}
-            </span>
-            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-              {session.user.role}
-            </span>
+            <UserMenu
+              email={session.user.email ?? ""}
+              role={session.user.role ?? "client"}
+              name={session.user.name}
+            />
           </div>
         </div>
       </header>
