@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to plan
-stopped_at: Phase 9 UI-SPEC approved
-last_updated: "2026-03-27T22:38:20.372Z"
+status: Ready to execute
+stopped_at: Completed 09-01-PLAN.md
+last_updated: "2026-03-28T10:48:32.166Z"
 progress:
   total_phases: 9
   completed_phases: 7
-  total_plans: 25
-  completed_plans: 24
+  total_plans: 28
+  completed_plans: 25
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Le client doit pouvoir exprimer sa situation juridique de maniere complete et structuree, guide par une IA empathique, dans un environnement percu comme totalement securise — pour que l'avocat recoive un dossier parfaitement qualifie des le premier contact.
-**Current focus:** Phase 08 — intake-templates-customization
+**Current focus:** Phase 09 — distribution-embedding
 
 ## Current Position
 
-Phase: 9
-Plan: Not started
+Phase: 09 (distribution-embedding) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -63,6 +63,7 @@ Plan: Not started
 | Phase 08 P01 | 5min | 2 tasks | 11 files |
 | Phase 08 P03 | 4min | 2 tasks | 6 files |
 | Phase 08 P02 | 10min | 2 tasks | 16 files |
+| Phase 09 P01 | 2min | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -114,6 +115,8 @@ Recent decisions affecting current work:
 - [Phase 08]: useReducer for editor state: single source of truth for template + branding across tabs and preview
 - [Phase 08]: Base64 data URL for logo storage in jsonb - avoids S3 for v1
 - [Phase 08]: Conditional rules only allow prior questions as source - prevents circular visibility chains
+- [Phase 09]: Script src origin derivation for widget API_BASE -- cross-origin embedding support
+- [Phase 09]: CORS headers as shared cors.ts helper reused by all three widget API routes
 
 ### Pending Todos
 
@@ -128,6 +131,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-27T22:38:20.363Z
-Stopped at: Phase 9 UI-SPEC approved
-Resume file: .planning/phases/09-distribution-embedding/09-UI-SPEC.md
+Last session: 2026-03-28T10:48:32.161Z
+Stopped at: Completed 09-01-PLAN.md
+Resume file: None
