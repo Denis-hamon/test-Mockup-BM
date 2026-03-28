@@ -23,14 +23,15 @@ export function LoginForm() {
 
   async function onSubmit(data: LoginInput) {
     setServerError(null);
-    try {
-      await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        redirectTo: "/dashboard",
-      });
-    } catch (error: unknown) {
+    const result = await signIn("credentials", {
+      email: data.email,
+      password: data.password,
+      redirect: false,
+    });
+    if (result?.error) {
       setServerError("Email ou mot de passe incorrect.");
+    } else {
+      window.location.href = "/dashboard";
     }
   }
 
