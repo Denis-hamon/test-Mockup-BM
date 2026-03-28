@@ -2,19 +2,20 @@
 
 import { signIn } from "@/lib/auth";
 import { AuthError } from "next-auth";
+import { redirect } from "next/navigation";
 
 export async function loginAction(email: string, password: string) {
   try {
     await signIn("credentials", {
       email,
       password,
-      redirectTo: "/dashboard",
+      redirect: false,
     });
   } catch (error) {
     if (error instanceof AuthError) {
       return { error: "Email ou mot de passe incorrect." };
     }
-    // NEXT_REDIRECT — must rethrow for redirect to work
     throw error;
   }
+  redirect("/dashboard");
 }

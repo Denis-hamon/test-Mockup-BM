@@ -29,7 +29,6 @@ export function LoginForm() {
       if (result?.error) {
         setServerError(result.error);
       }
-      // On success, signIn throws NEXT_REDIRECT which auto-navigates
     });
   }
 
