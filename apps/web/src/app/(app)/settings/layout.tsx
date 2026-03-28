@@ -2,6 +2,7 @@ import Link from "next/link";
 
 const settingsNav = [
   { href: "/settings/cabinet", label: "Cabinet" },
+  { href: "/settings/cabinet/integration", label: "Integration" },
   { href: "/settings/privacy", label: "Confidentialite" },
   { href: "/settings/export", label: "Exporter mes donnees" },
   { href: "/settings/delete", label: "Supprimer mon compte" },
