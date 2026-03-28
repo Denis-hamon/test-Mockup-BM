@@ -167,7 +167,7 @@ Plans:
 
 Plans:
 - [x] 09-01-PLAN.md — Widget Vite scaffold (Shadow DOM entry, CSS, utilities) + API routes with CORS
-- [ ] 09-02-PLAN.md — Widget React components (button, modal, intake form, confirmation)
+- [x] 09-02-PLAN.md — Widget React components (button, modal, intake form, confirmation)
 - [ ] 09-03-PLAN.md — Hosted lawyer pages (/cabinet-[slug]) with landing hero + specialties + intake form, OG images, integration settings page with snippet copy
 
 ## Progress
