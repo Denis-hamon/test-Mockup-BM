@@ -21,26 +21,25 @@ export default async function LoginPage({
   const params = await searchParams;
   const error = params.error;
 
-  async function handleLogin(formData: FormData) {
-    "use server";
-    try {
-      await signIn("credentials", {
-        email: formData.get("email") as string,
-        password: formData.get("password") as string,
-        redirectTo: "/dashboard",
-      });
-    } catch (err) {
-      if (err instanceof AuthError) {
-        redirect("/login?error=credentials");
-      }
-      throw err;
-    }
-  }
-
   return (
     <div className="rounded-lg border bg-card p-6 shadow-sm">
       <h1 className="mb-6 text-center text-2xl font-semibold">Se connecter</h1>
-      <form action={handleLogin} className="flex flex-col gap-4">
+      <form
+        action={async (formData) => {
+          "use server";
+          try {
+            await signIn("credentials", formData);
+          } catch (err) {
+            if (err instanceof AuthError) {
+              redirect("/login?error=credentials");
+            }
+            throw err;
+          }
+        }}
+        className="flex flex-col gap-4"
+      >
+        <input type="hidden" name="redirectTo" value="/dashboard" />
+
         {error && (
           <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
             Email ou mot de passe incorrect.
