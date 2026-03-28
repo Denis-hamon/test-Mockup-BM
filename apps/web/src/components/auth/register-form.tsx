@@ -47,9 +47,9 @@ export function RegisterForm() {
   if (success) {
     return (
       <div className="rounded-lg border bg-card p-6 text-center shadow-sm">
-        <h2 className="mb-4 text-xl font-semibold">V\u00e9rifiez votre email</h2>
+        <h2 className="mb-4 text-xl font-semibold">Vérifiez votre email</h2>
         <p className="text-muted-foreground">
-          Un email de v\u00e9rification vous a \u00e9t\u00e9 envoy\u00e9. Veuillez cliquer sur le
+          Un email de vérification vous a été envoyé. Veuillez cliquer sur le
           lien contenu dans cet email pour activer votre compte.
         </p>
       </div>
@@ -59,7 +59,7 @@ export function RegisterForm() {
   return (
     <div className="rounded-lg border bg-card p-6 shadow-sm">
       <h1 className="mb-6 text-center text-2xl font-semibold">
-        Cr\u00e9er mon compte
+        Créer mon compte
       </h1>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         {serverError && (
@@ -132,11 +132,11 @@ export function RegisterForm() {
         </div>
 
         <Button type="submit" disabled={isSubmitting} className="mt-2">
-          {isSubmitting ? "Cr\u00e9ation en cours\u2026" : "Cr\u00e9er mon compte"}
+          {isSubmitting ? "Création en cours…" : "Créer mon compte"}
         </Button>
 
         <p className="text-center text-sm text-muted-foreground">
-          D\u00e9j\u00e0 un compte ?{" "}
+          Déjà un compte ?{" "}
           <Link href="/login" className="text-primary underline">
             Se connecter
           </Link>

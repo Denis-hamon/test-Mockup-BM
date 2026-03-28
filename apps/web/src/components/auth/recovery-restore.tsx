@@ -56,7 +56,7 @@ export function RecoveryRestore() {
     } catch {
       // D-02: No server recourse
       setError(
-        "Phrase de r\u00e9cup\u00e9ration incorrecte. Vos donn\u00e9es ne peuvent pas \u00eatre d\u00e9chiffr\u00e9es."
+        "Phrase de récupération incorrecte. Vos données ne peuvent pas être déchiffrées."
       );
     } finally {
       setLoading(false);
@@ -67,7 +67,7 @@ export function RecoveryRestore() {
     return (
       <div className="mx-auto max-w-md rounded-lg border bg-card p-6 text-center">
         <p className="text-sm text-muted-foreground">
-          Cl\u00e9 restaur\u00e9e avec succ\u00e8s. Redirection\u2026
+          Clé restaurée avec succès. Redirection…
         </p>
       </div>
     );
@@ -76,12 +76,12 @@ export function RecoveryRestore() {
   return (
     <div className="mx-auto max-w-md">
       <h1 className="mb-4 text-center text-2xl font-semibold">
-        Restaurer vos cl\u00e9s de chiffrement
+        Restaurer vos clés de chiffrement
       </h1>
 
       <p className="mb-6 text-center text-sm text-muted-foreground">
-        Entrez vos 12 mots de r\u00e9cup\u00e9ration pour restaurer l&apos;acc\u00e8s \u00e0 vos
-        donn\u00e9es chiffr\u00e9es sur cet appareil.
+        Entrez vos 12 mots de récupération pour restaurer l&apos;accès à vos
+        données chiffrées sur cet appareil.
       </p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -123,7 +123,7 @@ export function RecoveryRestore() {
           disabled={loading}
           className="mt-2 w-full rounded-md bg-primary px-4 py-3 text-sm font-medium text-primary-foreground disabled:opacity-50"
         >
-          {loading ? "Restauration\u2026" : "Restaurer mes cl\u00e9s"}
+          {loading ? "Restauration…" : "Restaurer mes clés"}
         </button>
       </form>
     </div>

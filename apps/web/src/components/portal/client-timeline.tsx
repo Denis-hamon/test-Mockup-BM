@@ -28,9 +28,9 @@ export function ClientTimeline({ events, maxItems = 10 }: ClientTimelineProps) {
   if (displayEvents.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12 text-center">
-        <p className="text-sm font-semibold">Aucun \u00e9v\u00e9nement</p>
+        <p className="text-sm font-semibold">Aucun événement</p>
         <p className="mt-2 text-sm text-muted-foreground">
-          Les \u00e9v\u00e9nements de votre dossier appara\u00eetront ici.
+          Les événements de votre dossier apparaîtront ici.
         </p>
       </div>
     );

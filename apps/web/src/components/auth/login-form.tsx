@@ -74,12 +74,12 @@ export function LoginForm() {
         </div>
 
         <Button type="submit" disabled={isSubmitting} className="mt-2">
-          {isSubmitting ? "Connexion en cours\u2026" : "Se connecter"}
+          {isSubmitting ? "Connexion en cours…" : "Se connecter"}
         </Button>
 
         <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
           <Link href="/reset-password" className="text-primary underline">
-            Mot de passe oubli\u00e9 ?
+            Mot de passe oublié ?
           </Link>
           <p>
             Pas encore de compte ?{" "}

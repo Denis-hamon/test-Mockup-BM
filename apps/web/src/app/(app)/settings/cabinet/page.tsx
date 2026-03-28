@@ -21,7 +21,7 @@ export default async function CabinetSettingsPage() {
 
   return (
     <div className="flex flex-col gap-8 max-w-2xl">
-      <h1 className="text-xl font-semibold">Param\u00e8tres</h1>
+      <h1 className="text-xl font-semibold">Paramètres</h1>
       <CabinetSettingsForm
         initialProfile={profile}
         email={session.user.email ?? ""}

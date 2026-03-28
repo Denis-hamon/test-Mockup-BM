@@ -48,7 +48,7 @@ export default async function DossiersPage({ searchParams }: Props) {
           Impossible de charger les dossiers.
         </p>
         <p className="mt-2 text-sm text-muted-foreground">
-          V\u00e9rifiez votre connexion et rechargez la page.
+          Vérifiez votre connexion et rechargez la page.
         </p>
       </div>
     );

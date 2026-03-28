@@ -130,7 +130,7 @@ export default async function CaseDetailClientPage({ params }: Props) {
                 Aucun message pour le moment
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
-                Les messages appara\u00eetront ici une fois que votre avocat aura
+                Les messages apparaîtront ici une fois que votre avocat aura
                 pris en charge votre dossier.
               </p>
             </div>

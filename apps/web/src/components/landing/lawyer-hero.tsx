@@ -23,7 +23,7 @@ export function LawyerHero({
   accentColor,
 }: LawyerHeroProps) {
   const defaultDescription =
-    "Bienvenue sur notre espace de consultation en ligne. D\u00e9crivez votre situation en toute confidentialit\u00e9.";
+    "Bienvenue sur notre espace de consultation en ligne. Décrivez votre situation en toute confidentialité.";
 
   const initials = firmName
     .split(" ")

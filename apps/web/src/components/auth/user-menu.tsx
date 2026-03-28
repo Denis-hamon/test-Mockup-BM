@@ -64,7 +64,7 @@ export function UserMenu({ email, role, name }: UserMenuProps) {
         <DropdownMenuSeparator />
         <DropdownMenuItem render={<Link href={settingsHref} />}>
           <Settings className="size-4" />
-          Param\u00e8tres
+          Paramètres
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -72,7 +72,7 @@ export function UserMenu({ email, role, name }: UserMenuProps) {
           variant="destructive"
         >
           <LogOut className="size-4" />
-          Se d\u00e9connecter
+          Se déconnecter
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

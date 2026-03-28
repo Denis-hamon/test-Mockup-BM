@@ -2,9 +2,9 @@ import Link from "next/link";
 
 const settingsNav = [
   { href: "/settings/cabinet", label: "Cabinet" },
-  { href: "/settings/cabinet/integration", label: "Int\u00e9gration" },
-  { href: "/settings/privacy", label: "Confidentialit\u00e9" },
-  { href: "/settings/export", label: "Exporter mes donn\u00e9es" },
+  { href: "/settings/cabinet/integration", label: "Intégration" },
+  { href: "/settings/privacy", label: "Confidentialité" },
+  { href: "/settings/export", label: "Exporter mes données" },
   { href: "/settings/delete", label: "Supprimer mon compte" },
 ];
 
@@ -17,7 +17,7 @@ export default function SettingsLayout({
     <div className="flex gap-8">
       {/* Sidebar */}
       <nav className="w-56 shrink-0">
-        <h2 className="mb-4 text-lg font-semibold">Param\u00e8tres</h2>
+        <h2 className="mb-4 text-lg font-semibold">Paramètres</h2>
         <ul className="flex flex-col gap-1">
           {settingsNav.map((item) => (
             <li key={item.href}>

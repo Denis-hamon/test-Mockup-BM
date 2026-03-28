@@ -14,7 +14,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dossiers", label: "Dossiers", icon: FolderOpen },
-  { href: "/settings/cabinet", label: "Param\u00e8tres", icon: Settings },
+  { href: "/settings/cabinet", label: "Paramètres", icon: Settings },
 ];
 
 export function LawyerSidebar() {

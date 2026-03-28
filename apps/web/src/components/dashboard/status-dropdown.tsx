@@ -27,8 +27,8 @@ import {
 const STATUS_CONFIG: Record<string, { label: string; order: number }> = {
   submitted: { label: "Nouveau", order: 0 },
   en_cours: { label: "En cours", order: 1 },
-  termine: { label: "Termin\u00e9", order: 2 },
-  archive: { label: "Archiv\u00e9", order: 3 },
+  termine: { label: "Terminé", order: 2 },
+  archive: { label: "Archivé", order: 3 },
 };
 
 interface StatusDropdownProps {
@@ -67,10 +67,10 @@ export function StatusDropdown({
     startTransition(async () => {
       const result = await updateCaseStatus(submissionId, newStatus);
       if (result.success) {
-        toast.success("Statut mis \u00e0 jour");
+        toast.success("Statut mis à jour");
         router.refresh();
       } else {
-        toast.error("Erreur lors de la mise \u00e0 jour");
+        toast.error("Erreur lors de la mise à jour");
       }
     });
   }
@@ -111,7 +111,7 @@ export function StatusDropdown({
           <AlertDialogHeader>
             <AlertDialogTitle>Archiver ce dossier</AlertDialogTitle>
             <AlertDialogDescription>
-              \u00cates-vous s\u00fbr de vouloir archiver le dossier
+              Êtes-vous sûr de vouloir archiver le dossier
               {clientName ? ` de ${clientName}` : ""} ? Le dossier restera
               accessible dans vos archives.
             </AlertDialogDescription>

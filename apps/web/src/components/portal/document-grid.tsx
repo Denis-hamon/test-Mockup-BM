@@ -45,7 +45,7 @@ export function DocumentGrid({ documents }: DocumentGridProps) {
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
         <p className="text-sm font-semibold">Aucun document</p>
         <p className="mt-2 text-sm text-muted-foreground">
-          Les documents que vous avez partag\u00e9s avec votre avocat appara\u00eetront
+          Les documents que vous avez partagés avec votre avocat apparaîtront
           ici.
         </p>
       </div>
@@ -76,8 +76,8 @@ export function DocumentGrid({ documents }: DocumentGridProps) {
                 variant="ghost"
                 size="icon"
                 disabled
-                aria-label={`T\u00e9l\u00e9charger ${doc.fileName ?? "document"}`}
-                title="T\u00e9l\u00e9chargement bient\u00f4t disponible"
+                aria-label={`Télécharger ${doc.fileName ?? "document"}`}
+                title="Téléchargement bientôt disponible"
               >
                 <Download className="h-4 w-4" />
               </Button>

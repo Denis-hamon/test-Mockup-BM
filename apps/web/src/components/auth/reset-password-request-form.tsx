@@ -34,13 +34,13 @@ export function ResetPasswordRequestForm() {
   if (submitted) {
     return (
       <div className="rounded-lg border bg-card p-6 text-center shadow-sm">
-        <h2 className="mb-4 text-xl font-semibold">Email envoy\u00e9</h2>
+        <h2 className="mb-4 text-xl font-semibold">Email envoyé</h2>
         <p className="mb-4 text-muted-foreground">
           Si un compte existe avec cet email, vous recevrez un lien de
-          r\u00e9initialisation.
+          réinitialisation.
         </p>
         <Link href="/login" className="text-primary underline">
-          Retour \u00e0 la connexion
+          Retour à la connexion
         </Link>
       </div>
     );
@@ -49,10 +49,10 @@ export function ResetPasswordRequestForm() {
   return (
     <div className="rounded-lg border bg-card p-6 shadow-sm">
       <h1 className="mb-2 text-center text-2xl font-semibold">
-        Mot de passe oubli\u00e9
+        Mot de passe oublié
       </h1>
       <p className="mb-6 text-center text-sm text-muted-foreground">
-        Entrez votre adresse email pour recevoir un lien de r\u00e9initialisation.
+        Entrez votre adresse email pour recevoir un lien de réinitialisation.
       </p>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
@@ -70,12 +70,12 @@ export function ResetPasswordRequestForm() {
         </div>
 
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Envoi en cours\u2026" : "Envoyer le lien"}
+          {isSubmitting ? "Envoi en cours…" : "Envoyer le lien"}
         </Button>
 
         <p className="text-center text-sm text-muted-foreground">
           <Link href="/login" className="text-primary underline">
-            Retour \u00e0 la connexion
+            Retour à la connexion
           </Link>
         </p>
       </form>

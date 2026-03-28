@@ -18,6 +18,8 @@ export const lawyerProfiles = pgTable("lawyer_profiles", {
     .references(() => users.id),
   firmName: text("firm_name"),
   phone: text("phone"),
+  description: text("description"),
+  photoUrl: text("photo_url"),
   specialties: text("specialties").notNull().default("[]"), // JSON string[] e.g. ["famille","travail"]
   notifyNewCase: integer("notify_new_case").default(1).notNull(), // 1=on, 0=off
   notifyNewMessage: integer("notify_new_message").default(1).notNull(), // 1=on, 0=off

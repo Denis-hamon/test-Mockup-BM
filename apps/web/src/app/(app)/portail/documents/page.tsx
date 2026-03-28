@@ -18,7 +18,7 @@ export default async function DocumentsClientPage() {
           Impossible de charger cette page.
         </p>
         <p className="mt-2 text-sm text-muted-foreground">
-          V\u00e9rifiez votre connexion et rechargez.
+          Vérifiez votre connexion et rechargez.
         </p>
       </div>
     );

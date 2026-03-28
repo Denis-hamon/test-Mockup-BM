@@ -1,8 +1,8 @@
 import { RegisterForm } from "@/components/auth/register-form";
 
 export const metadata = {
-  title: "Cr\u00e9er un compte - LegalConnect",
-  description: "Cr\u00e9ez votre compte LegalConnect pour acc\u00e9der \u00e0 votre espace juridique s\u00e9curis\u00e9.",
+  title: "Créer un compte - LegalConnect",
+  description: "Créez votre compte LegalConnect pour accéder à votre espace juridique sécurisé.",
 };
 
 export default function RegisterPage() {

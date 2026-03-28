@@ -21,7 +21,7 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const firstName = session.user.name?.split(" ")[0] ?? "Ma\u00eetre";
+  const firstName = session.user.name?.split(" ")[0] ?? "Maître";
   const result = await getDashboardStats();
   const stats = result.data;
 
@@ -45,7 +45,7 @@ export default async function DashboardPage() {
       href: "/dossiers?status=en_cours",
     },
     {
-      title: "Termin\u00e9s",
+      title: "Terminés",
       value: stats?.completedCases ?? 0,
       icon: CheckCircle2,
       href: "/dossiers?status=termine",
@@ -59,7 +59,7 @@ export default async function DashboardPage() {
           Bonjour, {firstName}
         </h1>
         <p className="mt-1 text-muted-foreground">
-          Voici un aper\u00e7u de vos dossiers.
+          Voici un aperçu de vos dossiers.
         </p>
       </div>
 

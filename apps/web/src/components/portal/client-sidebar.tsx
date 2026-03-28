@@ -118,7 +118,7 @@ export function ClientSidebar({
       badge: pendingAppointments || undefined,
     },
     { href: "/portail/documents", label: "Documents", icon: FileText },
-    { href: "/portail/parametres", label: "Param\u00e8tres", icon: Settings },
+    { href: "/portail/parametres", label: "Paramètres", icon: Settings },
   ];
 
   return (

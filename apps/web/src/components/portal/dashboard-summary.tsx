@@ -65,7 +65,7 @@ export function DashboardSummary({
       title: "Prochain rendez-vous",
       value: nextAppointment?.date
         ? formatDate(nextAppointment.date)
-        : "Aucun rendez-vous pr\u00e9vu",
+        : "Aucun rendez-vous prévu",
       icon: CalendarDays,
       href: "/portail/rendez-vous",
     },
@@ -111,7 +111,7 @@ export function DashboardSummary({
       {recentActivity.length > 0 && (
         <div className="flex flex-col gap-4">
           <h2 className="text-[20px] font-semibold leading-[1.2]">
-            Activit\u00e9 r\u00e9cente
+            Activité récente
           </h2>
           <div className="flex flex-col gap-3">
             {recentActivity.slice(0, 5).map((event, index) => (

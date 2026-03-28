@@ -2,7 +2,7 @@
 
 import zxcvbn from "zxcvbn";
 
-const LABELS = ["Tr\u00e8s faible", "Faible", "Moyen", "Fort", "Tr\u00e8s fort"];
+const LABELS = ["Très faible", "Faible", "Moyen", "Fort", "Très fort"];
 const COLORS = [
   "bg-red-500",
   "bg-red-500",

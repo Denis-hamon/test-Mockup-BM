@@ -9,13 +9,13 @@ interface CaseStatusTrackerProps {
 const STEPS = [
   { label: "Nouveau", value: 1 },
   { label: "En cours", value: 2 },
-  { label: "Termin\u00e9", value: 3 },
+  { label: "Terminé", value: 3 },
 ];
 
 function statusToValue(status: string): number {
   if (status === "Nouveau") return 1;
   if (status === "En cours") return 2;
-  if (status === "Termin\u00e9") return 3;
+  if (status === "Terminé") return 3;
   return 1;
 }
 
