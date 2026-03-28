@@ -1,15 +1,16 @@
 /**
- * LegalConnect Widget — IIFE entry point.
+ * LegalConnect Widget -- IIFE entry point.
  *
  * Reads data-* attributes from the embedding script tag, creates a Shadow DOM
  * container, and renders the widget inside it for complete style isolation.
  */
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { createRoot } from "react-dom/client";
-import { parseConfig, type WidgetConfig } from "./lib/config";
-import { initApiBase, fetchTemplate } from "./lib/api";
+import { parseConfig } from "./lib/config";
+import { initApiBase } from "./lib/api";
 import { getContrastForeground } from "./lib/luminance";
+import { Widget } from "./Widget";
 import widgetCss from "./styles/widget.css?inline";
 
 // ---------------------------------------------------------------------------
@@ -19,62 +20,6 @@ import widgetCss from "./styles/widget.css?inline";
 const currentScript: HTMLScriptElement | null =
   (document.currentScript as HTMLScriptElement) ||
   document.querySelector<HTMLScriptElement>("script[data-slug]");
-
-// ---------------------------------------------------------------------------
-// Widget component (placeholder — will be expanded in 09-02)
-// ---------------------------------------------------------------------------
-
-function Widget({
-  config,
-  template,
-}: {
-  config: WidgetConfig;
-  template: unknown;
-}) {
-  const [open, setOpen] = useState(false);
-  const isLeft = config.position === "bottom-left";
-
-  return (
-    <div className={`lc-widget${isLeft ? " lc-widget--left" : ""}`}>
-      {open && (
-        <>
-          {/* Mobile backdrop */}
-          <div className="lc-backdrop lc-fade-in" onClick={() => setOpen(false)} />
-          <div
-            className={`lc-modal lc-slide-up${isLeft ? " lc-modal--left" : ""}`}
-          >
-            <div className="lc-modal-header">
-              <h3>Contactez-nous</h3>
-              <button
-                className="lc-btn-secondary"
-                onClick={() => setOpen(false)}
-                aria-label="Fermer"
-                style={{ padding: "4px 8px", fontSize: "18px", border: "none" }}
-              >
-                &times;
-              </button>
-            </div>
-            <div className="lc-modal-body">
-              <p style={{ color: "var(--lc-muted, #6b7280)" }}>
-                Chargement du formulaire...
-              </p>
-            </div>
-          </div>
-        </>
-      )}
-      <button
-        className="lc-btn lc-fade-in"
-        onClick={() => setOpen(!open)}
-        aria-label="Ouvrir le formulaire de contact"
-        style={{ animationDelay: "300ms", opacity: 0 }}
-      >
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.2L4 17.2V4h16v12z" />
-        </svg>
-      </button>
-    </div>
-  );
-}
 
 // ---------------------------------------------------------------------------
 // Bootstrap: parse config, create Shadow DOM, render
@@ -113,29 +58,27 @@ function bootstrap(): void {
   // Compute contrast foreground
   const accentFg = getContrastForeground(config.accentColor);
 
-  // Set CSS custom properties on the host
-  host.style.setProperty("--lc-accent", config.accentColor);
-  host.style.setProperty("--lc-accent-fg", accentFg);
-  host.style.setProperty("--lc-surface", "#ffffff");
-  host.style.setProperty("--lc-fg", "#1a1a2e");
-  host.style.setProperty("--lc-muted", "#6b7280");
-  host.style.setProperty("--lc-border", "#e5e7eb");
-
-  // Mount div inside shadow
-  const mount = document.createElement("div");
-  shadow.appendChild(mount);
+  // Set CSS custom properties on the shadow host via a wrapper div
+  const wrapper = document.createElement("div");
+  wrapper.style.setProperty("--lc-accent", config.accentColor);
+  wrapper.style.setProperty("--lc-accent-fg", accentFg);
+  wrapper.style.setProperty("--lc-surface", "#ffffff");
+  wrapper.style.setProperty("--lc-fg", "#1a1a2e");
+  wrapper.style.setProperty("--lc-muted", "#f5f5f5");
+  wrapper.style.setProperty("--lc-border", "#e5e5e5");
+  shadow.appendChild(wrapper);
 
   // Render React app
-  const root = createRoot(mount);
-
-  // Fetch template and render
-  fetchTemplate(config.slug).then((template) => {
-    root.render(
-      <React.StrictMode>
-        <Widget config={config} template={template} />
-      </React.StrictMode>
-    );
-  });
+  const root = createRoot(wrapper);
+  root.render(
+    <React.StrictMode>
+      <Widget
+        slug={config.slug}
+        accentColor={config.accentColor}
+        position={config.position}
+      />
+    </React.StrictMode>
+  );
 }
 
 // Run bootstrap

@@ -170,6 +170,188 @@
   margin-top: 4px;
 }
 
+.lc-input--error {
+  border-color: #dc2626;
+}
+
+.lc-input--error:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+/* ----------------------------------------------------------------
+   Form structure
+   ---------------------------------------------------------------- */
+
+.lc-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.lc-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.lc-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.lc-field-desc {
+  font-size: 12px;
+  color: var(--lc-muted, #6b7280);
+  margin: 0 0 6px 0;
+}
+
+.lc-required {
+  color: #dc2626;
+}
+
+.lc-form-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+}
+
+/* ----------------------------------------------------------------
+   Checkbox
+   ---------------------------------------------------------------- */
+
+.lc-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.lc-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--lc-accent, #1a365d);
+}
+
+/* ----------------------------------------------------------------
+   Step indicator
+   ---------------------------------------------------------------- */
+
+.lc-step-indicator {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.lc-step-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--lc-fg, #1a1a2e);
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* ----------------------------------------------------------------
+   Confirmation
+   ---------------------------------------------------------------- */
+
+.lc-confirmation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px 16px;
+  gap: 12px;
+}
+
+.lc-confirmation-icon {
+  margin-bottom: 8px;
+}
+
+.lc-confirmation-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--lc-fg, #1a1a2e);
+  margin: 0;
+}
+
+.lc-confirmation-text {
+  font-size: 14px;
+  color: var(--lc-muted, #6b7280);
+  margin: 0;
+}
+
+/* ----------------------------------------------------------------
+   Close button
+   ---------------------------------------------------------------- */
+
+.lc-btn-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--lc-fg, #1a1a2e);
+  padding: 0;
+  transition: background-color 0.15s ease;
+}
+
+.lc-btn-close:hover {
+  background: var(--lc-muted, #f5f5f5);
+}
+
+/* ----------------------------------------------------------------
+   Loading skeleton
+   ---------------------------------------------------------------- */
+
+.lc-loading {
+  padding: 16px 0;
+}
+
+.lc-skeleton {
+  background: linear-gradient(90deg, var(--lc-border, #e5e5e5) 25%, var(--lc-muted, #f5f5f5) 50%, var(--lc-border, #e5e5e5) 75%);
+  background-size: 200% 100%;
+  animation: lc-shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+@keyframes lc-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ----------------------------------------------------------------
+   Error message
+   ---------------------------------------------------------------- */
+
+.lc-error-message {
+  text-align: center;
+  color: #dc2626;
+  font-size: 14px;
+  padding: 24px 16px;
+}
+
+/* ----------------------------------------------------------------
+   Footer detail styles
+   ---------------------------------------------------------------- */
+
+.lc-footer-brand {
+  font-size: 11px;
+  color: var(--lc-muted, #6b7280);
+}
+
+.lc-footer-trust {
+  font-size: 11px;
+  color: hsl(142, 71%, 45%);
+  display: flex;
+  align-items: center;
+}
+
 /* ----------------------------------------------------------------
    Buttons
    ---------------------------------------------------------------- */
