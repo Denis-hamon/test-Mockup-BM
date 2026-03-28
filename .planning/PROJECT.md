@@ -94,4 +94,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-27 — Phase 8 (Intake Templates) complete: JSON template engine, 3 seed templates (famille/travail/pénal), split-view editor avec @dnd-kit, branding avocat, /intake/[slug] avec co-branding*
+*Last updated: 2026-03-28 — Phase 9 (Distribution & Embedding) complete: widget IIFE 66KB (Shadow DOM + Vite), landing pages /cabinet-[slug] avec OG dynamique, page intégration avec snippet copiable. DERNIÈRE PHASE v1.0.*
