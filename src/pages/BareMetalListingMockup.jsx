@@ -300,10 +300,6 @@ function statusLabel(status) {
   return status === 'available_now' ? 'Disponible' : 'Sur demande';
 }
 
-function statusTagLabel(status) {
-  return status === 'available_now' ? 'DISPO' : 'SUR DEMANDE';
-}
-
 function isLegacyReferenceExcluded(server) {
   return server.year === '2024' && server.name !== 'Advance-5';
 }
@@ -366,7 +362,6 @@ export default function BareMetalListingMockup() {
 
     if (mode === 'available_now') {
       return baseServers
-        .filter((server) => !requiresContact(server))
         .map((server) => ({
           ...server,
           memoryOptions: server.memoryOptions.filter((option) => option.status === 'available_now'),
@@ -374,7 +369,12 @@ export default function BareMetalListingMockup() {
         .filter((server) => server.memoryOptions.length > 0);
     }
 
-    return baseServers;
+    return baseServers
+      .map((server) => ({
+        ...server,
+        memoryOptions: server.memoryOptions.filter((option) => option.status === 'on_request'),
+      }))
+      .filter((server) => server.memoryOptions.length > 0);
   }, [apiRows, mode]);
 
   function makePayload(server, extra = {}) {
@@ -554,7 +554,11 @@ export default function BareMetalListingMockup() {
             Mode Disponible: seules les RAM disponibles sont affichees. Les references 2024 sont masquees,
             sauf Advance-5.
           </p>
-        ) : null}
+        ) : (
+          <p className="ovh-api-meta-inline">
+            Mode Sur demande: seules les RAM indisponibles a date sont affichees.
+          </p>
+        )}
         {apiError ? <p className="ovh-api-error">{apiError}</p> : null}
 
         <div className="ovh-table">
@@ -594,9 +598,6 @@ export default function BareMetalListingMockup() {
                       title={`RAM: ${statusLabel(option.status)}`}
                       aria-label={`RAM: ${statusLabel(option.status)}`}
                     >
-                      <span className={`ovh-option-tag ovh-option-tag-${option.status}`}>
-                        {statusTagLabel(option.status)}
-                      </span>
                       <span className="ovh-option-value">{option.label}</span>
                     </span>
                   ))}
