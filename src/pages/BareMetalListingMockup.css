@@ -591,6 +591,7 @@
   border-radius: 9px;
   padding: 8px 13px;
   min-width: 106px;
+  white-space: nowrap;
   font-size: 13px;
   font-weight: 700;
   color: #fff;
