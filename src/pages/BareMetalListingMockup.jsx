@@ -526,10 +526,6 @@ export default function BareMetalListingMockup() {
             {apiLoading ? 'Rafraichissement...' : 'Rafraichir'}
           </button>
         </div>
-        <p className="ovh-api-meta-inline">
-          Donnees live API OVHcloud: <code>/dedicated/server/datacenter/availabilities</code> (scope ADV)
-          {apiUpdatedAt ? ` / Maj: ${new Date(apiUpdatedAt).toLocaleString('fr-FR')}` : ''}
-        </p>
         {mode === 'available_now' ? (
           <p className="ovh-api-meta-inline">
             Mode Disponible: les references 2024 sont masquees pour privilegier les generations recentes.
