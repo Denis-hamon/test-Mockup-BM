@@ -348,7 +348,9 @@ export default function BareMetalListingMockup() {
 
   const visibleServers = useMemo(() => {
     if (mode === 'available_now') {
-      return apiRows.filter((server) => !requiresContact(server));
+      return apiRows.filter(
+        (server) => !requiresContact(server) && server.year !== '2024'
+      );
     }
     return apiRows;
   }, [apiRows, mode]);
@@ -528,6 +530,11 @@ export default function BareMetalListingMockup() {
           Donnees live API OVHcloud: <code>/dedicated/server/datacenter/availabilities</code> (scope ADV)
           {apiUpdatedAt ? ` / Maj: ${new Date(apiUpdatedAt).toLocaleString('fr-FR')}` : ''}
         </p>
+        {mode === 'available_now' ? (
+          <p className="ovh-api-meta-inline">
+            Mode Disponible: les references 2024 sont masquees pour privilegier les generations recentes.
+          </p>
+        ) : null}
         <div className="ovh-legend">
           <span>
             <i className="ovh-dot available_now" /> Bille verte: disponible
