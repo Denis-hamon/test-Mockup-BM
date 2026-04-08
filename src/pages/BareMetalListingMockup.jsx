@@ -199,6 +199,13 @@ function buildStorageRange(storageOptions) {
   return `de ${formatTotalStorageGo(min)} a ${formatTotalStorageGo(max)}`;
 }
 
+function getStorageRangeForListing(serverName, storageOptions) {
+  if (serverName !== 'Advance-STOR') {
+    return 'de 960 GB a 7.7 TB';
+  }
+  return buildStorageRange(storageOptions);
+}
+
 function getYearFromServerCode(serverCode) {
   const m = serverCode.match(/^(\d{2})/);
   if (!m) return '';
@@ -278,7 +285,7 @@ function summarizeFromApi(items) {
         ...row,
         memoryOptions,
         storageOptions,
-        storageRange: buildStorageRange(storageOptions),
+        storageRange: getStorageRangeForListing(row.name, storageOptions),
         datacenterCount: row.datacenterSet.size,
       };
     })
@@ -556,7 +563,6 @@ export default function BareMetalListingMockup() {
                   <span className="ovh-check">v</span>
                   <span className="ovh-name">{server.name}</span>
                   {server.year ? <span className="ovh-year">{server.year}</span> : null}
-                  <span className="ovh-ref-code">{server.serverCode}</span>
                 </div>
                 <div className="ovh-cell-stack">
                   {server.cpu.map((line) => (

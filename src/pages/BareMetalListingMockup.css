@@ -532,7 +532,7 @@
 }
 
 .ovh-option-line-on_request {
-  color: #4f5f83;
+  color: #8f98b3;
 }
 
 .ovh-option-line span {
@@ -548,6 +548,7 @@
 
 .ovh-option-line-on_request span {
   color: inherit;
+  font-weight: 600;
 }
 
 .ovh-dc-count {
