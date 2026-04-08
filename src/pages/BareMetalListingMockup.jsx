@@ -309,7 +309,8 @@ function formatPrice(value) {
   return `${value.toFixed(2).replace('.', ',')} EUR`;
 }
 
-export default function BareMetalListingMockup() {
+export default function BareMetalListingMockup({ toggleVariant = 'top' }) {
+  const isBottomToggle = toggleVariant === 'bottom';
   const [mode, setMode] = useState('on_request');
   const [payloadPreview, setPayloadPreview] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -440,7 +441,7 @@ export default function BareMetalListingMockup() {
   }
 
   return (
-    <div className="ovh-page">
+    <div className={`ovh-page${isBottomToggle ? ' ovh-page-v2' : ''}`}>
       <header className="ovh-topbar">
         <div className="ovh-topbar-inner">
           <div className="ovh-logo">
@@ -513,22 +514,24 @@ export default function BareMetalListingMockup() {
         </div>
 
         <div className="ovh-controls">
-          <div className="ovh-mode-toggle">
-            <button
-              type="button"
-              className={mode === 'available_now' ? 'active' : ''}
-              onClick={() => setMode('available_now')}
-            >
-              Disponible
-            </button>
-            <button
-              type="button"
-              className={mode === 'on_request' ? 'active' : ''}
-              onClick={() => setMode('on_request')}
-            >
-              Sur demande
-            </button>
-          </div>
+          {!isBottomToggle ? (
+            <div className="ovh-mode-toggle">
+              <button
+                type="button"
+                className={mode === 'available_now' ? 'active' : ''}
+                onClick={() => setMode('available_now')}
+              >
+                Disponible
+              </button>
+              <button
+                type="button"
+                className={mode === 'on_request' ? 'active' : ''}
+                onClick={() => setMode('on_request')}
+              >
+                Sur demande
+              </button>
+            </div>
+          ) : null}
           <div className="ovh-sort-wrap">
             <div className="ovh-view-switch" aria-hidden="true">
               <span className="active icon-list" />
@@ -540,7 +543,7 @@ export default function BareMetalListingMockup() {
         </div>
       </section>
 
-      <section className="ovh-results">
+      <section className={`ovh-results${isBottomToggle ? ' ovh-results-with-bottom-toggle' : ''}`}>
         <div className="ovh-results-head">
           <h2>
             Resultats <span>({visibleServers.length} serveur(s))</span>
@@ -658,6 +661,27 @@ export default function BareMetalListingMockup() {
           </p>
         </article>
       </section>
+
+      {isBottomToggle ? (
+        <div className="ovh-bottom-toggle-wrap">
+          <div className="ovh-mode-toggle ovh-mode-toggle-bottom">
+            <button
+              type="button"
+              className={mode === 'available_now' ? 'active' : ''}
+              onClick={() => setMode('available_now')}
+            >
+              Disponible
+            </button>
+            <button
+              type="button"
+              className={mode === 'on_request' ? 'active' : ''}
+              onClick={() => setMode('on_request')}
+            >
+              Sur demande
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       <div
         className={`ovh-modal-backdrop${isModalOpen ? ' open' : ''}`}

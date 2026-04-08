@@ -290,6 +290,37 @@
   color: var(--ovh-blue-700);
 }
 
+.ovh-results-with-bottom-toggle {
+  padding-bottom: 132px;
+}
+
+.ovh-bottom-toggle-wrap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 14px;
+  padding: 0 14px calc(6px + env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 65;
+}
+
+.ovh-mode-toggle-bottom {
+  pointer-events: auto;
+  border: 1px solid #c2cff0;
+  background: rgba(230, 238, 255, 0.92);
+  box-shadow: 0 10px 24px rgba(17, 35, 82, 0.14);
+  backdrop-filter: blur(8px) saturate(135%);
+  -webkit-backdrop-filter: blur(8px) saturate(135%);
+}
+
+.ovh-mode-toggle-bottom button {
+  min-width: 146px;
+  padding: 10px 16px;
+  font-size: 14px;
+}
+
 .ovh-sort-wrap {
   display: inline-flex;
   align-items: center;
@@ -933,6 +964,12 @@
   .ovh-row {
     min-width: 1120px;
   }
+
+  .ovh-mode-toggle-bottom button {
+    min-width: 132px;
+    padding: 9px 14px;
+    font-size: 13px;
+  }
 }
 
 @media (max-width: 640px) {
@@ -942,5 +979,24 @@
 
   .ovh-api-grid {
     grid-template-columns: 1fr;
+  }
+
+  .ovh-results-with-bottom-toggle {
+    padding-bottom: 122px;
+  }
+
+  .ovh-bottom-toggle-wrap {
+    bottom: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .ovh-mode-toggle-bottom {
+    width: min(460px, 100%);
+  }
+
+  .ovh-mode-toggle-bottom button {
+    min-width: 0;
+    flex: 1;
   }
 }

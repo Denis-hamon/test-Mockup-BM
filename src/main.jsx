@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import BareMetalAvailabilityMockup from './pages/BareMetalAvailabilityMockup.jsx'
 import BareMetalListingMockup from './pages/BareMetalListingMockup.jsx'
+import BareMetalListingMockupV2 from './pages/BareMetalListingMockupV2.jsx'
 import { LOCALE_MAP, DEFAULT_LOCALE } from './i18n/locale-map.js'
 import { setLocale } from './i18n/index.js'
 
@@ -50,6 +51,8 @@ if (!urlLocale || !LOCALE_MAP[urlLocale]) {
       ? BareMetalAvailabilityMockup
       : route === 'maquette-baremetal-listing'
         ? BareMetalListingMockup
+        : route === 'maquette-baremetal-listing-v2'
+          ? BareMetalListingMockupV2
         : App;
 
   ReactDOM.createRoot(document.getElementById('root')).render(
