@@ -293,6 +293,24 @@ function statusLabel(status) {
   return status === 'available_now' ? 'Disponible' : 'Sur demande';
 }
 
+function groupMemoryOptionsByStatus(memoryOptions) {
+  const available = memoryOptions
+    .filter((option) => option.status === 'available_now')
+    .map((option) => option.label);
+  const onRequest = memoryOptions
+    .filter((option) => option.status === 'on_request')
+    .map((option) => option.label);
+
+  const groups = [];
+  if (available.length) {
+    groups.push({ status: 'available_now', label: available.join(' / ') });
+  }
+  if (onRequest.length) {
+    groups.push({ status: 'on_request', label: onRequest.join(' / ') });
+  }
+  return groups;
+}
+
 function formatPrice(value) {
   if (typeof value !== 'number') return 'N/A';
   return `${value.toFixed(2).replace('.', ',')} EUR`;
@@ -576,15 +594,15 @@ export default function BareMetalListingMockup() {
                   ))}
                 </div>
                 <div className="ovh-cell-stack">
-                  {server.memoryOptions.map((option) => (
+                  {groupMemoryOptionsByStatus(server.memoryOptions).map((group, index) => (
                     <span
-                      key={`${server.id}-ram-${option.label}`}
-                      className={`ovh-option-line ovh-option-line-${option.status}`}
-                      title={`RAM: ${statusLabel(option.status)}`}
-                      aria-label={`RAM: ${statusLabel(option.status)}`}
+                      key={`${server.id}-ram-group-${group.status}-${index}`}
+                      className={`ovh-option-line ovh-option-line-${group.status}`}
+                      title={`RAM: ${statusLabel(group.status)}`}
+                      aria-label={`RAM: ${statusLabel(group.status)}`}
                     >
-                      <i className={`ovh-dot ${option.status}`} />
-                      <span>{option.label}</span>
+                      <i className={`ovh-dot ${group.status}`} />
+                      <span>{group.label}</span>
                     </span>
                   ))}
                 </div>

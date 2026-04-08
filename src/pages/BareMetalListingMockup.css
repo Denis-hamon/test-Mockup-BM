@@ -534,6 +534,7 @@
 
 .ovh-option-line {
   width: fit-content;
+  max-width: 100%;
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -574,6 +575,7 @@
   color: #304671;
   font-weight: 700;
   font-size: 11px;
+  white-space: normal;
 }
 
 .ovh-dc-count {
