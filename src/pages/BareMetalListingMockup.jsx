@@ -366,6 +366,7 @@ export default function BareMetalListingMockup() {
 
     if (mode === 'available_now') {
       return baseServers
+        .filter((server) => !requiresContact(server))
         .map((server) => ({
           ...server,
           memoryOptions: server.memoryOptions.filter((option) => option.status === 'available_now'),
