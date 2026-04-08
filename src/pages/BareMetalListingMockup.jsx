@@ -572,7 +572,7 @@ export default function BareMetalListingMockup() {
                   {server.memoryOptions.map((option) => (
                     <span
                       key={`${server.id}-ram-${option.label}`}
-                      className="ovh-option-line"
+                      className={`ovh-option-line ovh-option-line-${option.status}`}
                       title={`RAM: ${statusLabel(option.status)}`}
                       aria-label={`RAM: ${statusLabel(option.status)}`}
                     >
