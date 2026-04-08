@@ -293,24 +293,6 @@ function statusLabel(status) {
   return status === 'available_now' ? 'Disponible' : 'Sur demande';
 }
 
-function groupMemoryOptionsByStatus(memoryOptions) {
-  const available = memoryOptions
-    .filter((option) => option.status === 'available_now')
-    .map((option) => option.label);
-  const onRequest = memoryOptions
-    .filter((option) => option.status === 'on_request')
-    .map((option) => option.label);
-
-  const groups = [];
-  if (available.length) {
-    groups.push({ status: 'available_now', label: available.join(' / ') });
-  }
-  if (onRequest.length) {
-    groups.push({ status: 'on_request', label: onRequest.join(' / ') });
-  }
-  return groups;
-}
-
 function formatPrice(value) {
   if (typeof value !== 'number') return 'N/A';
   return `${value.toFixed(2).replace('.', ',')} EUR`;
@@ -553,14 +535,6 @@ export default function BareMetalListingMockup() {
             Mode Disponible: les references 2024 sont masquees pour privilegier les generations recentes.
           </p>
         ) : null}
-        <div className="ovh-legend">
-          <span>
-            <i className="ovh-dot available_now" /> Bille verte: disponible
-          </span>
-          <span>
-            <i className="ovh-dot on_request" /> Bille grise: sur demande
-          </span>
-        </div>
         {apiError ? <p className="ovh-api-error">{apiError}</p> : null}
 
         <div className="ovh-table">
@@ -594,15 +568,14 @@ export default function BareMetalListingMockup() {
                   ))}
                 </div>
                 <div className="ovh-cell-stack">
-                  {groupMemoryOptionsByStatus(server.memoryOptions).map((group, index) => (
+                  {server.memoryOptions.map((option) => (
                     <span
-                      key={`${server.id}-ram-group-${group.status}-${index}`}
-                      className={`ovh-option-line ovh-option-line-${group.status}`}
-                      title={`RAM: ${statusLabel(group.status)}`}
-                      aria-label={`RAM: ${statusLabel(group.status)}`}
+                      key={`${server.id}-ram-${option.label}`}
+                      className={`ovh-option-line ovh-option-line-${option.status}`}
+                      title={`RAM: ${statusLabel(option.status)}`}
+                      aria-label={`RAM: ${statusLabel(option.status)}`}
                     >
-                      <i className={`ovh-dot ${group.status}`} />
-                      <span>{group.label}</span>
+                      <span>{option.label}</span>
                     </span>
                   ))}
                 </div>
