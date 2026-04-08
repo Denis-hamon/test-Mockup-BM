@@ -398,7 +398,8 @@ export default function BareMetalListingMockup() {
   function handleAction(server) {
     const payload = makePayload(server);
     setPayloadPreview(JSON.stringify(payload, null, 2));
-    if (requiresContact(server)) {
+    const shouldContact = mode === 'on_request' || requiresContact(server);
+    if (shouldContact) {
       setSelectedServer(server);
       setIsModalOpen(true);
       return;
@@ -556,7 +557,7 @@ export default function BareMetalListingMockup() {
           </div>
 
           {visibleServers.map((server) => {
-            const contactRequired = requiresContact(server);
+            const contactRequired = mode === 'on_request' || requiresContact(server);
             return (
               <div className="ovh-row" key={server.id}>
                 <div className="ovh-name-cell">
@@ -614,7 +615,7 @@ export default function BareMetalListingMockup() {
                     className={contactRequired ? 'contact' : 'configure'}
                     onClick={() => handleAction(server)}
                   >
-                    {contactRequired ? 'Contactez-nous' : 'Configurer'}
+                    {contactRequired ? 'Nous contacter' : 'Configurer'}
                   </button>
                 </div>
               </div>
