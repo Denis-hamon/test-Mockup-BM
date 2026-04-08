@@ -300,6 +300,10 @@ function statusLabel(status) {
   return status === 'available_now' ? 'Disponible' : 'Sur demande';
 }
 
+function isLegacyReferenceExcluded(server) {
+  return server.year === '2024' && server.name !== 'Advance-5';
+}
+
 function formatPrice(value) {
   if (typeof value !== 'number') return 'N/A';
   return `${value.toFixed(2).replace('.', ',')} EUR`;
@@ -354,12 +358,18 @@ export default function BareMetalListingMockup() {
   }, []);
 
   const visibleServers = useMemo(() => {
+    const baseServers = apiRows.filter((server) => !isLegacyReferenceExcluded(server));
+
     if (mode === 'available_now') {
-      return apiRows.filter(
-        (server) => !requiresContact(server) && server.year !== '2024'
-      );
+      return baseServers
+        .map((server) => ({
+          ...server,
+          memoryOptions: server.memoryOptions.filter((option) => option.status === 'available_now'),
+        }))
+        .filter((server) => server.memoryOptions.length > 0);
     }
-    return apiRows;
+
+    return baseServers;
   }, [apiRows, mode]);
 
   function makePayload(server, extra = {}) {
@@ -536,7 +546,8 @@ export default function BareMetalListingMockup() {
         </div>
         {mode === 'available_now' ? (
           <p className="ovh-api-meta-inline">
-            Mode Disponible: les references 2024 sont masquees pour privilegier les generations recentes.
+            Mode Disponible: seules les RAM disponibles sont affichees. Les references 2024 sont masquees,
+            sauf Advance-5.
           </p>
         ) : null}
         {apiError ? <p className="ovh-api-error">{apiError}</p> : null}
