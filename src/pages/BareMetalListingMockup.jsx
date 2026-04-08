@@ -300,6 +300,10 @@ function statusLabel(status) {
   return status === 'available_now' ? 'Disponible' : 'Sur demande';
 }
 
+function statusTagLabel(status) {
+  return status === 'available_now' ? 'DISPO' : 'SUR DEMANDE';
+}
+
 function isLegacyReferenceExcluded(server) {
   return server.year === '2024' && server.name !== 'Advance-5';
 }
@@ -589,7 +593,10 @@ export default function BareMetalListingMockup() {
                       title={`RAM: ${statusLabel(option.status)}`}
                       aria-label={`RAM: ${statusLabel(option.status)}`}
                     >
-                      <span>{option.label}</span>
+                      <span className={`ovh-option-tag ovh-option-tag-${option.status}`}>
+                        {statusTagLabel(option.status)}
+                      </span>
+                      <span className="ovh-option-value">{option.label}</span>
                     </span>
                   ))}
                 </div>

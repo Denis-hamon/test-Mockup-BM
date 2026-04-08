@@ -520,7 +520,10 @@
 }
 
 .ovh-option-line {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
   max-width: 100%;
   line-height: 1.3;
   padding: 0;
@@ -531,26 +534,53 @@
 }
 
 .ovh-option-line-available_now {
-  color: #146b3a;
+  color: #1f6a42;
 }
 
 .ovh-option-line-on_request {
-  color: #8f98b3;
+  color: #6e7897;
 }
 
-.ovh-option-line span {
+.ovh-option-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 18px;
+  border-radius: 999px;
+  padding: 1px 7px;
+  border: 1px solid transparent;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.ovh-option-tag-available_now {
+  background: #1f6a42;
+  border-color: #1b5e3a;
+  color: #ffffff;
+}
+
+.ovh-option-tag-on_request {
+  background: transparent;
+  border-color: #8f98b3;
+  color: #6e7897;
+}
+
+.ovh-option-value {
   display: inline-block;
   font-weight: 700;
   font-size: 12px;
   white-space: normal;
 }
 
-.ovh-option-line-available_now span {
-  color: inherit;
+.ovh-option-line-available_now .ovh-option-value {
+  color: #1f6a42;
 }
 
-.ovh-option-line-on_request span {
-  color: inherit;
+.ovh-option-line-on_request .ovh-option-value {
+  color: #6e7897;
   font-weight: 600;
 }
 
