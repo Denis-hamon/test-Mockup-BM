@@ -514,24 +514,6 @@ export default function BareMetalListingMockup({ toggleVariant = 'top' }) {
         </div>
 
         <div className="ovh-controls">
-          {!isBottomToggle ? (
-            <div className="ovh-mode-toggle">
-              <button
-                type="button"
-                className={mode === 'available_now' ? 'active' : ''}
-                onClick={() => setMode('available_now')}
-              >
-                Disponible
-              </button>
-              <button
-                type="button"
-                className={mode === 'on_request' ? 'active' : ''}
-                onClick={() => setMode('on_request')}
-              >
-                Sur demande
-              </button>
-            </div>
-          ) : null}
           <div className="ovh-sort-wrap">
             <div className="ovh-view-switch" aria-hidden="true">
               <span className="active icon-list" />
@@ -545,9 +527,29 @@ export default function BareMetalListingMockup({ toggleVariant = 'top' }) {
 
       <section className={`ovh-results${isBottomToggle ? ' ovh-results-with-bottom-toggle' : ''}`}>
         <div className="ovh-results-head">
-          <h2>
-            Resultats <span>({visibleServers.length} serveur(s))</span>
-          </h2>
+          <div className="ovh-results-head-left">
+            <h2>
+              Resultats <span>({visibleServers.length} serveur(s))</span>
+            </h2>
+            {!isBottomToggle ? (
+              <div className="ovh-mode-toggle ovh-mode-toggle-inline">
+                <button
+                  type="button"
+                  className={mode === 'available_now' ? 'active' : ''}
+                  onClick={() => setMode('available_now')}
+                >
+                  Disponibles
+                </button>
+                <button
+                  type="button"
+                  className={mode === 'on_request' ? 'active' : ''}
+                  onClick={() => setMode('on_request')}
+                >
+                  Sur demande
+                </button>
+              </div>
+            ) : null}
+          </div>
           <button type="button" className="ovh-open-all" onClick={() => loadApiAvailability()}>
             {apiLoading ? 'Rafraichissement...' : 'Rafraichir'}
           </button>

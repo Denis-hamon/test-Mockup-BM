@@ -392,9 +392,16 @@
 .ovh-results-head {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   margin-bottom: 12px;
+}
+
+.ovh-results-head-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .ovh-results h2 {
@@ -417,6 +424,15 @@
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
+}
+
+.ovh-mode-toggle-inline {
+  padding: 3px;
+}
+
+.ovh-mode-toggle-inline button {
+  padding: 6px 10px;
+  font-size: 12px;
 }
 
 .ovh-api-meta-inline {
@@ -450,9 +466,9 @@
 
 .ovh-row {
   display: grid;
-  grid-template-columns: 2.2fr 1.8fr 1.22fr 1.35fr 2.05fr 1.45fr 0.68fr 1.06fr;
+  grid-template-columns: 2.45fr 2.05fr 1.1fr 1.2fr 1.85fr 1.35fr 0.62fr 1fr;
   gap: 16px;
-  align-items: center;
+  align-items: flex-start;
   padding: 14px 16px;
   border-top: 1px solid var(--ovh-gray-200);
   font-size: 12px;
@@ -467,7 +483,7 @@
   color: #15306d;
   font-weight: 700;
   font-size: 14px;
-  align-items: end;
+  align-items: center;
   padding-top: 12px;
   padding-bottom: 12px;
 }
@@ -501,8 +517,8 @@
 }
 
 .ovh-name {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 800;
 }
 
 .ovh-year {
