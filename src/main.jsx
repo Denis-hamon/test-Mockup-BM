@@ -54,7 +54,7 @@ if (!urlLocale || !LOCALE_MAP[urlLocale]) {
         ? BareMetalListingMockup
         : route === 'maquette-baremetal-listing-v2'
           ? BareMetalListingMockupV2
-          : route === 'maquette-baremetal-config-adv1'
+          : route === 'maquette-baremetal-config-adv1' || route === 'config-adv1'
             ? BareMetalConfiguratorMockup
         : App;
 
