@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './BareMetalListingMockup.css';
 import './BareMetalConfiguratorMockup.css';
 
@@ -11,7 +11,11 @@ const MEMORY_AVAILABLE = [
   { id: 'ram-384', label: '384 Go DDR5 4800 MHz', badge: 'On-Die ECC', price: 84.0 },
 ];
 
-const MEMORY_ON_REQUEST = [{ id: 'ram-512-call', label: '512 Go DDR5 4800 MHz', mode: 'on_request' }];
+const MEMORY_ON_REQUEST = [
+  { id: 'ram-256-call', label: '256 Go DDR5 4800 MHz', mode: 'on_request' },
+  { id: 'ram-512-call', label: '512 Go DDR5 4800 MHz', mode: 'on_request' },
+  { id: 'ram-1024-call', label: '1024 Go DDR5 4800 MHz', mode: 'on_request' },
+];
 
 const STORAGE_OPTIONS = [
   { id: 'sto-960', label: '2 x 960 Go SSD NVMe Soft RAID', included: true, price: null },
@@ -52,6 +56,9 @@ function OptionRow({ selected = false, label, badge, included = false, price = n
 
 export default function BareMetalConfiguratorMockup() {
   const [selectedMemory, setSelectedMemory] = useState('ram-128');
+  const [requestDropdownOpen, setRequestDropdownOpen] = useState(false);
+  const [selectedRequestMemory, setSelectedRequestMemory] = useState(MEMORY_ON_REQUEST[0].id);
+  const requestDropdownRef = useRef(null);
 
   useEffect(() => {
     document.body.classList.add('no-scanlines');
@@ -60,9 +67,28 @@ export default function BareMetalConfiguratorMockup() {
     };
   }, []);
 
-  const callbackMode = selectedMemory === 'ram-512-call';
+  useEffect(() => {
+    function handleDocumentClick(event) {
+      if (!requestDropdownRef.current) return;
+      if (!requestDropdownRef.current.contains(event.target)) {
+        setRequestDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleDocumentClick);
+    return () => {
+      document.removeEventListener('mousedown', handleDocumentClick);
+    };
+  }, []);
+
+  const callbackMode = MEMORY_ON_REQUEST.some((item) => item.id === selectedMemory);
+  const selectedRequestOption =
+    MEMORY_ON_REQUEST.find((item) => item.id === selectedRequestMemory) || MEMORY_ON_REQUEST[0];
   const selectedMemoryLabel = useMemo(() => {
-    if (callbackMode) return MEMORY_ON_REQUEST[0].label;
+    if (callbackMode) {
+      const requestMatch = MEMORY_ON_REQUEST.find((item) => item.id === selectedMemory);
+      return requestMatch ? requestMatch.label : MEMORY_ON_REQUEST[0].label;
+    }
     const match = MEMORY_AVAILABLE.find((item) => item.id === selectedMemory);
     return match ? match.label : MEMORY_AVAILABLE[0].label;
   }, [callbackMode, selectedMemory]);
@@ -128,7 +154,10 @@ export default function BareMetalConfiguratorMockup() {
                     type="button"
                     key={option.id}
                     className={`ovh-conf-row${!callbackMode && selectedMemory === option.id ? ' selected' : ''}`}
-                    onClick={() => setSelectedMemory(option.id)}
+                    onClick={() => {
+                      setSelectedMemory(option.id);
+                      setRequestDropdownOpen(false);
+                    }}
                   >
                     <span
                       className={`ovh-conf-radio${!callbackMode && selectedMemory === option.id ? ' selected' : ''}`}
@@ -151,21 +180,44 @@ export default function BareMetalConfiguratorMockup() {
 
                 <h3 className="ovh-conf-subheading">Autres options de RAM sur demande</h3>
                 <div className={`ovh-conf-request${callbackMode ? ' active' : ''}`}>
-                  <button
-                    type="button"
-                    className="ovh-conf-request-select"
-                    onClick={() => setSelectedMemory('ram-512-call')}
-                  >
-                    <span className={`ovh-conf-radio${callbackMode ? ' selected' : ''}`} aria-hidden="true" />
-                    <span className="ovh-conf-label">{MEMORY_ON_REQUEST[0].label}</span>
-                    <span className="ovh-conf-chevron" aria-hidden="true">
-                      v
-                    </span>
-                  </button>
+                  <div className="ovh-conf-request-select-wrap" ref={requestDropdownRef}>
+                    <button
+                      type="button"
+                      className="ovh-conf-request-select"
+                      onClick={() => setRequestDropdownOpen((current) => !current)}
+                    >
+                      <span className={`ovh-conf-radio${callbackMode ? ' selected' : ''}`} aria-hidden="true" />
+                      <span className="ovh-conf-label">{selectedRequestOption.label}</span>
+                      <span className="ovh-conf-chevron" aria-hidden="true">
+                        {requestDropdownOpen ? '^' : 'v'}
+                      </span>
+                    </button>
+                    {requestDropdownOpen ? (
+                      <div className="ovh-conf-request-list">
+                        {MEMORY_ON_REQUEST.map((option) => (
+                          <button
+                            key={option.id}
+                            type="button"
+                            className={`ovh-conf-request-item${selectedRequestMemory === option.id ? ' selected' : ''}`}
+                            onClick={() => {
+                              setSelectedRequestMemory(option.id);
+                              setSelectedMemory(option.id);
+                              setRequestDropdownOpen(false);
+                            }}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
                   <button
                     type="button"
                     className={`ovh-conf-request-cta${callbackMode ? ' active' : ''}`}
-                    onClick={() => setSelectedMemory('ram-512-call')}
+                    onClick={() => {
+                      setSelectedMemory(selectedRequestMemory);
+                      setRequestDropdownOpen(false);
+                    }}
                   >
                     Etre rappele
                   </button>

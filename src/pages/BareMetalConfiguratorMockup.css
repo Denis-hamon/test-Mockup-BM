@@ -87,12 +87,17 @@
   align-items: center;
   text-align: left;
   cursor: pointer;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
 }
 
 .ovh-conf-row.selected {
   border: 2px solid #2a5fd6;
   background: #f6fbff;
   padding: 7px 8px;
+}
+
+.ovh-conf-row:hover {
+  border-color: #aebfdf;
 }
 
 .ovh-conf-radio {
@@ -165,6 +170,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) 134px;
   background: #fff;
+  position: relative;
 }
 
 .ovh-conf-request.active {
@@ -183,6 +189,50 @@
   align-items: center;
   text-align: left;
   cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.ovh-conf-request-select:hover {
+  background: #f7f9fd;
+}
+
+.ovh-conf-request-select-wrap {
+  position: relative;
+}
+
+.ovh-conf-request-list {
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  top: calc(100% - 1px);
+  border: 1px solid #bfcdea;
+  border-top: none;
+  background: #fff;
+  box-shadow: 0 10px 20px rgba(16, 38, 84, 0.14);
+  z-index: 14;
+}
+
+.ovh-conf-request-item {
+  width: 100%;
+  min-height: 36px;
+  border: none;
+  border-top: 1px solid #e1e8f4;
+  background: #fff;
+  color: #153571;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+  padding: 8px 18px;
+  cursor: pointer;
+}
+
+.ovh-conf-request-item:first-child {
+  border-top: none;
+}
+
+.ovh-conf-request-item:hover,
+.ovh-conf-request-item.selected {
+  background: #f2f6ff;
 }
 
 .ovh-conf-request-cta {
@@ -192,6 +242,7 @@
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
 }
 
 .ovh-conf-request-cta.active {
@@ -241,6 +292,10 @@
   background: #fff;
   overflow: hidden;
   box-shadow: 0 5px 16px rgba(20, 40, 92, 0.08);
+}
+
+.ovh-conf-main-cta {
+  cursor: pointer;
 }
 
 .ovh-conf-summary-head {
