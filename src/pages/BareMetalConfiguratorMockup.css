@@ -1,0 +1,409 @@
+.ovh-config-page {
+  min-height: 100vh;
+  background: #f3f5fa;
+  color: #132c66;
+  font-family: 'Source Sans 3', 'Segoe UI', Arial, sans-serif;
+}
+
+.ovh-config-main {
+  padding: 0 20px 64px;
+}
+
+.ovh-config-shell {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-top: 24px;
+}
+
+.ovh-config-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 334px;
+  gap: 20px;
+  align-items: start;
+}
+
+.ovh-config-left {
+  min-width: 0;
+}
+
+.ovh-config-breadcrumb {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: #4f638f;
+}
+
+.ovh-config-title {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1.05;
+  color: #102d6d;
+  letter-spacing: -0.01em;
+}
+
+.ovh-config-subtitle {
+  margin: 12px 0 18px;
+  max-width: 760px;
+  font-size: 15px;
+  line-height: 1.38;
+  color: #4a5f8e;
+}
+
+.ovh-config-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #1a57d6;
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+  margin-bottom: 14px;
+}
+
+.ovh-config-link::after {
+  content: '->';
+  font-size: 13px;
+}
+
+.ovh-config-block {
+  margin-bottom: 20px;
+}
+
+.ovh-config-block h2 {
+  margin: 0 0 10px;
+  font-size: 40px;
+  font-size: clamp(28px, 2.1vw, 36px);
+  line-height: 1;
+  color: #173575;
+  letter-spacing: -0.01em;
+}
+
+.ovh-config-choice {
+  width: 100%;
+  border: 1px solid #c6d2eb;
+  background: #fff;
+  border-radius: 8px;
+  min-height: 54px;
+  padding: 11px 12px;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ovh-config-choice.is-selected {
+  border: 2px solid #1e57d8;
+  background: #f5fbff;
+}
+
+.ovh-config-radio {
+  width: 13px;
+  height: 13px;
+  border: 1px solid #b8c3de;
+  border-radius: 999px;
+  position: relative;
+  background: #fff;
+}
+
+.ovh-config-radio.is-selected {
+  border-color: #1f57d8;
+}
+
+.ovh-config-radio.is-selected::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 999px;
+  background: #1f57d8;
+}
+
+.ovh-config-choice-text {
+  min-width: 0;
+  font-size: 31px;
+  font-size: clamp(22px, 1.6vw, 29px);
+  font-weight: 700;
+  color: #15336f;
+  line-height: 1.1;
+}
+
+.ovh-config-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px;
+  background: #d3f2ff;
+  color: #246086;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 8px;
+}
+
+.ovh-config-choice-price {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1f57d8;
+  line-height: 1;
+}
+
+.ovh-config-choice-price small {
+  margin-top: 4px;
+  font-size: 10px;
+  color: #5a6892;
+  font-weight: 600;
+}
+
+.ovh-config-choice-end {
+  font-size: 33px;
+  font-size: clamp(22px, 1.7vw, 31px);
+  font-weight: 700;
+  color: #1e57d8;
+  line-height: 1;
+}
+
+.ovh-config-onrequest {
+  border: 1px solid #c6d2eb;
+  border-radius: 8px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 132px;
+  background: #fff;
+}
+
+.ovh-config-onrequest.is-selected {
+  border-color: #1f57d8;
+}
+
+.ovh-config-onrequest-select {
+  border: none;
+  border-right: 1px solid #cad5ee;
+  background: transparent;
+  min-height: 52px;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ovh-config-chevron {
+  color: #6a7697;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.ovh-config-onrequest-cta {
+  border: none;
+  background: #c6c7cb;
+  color: #f4f4f5;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ovh-config-onrequest-cta.is-active {
+  background: #2552d0;
+  color: #fff;
+}
+
+.ovh-config-right {
+  position: sticky;
+  top: 18px;
+}
+
+.ovh-config-summary {
+  border: 1px solid #ced6e8;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(24, 45, 95, 0.08);
+  overflow: hidden;
+}
+
+.ovh-config-summary-head {
+  padding: 14px 14px 12px;
+  border-bottom: 1px solid #d8dfec;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.ovh-config-summary-head p {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7898;
+  font-weight: 600;
+}
+
+.ovh-config-summary-head h3 {
+  margin: 3px 0 0;
+  font-size: 30px;
+  font-size: clamp(22px, 1.5vw, 30px);
+  line-height: 1;
+}
+
+.ovh-config-summary-head strong {
+  font-size: 24px;
+  font-size: clamp(18px, 1.2vw, 22px);
+  color: #173676;
+  line-height: 1;
+}
+
+.ovh-config-summary-lines {
+  padding: 2px 14px 0;
+}
+
+.ovh-config-line {
+  border-bottom: 1px solid #e2e6f0;
+  padding: 10px 0;
+}
+
+.ovh-config-line:last-child {
+  border-bottom: none;
+}
+
+.ovh-config-line p {
+  margin: 0 0 4px;
+  color: #6f7b97;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.ovh-config-line div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.ovh-config-line span {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a3976;
+}
+
+.ovh-config-line strong {
+  font-size: 23px;
+  font-size: clamp(15px, 1vw, 22px);
+  color: #1a3b7d;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.ovh-config-line strong.free {
+  color: #a13873;
+}
+
+.ovh-config-summary-foot {
+  border-top: 1px solid #d8deec;
+  padding: 12px 14px 14px;
+}
+
+.ovh-config-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.ovh-config-total p {
+  margin: 0;
+  font-size: 34px;
+  font-size: clamp(24px, 1.8vw, 34px);
+  color: #153471;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.ovh-config-total span {
+  font-size: 12px;
+  color: #6d7996;
+}
+
+.ovh-config-total strong {
+  font-size: 40px;
+  font-size: clamp(30px, 2.2vw, 40px);
+  color: #153471;
+  line-height: 1;
+}
+
+.ovh-config-main-cta {
+  width: 100%;
+  margin-top: 14px;
+  min-height: 46px;
+  border-radius: 6px;
+  border: none;
+  background: linear-gradient(180deg, #2f67eb, #2554cf);
+  color: #fff;
+  font-size: 19px;
+  font-size: clamp(14px, 1vw, 19px);
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ovh-config-main-cta.disabled {
+  background: #bfc2c8;
+  color: #f4f4f6;
+  cursor: not-allowed;
+}
+
+.ovh-config-floating-call {
+  position: fixed;
+  right: 22px;
+  bottom: 20px;
+  border: none;
+  border-radius: 999px;
+  min-height: 44px;
+  padding: 0 18px;
+  background: linear-gradient(94deg, #ddf257, #4ae5e3);
+  color: #1f3c61;
+  font-size: 16px;
+  font-weight: 700;
+  box-shadow: 0 12px 26px rgba(31, 56, 100, 0.22);
+  cursor: pointer;
+  z-index: 60;
+}
+
+@media (max-width: 1140px) {
+  .ovh-config-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ovh-config-right {
+    position: static;
+  }
+}
+
+@media (max-width: 820px) {
+  .ovh-config-main {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .ovh-config-choice {
+    grid-template-columns: 18px minmax(0, 1fr) auto;
+  }
+
+  .ovh-config-chip {
+    grid-column: 2 / 3;
+    width: fit-content;
+  }
+
+  .ovh-config-choice-price {
+    grid-column: 3 / 4;
+  }
+
+  .ovh-config-onrequest {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ovh-config-onrequest-select {
+    border-right: none;
+    border-bottom: 1px solid #cad5ee;
+  }
+}
