@@ -290,6 +290,20 @@
   color: var(--ovh-blue-700);
 }
 
+.ovh-mode-toggle button:first-child {
+  color: #1f6a42;
+}
+
+.ovh-mode-toggle button:first-child:not(.active) {
+  background: rgba(31, 143, 77, 0.1);
+}
+
+.ovh-mode-toggle button:first-child.active {
+  background: #1f8f4d;
+  color: #ffffff;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3) inset;
+}
+
 .ovh-results-with-bottom-toggle {
   padding-bottom: 132px;
 }

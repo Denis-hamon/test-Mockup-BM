@@ -311,7 +311,7 @@ function formatPrice(value) {
 
 export default function BareMetalListingMockup({ toggleVariant = 'top' }) {
   const isBottomToggle = toggleVariant === 'bottom';
-  const [mode, setMode] = useState('on_request');
+  const [mode, setMode] = useState('available_now');
   const [payloadPreview, setPayloadPreview] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedServer, setSelectedServer] = useState(null);
