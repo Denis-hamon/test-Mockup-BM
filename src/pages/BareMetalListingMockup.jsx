@@ -297,7 +297,7 @@ function requiresContact(server) {
 }
 
 function statusLabel(status) {
-  return status === 'available_now' ? 'Disponible' : 'Sur demande';
+  return status === 'available_now' ? 'Disponible' : 'Nous contacter';
 }
 
 function isLegacyReferenceExcluded(server) {
@@ -545,7 +545,7 @@ export default function BareMetalListingMockup({ toggleVariant = 'top' }) {
                   className={`mode-request${mode === 'on_request' ? ' active' : ''}`}
                   onClick={() => setMode('on_request')}
                 >
-                  Sur demande
+                  Nous contacter
                 </button>
               </div>
             ) : null}
@@ -561,7 +561,7 @@ export default function BareMetalListingMockup({ toggleVariant = 'top' }) {
           </p>
         ) : (
           <p className="ovh-api-meta-inline">
-            Mode Sur demande: seules les RAM indisponibles a date sont affichees.
+            Mode Nous contacter: seules les RAM indisponibles a date sont affichees.
           </p>
         )}
         {apiError ? <p className="ovh-api-error">{apiError}</p> : null}
@@ -658,7 +658,7 @@ export default function BareMetalListingMockup({ toggleVariant = 'top' }) {
             preparation en datacenter pour appliquer la configuration demandee.
           </p>
           <p>
-            Le mode "Sur demande" permet de conserver la visibilite sur l offre complete tout en orientant
+            Le mode "Nous contacter" permet de conserver la visibilite sur l offre complete tout en orientant
             les configurations contraintes vers un accompagnement commercial avec proposition d alternative.
           </p>
         </article>
@@ -679,7 +679,7 @@ export default function BareMetalListingMockup({ toggleVariant = 'top' }) {
               className={`mode-request${mode === 'on_request' ? ' active' : ''}`}
               onClick={() => setMode('on_request')}
             >
-              Sur demande
+              Nous contacter
             </button>
           </div>
         </div>
