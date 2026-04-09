@@ -535,14 +535,14 @@ export default function BareMetalListingMockup({ toggleVariant = 'top' }) {
               <div className="ovh-mode-toggle ovh-mode-toggle-inline">
                 <button
                   type="button"
-                  className={mode === 'available_now' ? 'active' : ''}
+                  className={`mode-available${mode === 'available_now' ? ' active' : ''}`}
                   onClick={() => setMode('available_now')}
                 >
-                  Disponibles
+                  Disponible
                 </button>
                 <button
                   type="button"
-                  className={mode === 'on_request' ? 'active' : ''}
+                  className={`mode-request${mode === 'on_request' ? ' active' : ''}`}
                   onClick={() => setMode('on_request')}
                 >
                   Sur demande
@@ -669,14 +669,14 @@ export default function BareMetalListingMockup({ toggleVariant = 'top' }) {
           <div className="ovh-mode-toggle ovh-mode-toggle-bottom">
             <button
               type="button"
-              className={mode === 'available_now' ? 'active' : ''}
+              className={`mode-available${mode === 'available_now' ? ' active' : ''}`}
               onClick={() => setMode('available_now')}
             >
               Disponible
             </button>
             <button
               type="button"
-              className={mode === 'on_request' ? 'active' : ''}
+              className={`mode-request${mode === 'on_request' ? ' active' : ''}`}
               onClick={() => setMode('on_request')}
             >
               Sur demande
