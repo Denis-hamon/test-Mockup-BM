@@ -224,6 +224,12 @@ export default function BareMetalConfiguratorMockup() {
   const [selectedMemory, setSelectedMemory] = useState('ram-128');
   const [requestDropdownOpen, setRequestDropdownOpen] = useState(false);
   const [selectedRequestMemory, setSelectedRequestMemory] = useState(MEMORY_ON_REQUEST[MEMORY_ON_REQUEST.length - 1].id);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [contactForm, setContactForm] = useState({
+    fullName: '',
+    email: '',
+    phone: '(+33)01 23 45 67 89',
+  });
   const [liveServerCode, setLiveServerCode] = useState('26adv01');
   const [regionsLoading, setRegionsLoading] = useState(false);
   const [regionsError, setRegionsError] = useState('');
@@ -252,6 +258,24 @@ export default function BareMetalConfiguratorMockup() {
       document.removeEventListener('mousedown', handleDocumentClick);
     };
   }, []);
+
+  useEffect(() => {
+    if (!contactModalOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    function handleEscape(event) {
+      if (event.key === 'Escape') {
+        setContactModalOpen(false);
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [contactModalOpen]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -634,7 +658,13 @@ export default function BareMetalConfiguratorMockup() {
                     </div>
                     <strong>{formatMoney(BASE_PRICE)}</strong>
                   </div>
-                  <button type="button" className={`ovh-conf-main-cta${callbackMode ? ' contact' : ''}`}>
+                  <button
+                    type="button"
+                    className={`ovh-conf-main-cta${callbackMode ? ' contact' : ''}`}
+                    onClick={() => {
+                      if (callbackMode) setContactModalOpen(true);
+                    }}
+                  >
                     {mainCtaLabel}
                   </button>
                 </footer>
@@ -644,9 +674,76 @@ export default function BareMetalConfiguratorMockup() {
         </div>
       </main>
 
-      <button type="button" className="ovh-conf-float-call">
+      <button type="button" className="ovh-conf-float-call" onClick={() => setContactModalOpen(true)}>
         Planifier un appel
       </button>
+
+      {contactModalOpen ? (
+        <div className="ovh-call-modal-overlay" role="presentation" onClick={() => setContactModalOpen(false)}>
+          <div
+            className="ovh-call-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ovh-call-modal-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="ovh-call-modal-head">
+              <h3 id="ovh-call-modal-title">Planifier un appel</h3>
+              <button
+                type="button"
+                className="ovh-call-modal-close"
+                aria-label="Fermer"
+                onClick={() => setContactModalOpen(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="ovh-call-modal-body">
+              <p className="ovh-call-modal-copy">
+                Un conseiller commercial OVHcloud se tient a votre disposition et vous rappelle gratuitement a
+                l'horaire de votre choix
+              </p>
+              <input
+                type="text"
+                placeholder="Nom Prenom"
+                value={contactForm.fullName}
+                onChange={(event) =>
+                  setContactForm((current) => ({ ...current, fullName: event.target.value }))
+                }
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={contactForm.email}
+                onChange={(event) => setContactForm((current) => ({ ...current, email: event.target.value }))}
+              />
+              <div className="ovh-call-phone-row">
+                <button type="button" className="ovh-call-country">
+                  <span className="ovh-call-fr-flag" aria-hidden="true" />
+                  <span className="ovh-call-country-chevron" aria-hidden="true" />
+                </button>
+                <input
+                  type="tel"
+                  value={contactForm.phone}
+                  onChange={(event) => setContactForm((current) => ({ ...current, phone: event.target.value }))}
+                />
+              </div>
+
+              <p className="ovh-call-modal-wish">Je souhaite :</p>
+              <button type="button" className="ovh-call-cta-primary">
+                Etre rappele dans un instant
+              </button>
+              <button type="button" className="ovh-call-cta-secondary">
+                Planifier un rendez-vous
+              </button>
+              <p className="ovh-call-modal-legal">
+                Les donnees personnelles collectees via ce formulaire sont traitees par OVHcloud...{' '}
+                <a href="#0">Lire plus</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
