@@ -210,6 +210,74 @@ const categories = [
   },
 ];
 
+const categoryExpansions = {
+  ideation: [
+    ['Constraint removal', 'Remove one major constraint and explore the product that becomes possible.', 'Breakthrough ideation.', 'If this product no longer had this constraint, what new product opportunities would become possible? Then rank which are still feasible.'],
+    ['Analogical transfer', 'Borrow patterns from another industry or product category.', 'Non-obvious feature discovery.', 'Which patterns from unrelated industries could solve this user problem? Translate them into product concepts.'],
+    ['Non-consumption mining', 'Look for users who do nothing today because existing solutions are too hard.', 'Market creation.', 'Who is not using any solution today, and what minimum product would make adoption possible for them?'],
+  ],
+  discovery: [
+    ['Trigger event mapping', 'Identify the event that makes the need urgent.', 'Demand discovery.', 'What events trigger this user to actively seek a solution, and what do they try first?'],
+    ['Alternative timeline reconstruction', 'Rebuild the sequence of solutions users tried before arriving here.', 'Switching research.', 'Reconstruct the timeline of alternatives this user tried, including what failed at each step.'],
+    ['Demand intensity scoring', 'Score demand by urgency, frequency, pain, and current spend.', 'Opportunity qualification.', 'Score these needs by urgency, frequency, pain intensity, current workaround cost, and willingness to switch.'],
+  ],
+  strategy: [
+    ['Playing field definition', 'Define the real arena of competition before choosing strategy.', 'Strategic framing.', 'What game are we actually playing: workflow, system of record, marketplace, infrastructure, or point solution?'],
+    ['Strategic option set', 'Generate mutually exclusive strategic paths.', 'Leadership decision.', 'Create 4 mutually exclusive strategic options, with what each requires, refuses, and risks.'],
+    ['Expansion path mapping', 'Map how a wedge can expand into adjacent segments or workflows.', 'Long-term roadmap.', 'Starting from this wedge, map credible expansion paths by segment, workflow, data, and channel.'],
+  ],
+  prioritization: [
+    ['Confidence decomposition', 'Separate confidence into evidence, feasibility, and strategic clarity.', 'Score quality improvement.', 'Decompose confidence for each initiative into user evidence, technical feasibility, and strategic alignment.'],
+    ['Regret minimization', 'Prioritize by the future regret of not acting.', 'Ambiguous roadmap choices.', 'Which option would we most regret not testing in 6 months, and why?'],
+    ['Risk-adjusted roadmap', 'Balance expected upside against delivery and adoption risk.', 'Roadmap governance.', 'Re-rank this roadmap by risk-adjusted value, not raw impact.'],
+  ],
+  experimentation: [
+    ['Fake-door experiment', 'Measure intent with an entry point before building.', 'Demand validation.', 'Design a fake-door test that measures real intent without misleading users or damaging trust.'],
+    ['Prototype interview test', 'Use a prototype to reveal comprehension, desire, and objections.', 'Concept validation.', 'Design a prototype interview script to test comprehension, perceived value, and objections.'],
+    ['Decision threshold design', 'Define what result will change the decision before launching a test.', 'Experiment governance.', 'Define success, failure, and inconclusive thresholds for this experiment before launch.'],
+  ],
+  metrics: [
+    ['Metric instrumentation audit', 'Check whether the metric can actually be trusted.', 'Analytics quality.', 'Audit whether this metric is instrumented well enough to support a product decision.'],
+    ['Proxy metric validation', 'Test whether a proxy metric predicts the real outcome.', 'Early signal design.', 'Which proxy metrics could predict the target outcome, and how would we validate them?'],
+    ['Behavioral segmentation', 'Segment by behavior rather than demographics.', 'Product analytics.', 'Segment users by behavior patterns that could explain this metric movement.'],
+  ],
+  ux: [
+    ['Comprehension test', 'Check whether users understand what the product does and what to do next.', 'UX clarity.', 'Audit this screen for comprehension: what will users understand, miss, or misinterpret?'],
+    ['Decision architecture audit', 'Evaluate how choices are structured and whether defaults guide success.', 'Complex UX.', 'Analyze the decision architecture: choices, defaults, sequencing, and risk of wrong selections.'],
+    ['Trust surface audit', 'Identify where users need reassurance, proof, or control.', 'Conversion and onboarding.', 'Where does this experience require trust, proof, transparency, or control to move forward?'],
+  ],
+  competition: [
+    ['Switching cost teardown', 'Analyze what makes competitors hard to leave.', 'Competitive strategy.', 'Break down competitor switching costs across data, workflow, integrations, habit, and procurement.'],
+    ['White-space mapping', 'Find areas competitors systematically ignore.', 'Market positioning.', 'Map the white spaces competitors ignore by segment, use case, price point, and workflow depth.'],
+    ['Capability asymmetry', 'Find where our strengths create a different game.', 'Differentiation.', 'Which capabilities do we have that competitors cannot easily copy, and what product strategy do they enable?'],
+  ],
+  delivery: [
+    ['Thin-slice sequencing', 'Order slices so each reduces the biggest uncertainty.', 'Incremental delivery.', 'Sequence this initiative into thin slices that each reduce a major uncertainty or deliver measurable value.'],
+    ['Operational readiness audit', 'Check support, monitoring, process, and rollout readiness.', 'Launch operations.', 'Audit operational readiness: support, monitoring, rollback, documentation, enablement, and ownership.'],
+    ['Requirements ambiguity scan', 'Find vague requirements before engineering starts.', 'Spec quality.', 'Scan these requirements for ambiguity, hidden dependencies, edge cases, and undefined acceptance criteria.'],
+  ],
+  monetization: [
+    ['Price fence design', 'Create packaging fences that segment customers fairly.', 'Packaging.', 'Design price fences that separate segments by value received without creating resentment.'],
+    ['Usage expansion trigger', 'Identify usage signals that indicate readiness to expand.', 'Expansion revenue.', 'Which usage events indicate a customer is ready for upgrade, expansion, or enterprise sales?'],
+    ['Budget owner mapping', 'Identify who owns the budget and what value they recognize.', 'B2B pricing.', 'Map user, buyer, budget owner, economic sponsor, and the ROI each one cares about.'],
+  ],
+  gtm: [
+    ['Channel-message fit', 'Match promise, audience, and acquisition channel.', 'GTM planning.', 'Which channels fit this message and audience, and what promise should lead in each channel?'],
+    ['Proof asset mapping', 'Identify the evidence needed to make claims credible.', 'PMM enablement.', 'What proof assets are required to make this positioning credible: demo, benchmark, case study, quote, ROI model?'],
+    ['Champion enablement path', 'Help an internal champion sell the product inside their organization.', 'Enterprise adoption.', 'Design the internal champion path: narrative, proof, objection handling, and stakeholder-specific materials.'],
+  ],
+  risk: [
+    ['Assumption decay audit', 'Check whether old assumptions are still valid.', 'Strategic governance.', 'Which assumptions behind this product decision may have decayed, and what evidence should refresh them?'],
+    ['Reversibility analysis', 'Classify decisions by reversibility and blast radius.', 'Decision quality.', 'Classify these decisions by reversibility, blast radius, and required evidence threshold.'],
+    ['Failure mode prioritization', 'Rank failure modes by probability, severity, and detectability.', 'Risk management.', 'List failure modes and rank them by probability, severity, detectability, and prevention action.'],
+  ],
+};
+
+const expandedCategories = categories.map((category) => ({
+  ...category,
+  techniques: [...category.techniques, ...(categoryExpansions[category.id] || [])],
+}));
+
 const nativeTechniques = [
   ['Multi-agent simulation', 'LLMs can simulate multiple stakeholders.', 'Make a PM, designer, engineer, sales lead, CFO, and expert user debate this roadmap.'],
   ['Adversarial refinement', 'Generate, attack, then improve.', 'Propose 10 ideas, critique them harshly, then rebuild the best 3.'],
@@ -328,7 +396,7 @@ const topTechniques = [
   ['20', 'Kill criteria', 'Prevents unproductive persistence'],
 ];
 
-const allTechniques = categories.flatMap((category) =>
+const allTechniques = expandedCategories.flatMap((category) =>
   category.techniques.map(([name, principle, use, prompt]) => ({
     categoryId: category.id,
     categoryTitle: category.title,
@@ -365,6 +433,51 @@ const contextQualityGate = `Before answering, run a context-quality-gate:
 4. If critical context is missing, ask up to 5 targeted clarification questions.
 5. If the task can still proceed, state the assumptions you will use and mark confidence as High / Medium / Low.`;
 
+const categoryLineage = {
+  ideation: ['Design thinking, creativity research, product discovery', 'Turns raw observations into candidate product moves before prioritization.'],
+  discovery: ['Jobs-to-be-Done, customer development, qualitative research', 'Prevents teams from confusing stated preferences with real demand.'],
+  strategy: ['Business strategy, category design, positioning, systems thinking', 'Helps decide where to compete, what to refuse, and how advantages compound.'],
+  prioritization: ['Lean product management, portfolio management, decision science', 'Makes trade-offs explicit when time, team capacity, and confidence are limited.'],
+  experimentation: ['Lean Startup, scientific method, experiment design', 'Reduces waste by testing the riskiest belief before building too much.'],
+  metrics: ['Product analytics, causal inference, systems thinking', 'Connects user behavior to measurable outcomes without over-trusting averages.'],
+  ux: ['Human-computer interaction, usability heuristics, service design', 'Reduces cognitive effort so users reach value faster and recover from errors.'],
+  competition: ['Competitive strategy, positioning, disruption theory', 'Avoids feature-copying by identifying real alternatives, substitutes, and neglected segments.'],
+  delivery: ['Agile delivery, requirements engineering, release management', 'Turns product intent into shippable, testable, and aligned execution.'],
+  monetization: ['SaaS pricing, value-based pricing, revenue strategy', 'Connects value created to value captured without damaging adoption or trust.'],
+  gtm: ['Product marketing, sales enablement, adoption strategy', 'Makes product value legible to buyers, users, champions, and channels.'],
+  risk: ['Decision analysis, pre-mortem practice, red-team review', 'Improves decision quality by attacking weak assumptions before reality does.'],
+};
+
+const techniqueProfileOverrides = {
+  'JTBD decomposition': ['Jobs-to-be-Done theory and switch interview practice', 'Use it when feature requests are noisy and you need to understand the underlying progress users seek.'],
+  'RICE critique': ['Intercom-style product prioritization rubric', 'Use it to make prioritization assumptions visible, especially confidence and effort.'],
+  'ICE fast ranking': ['Growth experimentation and fast prioritization practice', 'Use it when speed matters more than precision and you need a first cut.'],
+  'Cost of Delay': ['Lean, Kanban, and economics of flow', 'Use it when waiting has measurable business, churn, risk, or learning cost.'],
+  'First-principles reasoning': ['Physics-inspired reasoning adapted to strategy and product design', 'Use it when market conventions are constraining the solution space.'],
+  'Pre-mortem': ['Decision psychology and prospective hindsight', 'Use it before launch or investment to surface preventable failure modes.'],
+  'Red team': ['Adversarial review from security, military, and strategy practices', 'Use it when optimism, politics, or sunk cost may be weakening judgment.'],
+  'Metric tree decomposition': ['Analytics trees, driver trees, and causal product analysis', 'Use it to connect product work to business outcomes and leading indicators.'],
+  'Concierge MVP': ['Lean Startup and service prototyping', 'Use it to validate value manually before automating or scaling.'],
+  'Wizard of Oz': ['HCI prototyping and AI/automation validation', 'Use it to test perceived automation value before building the system.'],
+};
+
+function getTechniqueProfile(technique) {
+  const [origin, benefit] =
+    techniqueProfileOverrides[technique.name] || categoryLineage[technique.categoryId] || categoryLineage.strategy;
+
+  return {
+    origin,
+    benefit,
+    inputs: [
+      'Clear product objective',
+      'Target user or segment',
+      'Available evidence or metrics',
+      'Constraints and decision deadline',
+    ],
+    deliverable: `${technique.use} artifact with assumptions, risks, confidence, and next validation step.`,
+  };
+}
+
 function techniqueKey(technique) {
   return `${technique.categoryId}::${technique.name}`;
 }
@@ -382,7 +495,7 @@ function normalizeTechnique(category, technique) {
 }
 
 export default function ProductReasoningAtlas() {
-  const [activeCategory, setActiveCategory] = useState(categories[0].id);
+  const [activeCategory, setActiveCategory] = useState(expandedCategories[0].id);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchScope, setSearchScope] = useState('family');
   const [activeSituationId, setActiveSituationId] = useState(pmSituations[0].id);
@@ -392,7 +505,7 @@ export default function ProductReasoningAtlas() {
   const [copyState, setCopyState] = useState('Copy full prompt');
   const [comboCopyState, setComboCopyState] = useState('Copy full chain prompt');
   const [nativeCopyState, setNativeCopyState] = useState('Copy native prompt');
-  const active = categories.find((category) => category.id === activeCategory) || categories[0];
+  const active = expandedCategories.find((category) => category.id === activeCategory) || expandedCategories[0];
   const activeSituation = pmSituations.find((situation) => situation.id === activeSituationId) || pmSituations[0];
   const activeCombo = combos[activeComboIndex] || combos[0];
   const activeNative = nativeTechniques[activeNativeIndex] || nativeTechniques[0];
@@ -409,6 +522,7 @@ export default function ProductReasoningAtlas() {
     : familyTechniques;
   const selectedTechnique =
     visibleTechniques.find((technique) => techniqueKey(technique) === selectedKey) || visibleTechniques[0];
+  const selectedProfile = selectedTechnique ? getTechniqueProfile(selectedTechnique) : null;
   const recommendedTechniques = activeSituation.techniques.map(findTechniqueByName).filter(Boolean);
 
   useEffect(() => {
@@ -434,6 +548,7 @@ export default function ProductReasoningAtlas() {
   async function handleCopyPrompt() {
     if (!selectedTechnique) return;
     const boost = promptEngineeringBoosts[selectedTechnique.categoryId];
+    const profile = getTechniqueProfile(selectedTechnique);
     const copyText = `Role:
 You are a senior product strategist and product discovery lead. You reason rigorously, separate evidence from assumptions, and optimize for actionable product decisions.
 
@@ -455,6 +570,12 @@ ${selectedTechnique.name}
 
 Technique principle:
 ${selectedTechnique.principle}
+
+Technique origin / lineage:
+${profile.origin}
+
+Why this technique is useful:
+${profile.benefit}
 
 Prompt kernel:
 ${selectedTechnique.prompt}
@@ -658,7 +779,7 @@ Quality bar:
           </div>
           <div className="atlas-hero-metrics" aria-label="Atlas metrics">
             <div><strong>12</strong><span>families</span></div>
-            <div><strong>96</strong><span>core techniques</span></div>
+            <div><strong>{allTechniques.length}</strong><span>core techniques</span></div>
             <div><strong>10</strong><span>LLM-native modes</span></div>
             <div><strong>5</strong><span>high-yield chains</span></div>
           </div>
@@ -821,7 +942,7 @@ Quality bar:
 
         <div className="atlas-category-layout">
           <div className="atlas-category-rail" aria-label="Technique categories">
-            {categories.map((category, index) => (
+            {expandedCategories.map((category, index) => (
               <button
                 className={category.id === activeCategory ? 'is-active' : ''}
                 key={category.id}
@@ -878,6 +999,26 @@ Quality bar:
                 <aside className="prompt-lab" aria-label="Selected technique detail">
                   <span className="lab-kicker">Selected prompt · {selectedTechnique.categoryTitle}</span>
                   <h4>{selectedTechnique.name}</h4>
+                  {selectedProfile && (
+                    <div className="technique-fiche">
+                      <div>
+                        <span>Origin / lineage</span>
+                        <p>{selectedProfile.origin}</p>
+                      </div>
+                      <div>
+                        <span>Why use it</span>
+                        <p>{selectedProfile.benefit}</p>
+                      </div>
+                      <div>
+                        <span>Ideal inputs</span>
+                        <p>{selectedProfile.inputs.join(', ')}</p>
+                      </div>
+                      <div>
+                        <span>Expected deliverable</span>
+                        <p>{selectedProfile.deliverable}</p>
+                      </div>
+                    </div>
+                  )}
                   <dl>
                     <div>
                       <dt>Principle</dt>

@@ -1109,6 +1109,33 @@
   background: var(--cds-gray-70);
 }
 
+.technique-fiche {
+  display: grid;
+  gap: 1px;
+  margin: 0 0 1px;
+  background: var(--cds-gray-70);
+}
+
+.technique-fiche div {
+  padding: 14px;
+  background: #001d6c;
+}
+
+.technique-fiche span {
+  display: block;
+  color: #d0e2ff;
+  font: 600 12px/1.2 'IBM Plex Mono', monospace;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.technique-fiche p {
+  margin: 8px 0 0;
+  color: var(--cds-white);
+  font-size: 14px;
+  line-height: 1.58;
+}
+
 .prompt-lab dl div {
   padding: 14px;
   background: var(--cds-gray-90);
