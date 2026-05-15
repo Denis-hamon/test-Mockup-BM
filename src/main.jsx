@@ -57,7 +57,7 @@ if (!urlLocale || !LOCALE_MAP[urlLocale]) {
           ? BareMetalListingMockupV2
           : route === 'maquette-baremetal-config-adv1' || route === 'config-adv1'
             ? BareMetalConfiguratorMockup
-            : route === 'gpt-pm-techniques' || route === 'pm-reasoning-atlas'
+            : route === 'gpt-pm-techniques' || route === 'pm-reasoning-atlas' || route === 'llm-reasoning-atlas'
               ? ProductReasoningAtlas
         : App;
 

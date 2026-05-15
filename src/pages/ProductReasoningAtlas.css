@@ -35,6 +35,19 @@
   text-rendering: optimizeLegibility;
 }
 
+.atlas-page p,
+.atlas-page span,
+.atlas-page small,
+.atlas-page strong,
+.atlas-page code,
+.atlas-page dd,
+.atlas-page td,
+.atlas-page th,
+.atlas-page a,
+.atlas-page button {
+  overflow-wrap: anywhere;
+}
+
 .atlas-page *,
 .atlas-page *::before,
 .atlas-page *::after {
@@ -65,9 +78,9 @@
 }
 
 .atlas-hero {
-  min-height: 720px;
+  min-height: 780px;
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(360px, 0.8fr);
+  grid-template-columns: minmax(0, 1.08fr) minmax(420px, 0.92fr);
   grid-template-rows: auto 1fr;
   gap: 1px;
   padding: 0;
@@ -121,8 +134,11 @@
   display: flex;
   flex-direction: column;
   justify-content: end;
-  padding: clamp(32px, 5vw, 80px);
+  padding: clamp(32px, 5vw, 88px);
   color: var(--cds-white);
+  background:
+    linear-gradient(135deg, rgba(15, 98, 254, 0.28) 0%, transparent 42%),
+    linear-gradient(180deg, var(--cds-gray-100) 0%, #0b0b0b 100%);
 }
 
 .atlas-kicker,
@@ -153,8 +169,8 @@
 .atlas-hero h1 {
   max-width: 1120px;
   margin-top: 18px;
-  font-size: clamp(56px, 8vw, 128px);
-  line-height: 0.9;
+  font-size: clamp(56px, 7.4vw, 118px);
+  line-height: 0.98;
 }
 
 .atlas-hero-content > p {
@@ -163,14 +179,50 @@
   color: var(--cds-gray-20);
   font-size: clamp(18px, 1.8vw, 24px);
   font-weight: 300;
-  line-height: 1.45;
+  line-height: 1.56;
+}
+
+.atlas-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  width: fit-content;
+  margin-top: 32px;
+  background: var(--cds-gray-70);
+}
+
+.atlas-hero-actions a {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 18px;
+  color: var(--cds-white);
+  background: var(--cds-blue);
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background 120ms ease;
+}
+
+.atlas-hero-actions a:nth-child(2) {
+  color: var(--cds-gray-20);
+  background: var(--cds-gray-90);
+}
+
+.atlas-hero-actions a:hover {
+  background: var(--cds-blue-hover);
+}
+
+.atlas-hero-actions a:nth-child(2):hover {
+  color: var(--cds-white);
+  background: var(--cds-gray-80);
 }
 
 .atlas-hero-metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1px;
-  margin-top: 48px;
+  margin-top: 40px;
   max-width: 860px;
   background: var(--cds-gray-70);
 }
@@ -199,17 +251,50 @@
 
 .atlas-core-model {
   align-self: stretch;
-  min-height: 560px;
+  min-height: 640px;
   padding: clamp(24px, 4vw, 48px);
   color: var(--cds-white);
+  display: flex;
+  flex-direction: column;
+  background:
+    linear-gradient(180deg, var(--cds-gray-100) 0%, var(--cds-gray-90) 100%);
+}
+
+.hero-prompt-card,
+.hero-output-card {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid var(--cds-gray-70);
+  background: var(--cds-gray-90);
+}
+
+.hero-prompt-card span,
+.hero-output-card span {
+  display: block;
+  color: #78a9ff;
+  font: 600 12px/1.3 'IBM Plex Mono', monospace;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hero-prompt-card p {
+  margin: 12px 0 0;
+  color: var(--cds-white);
+  font-size: clamp(20px, 2.2vw, 30px);
+  font-weight: 300;
+  line-height: 1.25;
 }
 
 .core-ring {
-  min-height: 116px;
+  min-height: 124px;
   margin-top: 1px;
   padding: 18px;
   border-left: 4px solid var(--cds-blue);
   background: var(--cds-gray-90);
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  column-gap: 12px;
+  align-content: start;
 }
 
 .core-ring:nth-of-type(3) {
@@ -224,6 +309,12 @@
   border-left-color: var(--cds-red);
 }
 
+.core-ring em {
+  grid-row: span 2;
+  color: var(--cds-gray-50);
+  font: normal 600 13px/1.4 'IBM Plex Mono', monospace;
+}
+
 .core-ring strong {
   display: block;
   color: var(--cds-white);
@@ -236,7 +327,26 @@
   margin-top: 8px;
   color: var(--cds-gray-30);
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.6;
+}
+
+.hero-output-card {
+  margin-top: auto;
+  background: var(--cds-blue);
+  border-color: var(--cds-blue);
+}
+
+.hero-output-card span {
+  color: #d0e2ff;
+}
+
+.hero-output-card strong {
+  display: block;
+  margin-top: 10px;
+  color: var(--cds-white);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.35;
 }
 
 .atlas-section {
@@ -278,7 +388,7 @@
   margin-top: 10px;
   color: var(--cds-gray-100);
   font-size: clamp(36px, 4.8vw, 72px);
-  line-height: 0.98;
+  line-height: 1.06;
 }
 
 .atlas-controls {
@@ -449,7 +559,7 @@
 .panel-head h3 {
   color: var(--cds-gray-100);
   font-size: clamp(40px, 4.8vw, 72px);
-  line-height: 0.98;
+  line-height: 1.04;
 }
 
 .panel-head p {
@@ -481,11 +591,12 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1px;
   align-content: start;
+  grid-auto-rows: minmax(174px, auto);
   background: var(--cds-border);
 }
 
 .technique-card-grid button {
-  min-height: 152px;
+  min-height: 174px;
   padding: 18px;
   border: 0;
   color: inherit;
@@ -521,7 +632,7 @@
   color: var(--cds-gray-100);
   font-size: 20px;
   font-weight: 400;
-  line-height: 1.18;
+  line-height: 1.32;
 }
 
 .technique-card-grid button small {
@@ -529,7 +640,7 @@
   margin-top: 12px;
   color: var(--cds-gray-70);
   font-size: 14px;
-  line-height: 1.45;
+  line-height: 1.55;
 }
 
 .empty-result {
@@ -563,7 +674,7 @@
   color: var(--cds-white);
   font-size: clamp(34px, 3.6vw, 56px);
   font-weight: 300;
-  line-height: 0.98;
+  line-height: 1.05;
   letter-spacing: -0.035em;
 }
 
@@ -590,24 +701,36 @@
   margin: 8px 0 0;
   color: var(--cds-gray-20);
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.62;
 }
 
-.prompt-box {
+.prompt-box,
+.prompt-boost {
   margin-top: 1px;
   padding: 18px;
   color: var(--cds-gray-100);
   background: var(--cds-white);
 }
 
-.prompt-box span {
+.prompt-box span,
+.prompt-boost span {
   color: var(--cds-blue);
 }
 
-.prompt-box p {
+.prompt-box p,
+.prompt-boost p {
   margin: 10px 0 0;
   font-size: 15px;
-  line-height: 1.55;
+  line-height: 1.7;
+}
+
+.prompt-boost {
+  color: var(--cds-gray-20);
+  background: var(--cds-gray-80);
+}
+
+.prompt-boost span {
+  color: #78a9ff;
 }
 
 .prompt-lab > button {
@@ -661,6 +784,7 @@
 .native-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
   gap: 1px;
   background: var(--cds-border);
 }
@@ -674,7 +798,7 @@
 }
 
 .native-card {
-  min-height: 280px;
+  min-height: 330px;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -685,14 +809,14 @@
   color: var(--cds-gray-100);
   font-size: 20px;
   font-weight: 400;
-  line-height: 1.2;
+  line-height: 1.35;
 }
 
 .native-card p {
   margin: 16px 0;
   color: var(--cds-gray-70);
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .native-card code {
@@ -703,7 +827,8 @@
   background: var(--cds-gray-100);
   font-family: 'IBM Plex Mono', monospace;
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 1.62;
+  white-space: normal;
 }
 
 .combo-stack {
@@ -739,6 +864,7 @@
   font-size: 32px;
   font-weight: 300;
   letter-spacing: -0.025em;
+  line-height: 1.18;
 }
 
 .combo-steps {
@@ -752,14 +878,14 @@
   padding: 9px 12px;
   color: var(--cds-gray-100);
   background: var(--cds-gray-10);
-  font: 500 13px/1.3 'IBM Plex Sans', sans-serif;
+  font: 500 13px/1.45 'IBM Plex Sans', sans-serif;
 }
 
 .combo-card p {
   margin: 18px 0 0;
   color: var(--cds-gray-70);
   font-size: 16px;
-  line-height: 1.55;
+  line-height: 1.65;
 }
 
 .atlas-matrices {

@@ -204,14 +204,14 @@ const categories = [
 ];
 
 const nativeTechniques = [
-  ['Multi-agent simulation', 'GPT can simulate multiple stakeholders.', 'Make a PM, designer, engineer, sales lead, CFO, and expert user debate this roadmap.'],
+  ['Multi-agent simulation', 'LLMs can simulate multiple stakeholders.', 'Make a PM, designer, engineer, sales lead, CFO, and expert user debate this roadmap.'],
   ['Adversarial refinement', 'Generate, attack, then improve.', 'Propose 10 ideas, critique them harshly, then rebuild the best 3.'],
   ['Context distillation', 'Turn raw data into useful signals.', 'Here are 100 verbatims. Extract actionable patterns for the roadmap.'],
   ['Option generation under constraints', 'Use constraints to force creativity.', 'Propose 20 solutions with no new interface, no ML, and delivery in under 2 weeks.'],
   ['Synthetic edge-case generation', 'Imagine difficult boundary cases.', 'List unexpected user behaviors that could break this feature.'],
   ['Prompt chaining', 'Sequence specialized reasoning steps.', 'Discovery -> assumptions -> experiments -> roadmap -> PRD.'],
   ['Assumption ledger', 'Maintain a product assumption register.', 'Create a table of assumptions, evidence, confidence level, and next test.'],
-  ['Decision sparring partner', 'Use GPT as a structured opponent.', 'I think we should prioritize X. Find the reasons why this is a bad decision.'],
+  ['Decision sparring partner', 'Use an LLM as a structured opponent.', 'I think we should prioritize X. Find the reasons why this is a bad decision.'],
   ['Narrative compression', 'Turn product complexity into a clear message.', 'Explain this strategy in 1 sentence, 1 paragraph, then 1 executive slide.'],
   ['Model switching', 'Apply several mental models to one problem.', 'Analyze this problem with JTBD, systems thinking, RICE, pre-mortem, and pricing lens.'],
 ];
@@ -281,6 +281,21 @@ const allTechniques = categories.flatMap((category) =>
   }))
 );
 
+const promptEngineeringBoosts = {
+  ideation: 'Use divergent-convergent prompting: generate many options first, then force ranking with explicit constraints and rejection criteria.',
+  discovery: 'Use evidence-grounded synthesis: separate raw user quotes, inferred needs, confidence level, and follow-up questions.',
+  strategy: 'Use multi-lens reasoning: analyze the same problem through customer, market, moat, channel, and trade-off lenses before recommending.',
+  prioritization: 'Use rubric calibration: define scoring anchors before ranking, then ask the LLM to challenge low-confidence scores.',
+  experimentation: 'Use hypothesis-first prompting: state the falsifiable assumption, decision threshold, minimum test, and kill criteria before designing the experiment.',
+  metrics: 'Use causal decomposition: ask for drivers, confounders, counterfactuals, and leading indicators instead of metric commentary.',
+  ux: 'Use cognitive walkthrough prompting: force the LLM to simulate user intent, attention, decisions, errors, and recovery at each step.',
+  competition: 'Use adversarial positioning: compare direct competitors, substitutes, and non-consumption, then force a contrarian angle.',
+  delivery: 'Use specification stress testing: ask the LLM to inspect the artifact as engineering, design, support, sales, and security.',
+  monetization: 'Use segment simulation: evaluate pricing and packaging separately for buyer, user, admin, and economic sponsor.',
+  gtm: 'Use objection-first messaging: list adoption objections before writing the narrative, landing page, or enablement assets.',
+  risk: 'Use adversarial pre-mortem prompting: generate failure modes, disconfirming evidence, second-order effects, and stop conditions.',
+};
+
 function techniqueKey(technique) {
   return `${technique.categoryId}::${technique.name}`;
 }
@@ -346,7 +361,7 @@ export default function ProductReasoningAtlas() {
     document.body.classList.add('no-scanlines', 'atlas-body');
     const previousTitle = document.title;
     const previousLang = document.documentElement.lang;
-    document.title = 'GPT Reasoning Techniques for Product Management';
+    document.title = 'LLM Reasoning for Product Management';
     document.documentElement.lang = 'en';
     return () => {
       document.body.classList.remove('no-scanlines', 'atlas-body');
@@ -364,8 +379,18 @@ export default function ProductReasoningAtlas() {
 
   async function handleCopyPrompt() {
     if (!selectedTechnique) return;
+    const boost = promptEngineeringBoosts[selectedTechnique.categoryId];
+    const copyText = `${selectedTechnique.prompt}
+
+Prompt engineering boost:
+${boost}
+
+Output requirements:
+- Separate facts, assumptions, inferences, and recommendations.
+- Rank options by impact, confidence, effort, and risk.
+- End with the fastest validation test or next decision.`;
     try {
-      await navigator.clipboard.writeText(selectedTechnique.prompt);
+      await navigator.clipboard.writeText(copyText);
       setCopyState('Copied');
       window.setTimeout(() => setCopyState('Copy prompt'), 1400);
     } catch {
@@ -387,27 +412,40 @@ export default function ProductReasoningAtlas() {
 
         <div className="atlas-hero-content">
           <div className="atlas-kicker">Scientific operating system for AI-augmented product management</div>
-          <h1>GPT Reasoning Techniques Atlas for Product Managers</h1>
+          <h1>LLM Reasoning Atlas for Product Managers</h1>
           <p>
-            A structured map of reasoning engines that turn GPT from an idea generator into a product strategy,
+            A structured map of reasoning engines that turn LLMs from idea generators into product strategy,
             discovery, prioritization, experimentation, and decision-quality instrument.
           </p>
+          <div className="atlas-hero-actions">
+            <a href="#library">Explore techniques</a>
+            <a href="#templates">Use the master prompt</a>
+          </div>
           <div className="atlas-hero-metrics" aria-label="Atlas metrics">
             <div><strong>12</strong><span>families</span></div>
             <div><strong>96</strong><span>core techniques</span></div>
-            <div><strong>10</strong><span>GPT-native modes</span></div>
+            <div><strong>10</strong><span>LLM-native modes</span></div>
             <div><strong>5</strong><span>high-yield chains</span></div>
           </div>
         </div>
 
         <aside className="atlas-core-model" aria-label="Prompt architecture">
-          <span className="core-label">Prompt Architecture</span>
+          <span className="core-label">Decision Protocol</span>
+          <div className="hero-prompt-card">
+            <span>PM question</span>
+            <p>Which reasoning engine should I apply before asking an LLM for an answer?</p>
+          </div>
           {layers.map(([name, description], index) => (
             <div className="core-ring" key={name} style={{ '--ring': index }}>
+              <em>{String(index + 1).padStart(2, '0')}</em>
               <strong>{name}</strong>
               <span>{description}</span>
             </div>
           ))}
+          <div className="hero-output-card">
+            <span>Output</span>
+            <strong>Sharper decisions, testable assumptions, and usable product artifacts.</strong>
+          </div>
         </aside>
       </section>
 
@@ -418,7 +456,7 @@ export default function ProductReasoningAtlas() {
         </div>
         <p>
           A strong PM prompt combines context, a reasoning engine, critique, and a precise output format. The
-          highest leverage move is not asking GPT for ideas. It is forcing it to apply a specific thinking pattern
+          highest leverage move is not asking an LLM for ideas. It is forcing it to apply a specific thinking pattern
           to a product problem.
         </p>
       </section>
@@ -516,6 +554,10 @@ export default function ProductReasoningAtlas() {
                     <span>Prompt kernel</span>
                     <p>{selectedTechnique.prompt}</p>
                   </div>
+                  <div className="prompt-boost">
+                    <span>Prompt engineering boost</span>
+                    <p>{promptEngineeringBoosts[selectedTechnique.categoryId]}</p>
+                  </div>
                   <button type="button" onClick={handleCopyPrompt}>{copyState}</button>
                 </aside>
               )}
@@ -528,7 +570,7 @@ export default function ProductReasoningAtlas() {
 
       <section className="atlas-section atlas-native">
         <div className="atlas-section-heading">
-          <span>GPT-Native Power Moves</span>
+          <span>LLM-Native Power Moves</span>
           <h2>Techniques that exploit language models beyond classic PM frameworks.</h2>
         </div>
         <div className="native-grid">
