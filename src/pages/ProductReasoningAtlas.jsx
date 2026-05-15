@@ -224,6 +224,57 @@ const combos = [
   ['Improve activation and retention', ['Funnel diagnosis', 'Moment of truth mapping', 'Time-to-value reduction', 'Habit loop design', 'Experiment design'], 'Identify drop-off moments, propose product improvements, and design experiments ranked by learning speed.'],
 ];
 
+const pmSituations = [
+  {
+    id: 'discover',
+    label: 'Discover an opportunity',
+    question: 'What should we build next?',
+    output: 'Opportunity shortlist with assumptions and fastest validation test.',
+    techniques: ['JTBD decomposition', 'Customer struggle mining', 'Fill the gap', 'Opportunity sizing', 'Riskiest assumption test'],
+    promptPattern: 'Use evidence-grounded synthesis before ideation: quote -> inferred need -> opportunity -> risk -> test.',
+  },
+  {
+    id: 'prioritize',
+    label: 'Prioritize a roadmap',
+    question: 'What deserves team capacity now?',
+    output: 'Outcome-based roadmap with scoring rationale and confidence flags.',
+    techniques: ['North Star decomposition', 'Metric tree decomposition', 'Bottleneck prioritization', 'Cost of Delay', 'Outcome-based roadmap'],
+    promptPattern: 'Use rubric calibration: define scoring anchors before ranking and force a challenge pass on weak confidence.',
+  },
+  {
+    id: 'validate',
+    label: 'Validate before building',
+    question: 'What must be true before engineering invests?',
+    output: 'Assumption map, riskiest test, decision threshold, and kill criteria.',
+    techniques: ['Assumption mapping', 'Riskiest assumption test', 'Smoke test design', 'MVP laddering', 'Kill criteria definition'],
+    promptPattern: 'Use hypothesis-first prompting: falsifiable assumption -> threshold -> minimum test -> decision rule.',
+  },
+  {
+    id: 'differentiate',
+    label: 'Differentiate the product',
+    question: 'Why should the market choose us?',
+    output: 'Contrarian positioning options and strategic narrative.',
+    techniques: ['Competitive teardown', 'Substitute analysis', 'Contrarian positioning', 'Underserved segment mining', 'Strategic narrative building'],
+    promptPattern: 'Use adversarial positioning: compare direct competitors, substitutes, and non-consumption before writing claims.',
+  },
+  {
+    id: 'improve',
+    label: 'Improve a metric',
+    question: 'What is really moving the number?',
+    output: 'Causal diagnosis, segments, leading indicators, and experiments.',
+    techniques: ['Metric tree decomposition', 'Funnel diagnosis', 'Segmented diagnosis', 'Leading vs lagging indicators', 'Experiment pre-mortem'],
+    promptPattern: 'Use causal decomposition: drivers, confounders, counterfactuals, segment effects, and leading indicators.',
+  },
+  {
+    id: 'launch',
+    label: 'Launch and drive adoption',
+    question: 'How do we make the value obvious and used?',
+    output: 'Launch mode, message hierarchy, enablement pack, and activation plan.',
+    techniques: ['Message-market fit', 'Landing page reasoning', 'Launch tiering', 'Enablement generation', 'Activation campaign reasoning'],
+    promptPattern: 'Use objection-first messaging: list adoption objections before writing narrative, landing page, or enablement.',
+  },
+];
+
 const taxonomy = [
   ['Feature ideas', 'Fill the gap, friction mining, workaround mining, adjacent possible'],
   ['Understand users', 'JTBD, switching forces, struggle mining, synthetic interviews'],
@@ -281,6 +332,10 @@ const allTechniques = categories.flatMap((category) =>
   }))
 );
 
+function findTechniqueByName(name) {
+  return allTechniques.find((technique) => technique.name === name);
+}
+
 const promptEngineeringBoosts = {
   ideation: 'Use divergent-convergent prompting: generate many options first, then force ranking with explicit constraints and rejection criteria.',
   discovery: 'Use evidence-grounded synthesis: separate raw user quotes, inferred needs, confidence level, and follow-up questions.',
@@ -295,6 +350,13 @@ const promptEngineeringBoosts = {
   gtm: 'Use objection-first messaging: list adoption objections before writing the narrative, landing page, or enablement assets.',
   risk: 'Use adversarial pre-mortem prompting: generate failure modes, disconfirming evidence, second-order effects, and stop conditions.',
 };
+
+const contextQualityGate = `Before answering, run a context-quality-gate:
+1. List the context elements I provided that are sufficient for the objective.
+2. List the missing or weak context elements that would materially improve the answer.
+3. Separate facts, assumptions, and inferences.
+4. If critical context is missing, ask up to 5 targeted clarification questions.
+5. If the task can still proceed, state the assumptions you will use and mark confidence as High / Medium / Low.`;
 
 function techniqueKey(technique) {
   return `${technique.categoryId}::${technique.name}`;
@@ -342,20 +404,26 @@ function TechniqueTable({ techniques }) {
 export default function ProductReasoningAtlas() {
   const [activeCategory, setActiveCategory] = useState(categories[0].id);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchScope, setSearchScope] = useState('family');
+  const [activeSituationId, setActiveSituationId] = useState(pmSituations[0].id);
   const [selectedKey, setSelectedKey] = useState('ideation::Fill the gap');
   const [copyState, setCopyState] = useState('Copy prompt');
   const active = categories.find((category) => category.id === activeCategory) || categories[0];
+  const activeSituation = pmSituations.find((situation) => situation.id === activeSituationId) || pmSituations[0];
   const query = searchQuery.trim().toLowerCase();
+  const familyTechniques = active.techniques.map((technique) => normalizeTechnique(active, technique));
+  const searchableTechniques = searchScope === 'all' ? allTechniques : familyTechniques;
   const visibleTechniques = query
-    ? allTechniques.filter((technique) =>
+    ? searchableTechniques.filter((technique) =>
         [technique.name, technique.principle, technique.use, technique.prompt, technique.categoryTitle]
           .join(' ')
           .toLowerCase()
           .includes(query)
       )
-    : active.techniques.map((technique) => normalizeTechnique(active, technique));
+    : familyTechniques;
   const selectedTechnique =
     visibleTechniques.find((technique) => techniqueKey(technique) === selectedKey) || visibleTechniques[0];
+  const recommendedTechniques = activeSituation.techniques.map(findTechniqueByName).filter(Boolean);
 
   useEffect(() => {
     document.body.classList.add('no-scanlines', 'atlas-body');
@@ -382,6 +450,9 @@ export default function ProductReasoningAtlas() {
     const boost = promptEngineeringBoosts[selectedTechnique.categoryId];
     const copyText = `${selectedTechnique.prompt}
 
+Context-quality-gate:
+${contextQualityGate}
+
 Prompt engineering boost:
 ${boost}
 
@@ -397,6 +468,14 @@ Output requirements:
       setCopyState('Copy failed');
       window.setTimeout(() => setCopyState('Copy prompt'), 1600);
     }
+  }
+
+  function focusTechnique(technique) {
+    setActiveCategory(technique.categoryId);
+    setSearchQuery('');
+    setSearchScope('family');
+    setSelectedKey(techniqueKey(technique));
+    document.getElementById('library')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   return (
@@ -461,6 +540,59 @@ Output requirements:
         </p>
       </section>
 
+      <section className="atlas-section atlas-guided" aria-label="Guided PM workflow selector">
+        <div className="atlas-section-heading">
+          <span>Guided Path</span>
+          <h2>Start from your product situation, not from the framework list.</h2>
+        </div>
+
+        <div className="situation-shell">
+          <div className="situation-picker" role="list" aria-label="Product management situations">
+            {pmSituations.map((situation, index) => (
+              <button
+                aria-pressed={situation.id === activeSituationId}
+                className={situation.id === activeSituationId ? 'is-active' : ''}
+                key={situation.id}
+                onClick={() => {
+                  setActiveSituationId(situation.id);
+                  const firstTechnique = situation.techniques.map(findTechniqueByName).find(Boolean);
+                  if (firstTechnique) {
+                    setActiveCategory(firstTechnique.categoryId);
+                    setSearchQuery('');
+                    setSearchScope('family');
+                    setSelectedKey(techniqueKey(firstTechnique));
+                  }
+                }}
+                type="button"
+              >
+                <span>{String(index + 1).padStart(2, '0')}</span>
+                <strong>{situation.label}</strong>
+                <small>{situation.question}</small>
+              </button>
+            ))}
+          </div>
+
+          <article className="situation-detail">
+            <span className="detail-label">Recommended workflow</span>
+            <h3>{activeSituation.label}</h3>
+            <p>{activeSituation.output}</p>
+            <div className="recommended-chain">
+              {recommendedTechniques.map((technique, index) => (
+                <button key={techniqueKey(technique)} onClick={() => focusTechnique(technique)} type="button">
+                  <span>{index + 1}</span>
+                  <strong>{technique.name}</strong>
+                  <small>{technique.categoryTitle}</small>
+                </button>
+              ))}
+            </div>
+            <div className="pattern-note">
+              <span>Prompt engineering pattern</span>
+              <p>{activeSituation.promptPattern}</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <section className="atlas-section" id="library">
         <div className="atlas-section-heading">
           <span>Technique Library</span>
@@ -477,9 +609,36 @@ Output requirements:
               placeholder="Try: pricing, funnel, red team, roadmap, activation..."
             />
           </label>
+          <div className="scope-toggle" aria-label="Search scope">
+            <span>Scope</span>
+            <div>
+              <button
+                aria-pressed={searchScope === 'family'}
+                className={searchScope === 'family' ? 'is-active' : ''}
+                onClick={() => setSearchScope('family')}
+                type="button"
+              >
+                Family
+              </button>
+              <button
+                aria-pressed={searchScope === 'all'}
+                className={searchScope === 'all' ? 'is-active' : ''}
+                onClick={() => setSearchScope('all')}
+                type="button"
+              >
+                All atlas
+              </button>
+            </div>
+          </div>
           <div className="atlas-control-stat">
             <strong>{visibleTechniques.length}</strong>
-            <span>{query ? 'matching techniques' : `${active.title} techniques`}</span>
+            <span>
+              {query
+                ? searchScope === 'all'
+                  ? 'matching techniques in all atlas'
+                  : 'matching techniques in this family'
+                : `${active.title} techniques`}
+            </span>
           </div>
           <button type="button" onClick={() => setSearchQuery('')} disabled={!searchQuery}>
             Reset
@@ -557,6 +716,13 @@ Output requirements:
                   <div className="prompt-boost">
                     <span>Prompt engineering boost</span>
                     <p>{promptEngineeringBoosts[selectedTechnique.categoryId]}</p>
+                  </div>
+                  <div className="context-gate">
+                    <span>Context-quality-gate</span>
+                    <p>
+                      First audit what context is available, what is missing, which assumptions are required,
+                      and whether clarification is needed before producing the final answer.
+                    </p>
                   </div>
                   <button type="button" onClick={handleCopyPrompt}>{copyState}</button>
                 </aside>
