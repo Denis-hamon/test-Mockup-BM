@@ -8,6 +8,13 @@ const layers = [
   ['Output Format', 'Roadmap, PRD, opportunity tree, backlog, RICE score, experiment plan, or strategy memo.'],
 ];
 
+const howToUseSteps = [
+  ['Choose', 'Pick the PM situation closest to your current decision.'],
+  ['Inspect', 'Open a technique card to understand when and why to use it.'],
+  ['Copy', 'Copy the full prompt with context gate, boost, and output requirements.'],
+  ['Paste', 'Add your real product context in your LLM and run the prompt.'],
+];
+
 const categories = [
   {
     id: 'ideation',
@@ -374,45 +381,21 @@ function normalizeTechnique(category, technique) {
   };
 }
 
-function TechniqueTable({ techniques }) {
-  return (
-    <div className="atlas-table-wrap">
-      <table className="atlas-table">
-        <thead>
-          <tr>
-            <th>Technique</th>
-            <th>Principle</th>
-            <th>PM Use</th>
-            <th>Prompt Kernel</th>
-          </tr>
-        </thead>
-        <tbody>
-          {techniques.map(([name, principle, use, prompt]) => (
-            <tr key={name}>
-              <td>{name}</td>
-              <td>{principle}</td>
-              <td>{use}</td>
-              <td>{prompt}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
 export default function ProductReasoningAtlas() {
   const [activeCategory, setActiveCategory] = useState(categories[0].id);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchScope, setSearchScope] = useState('family');
   const [activeSituationId, setActiveSituationId] = useState(pmSituations[0].id);
   const [activeComboIndex, setActiveComboIndex] = useState(0);
+  const [activeNativeIndex, setActiveNativeIndex] = useState(0);
   const [selectedKey, setSelectedKey] = useState('ideation::Fill the gap');
-  const [copyState, setCopyState] = useState('Copy prompt');
-  const [comboCopyState, setComboCopyState] = useState('Copy chain prompt');
+  const [copyState, setCopyState] = useState('Copy full prompt');
+  const [comboCopyState, setComboCopyState] = useState('Copy full chain prompt');
+  const [nativeCopyState, setNativeCopyState] = useState('Copy native prompt');
   const active = categories.find((category) => category.id === activeCategory) || categories[0];
   const activeSituation = pmSituations.find((situation) => situation.id === activeSituationId) || pmSituations[0];
   const activeCombo = combos[activeComboIndex] || combos[0];
+  const activeNative = nativeTechniques[activeNativeIndex] || nativeTechniques[0];
   const query = searchQuery.trim().toLowerCase();
   const familyTechniques = active.techniques.map((technique) => normalizeTechnique(active, technique));
   const searchableTechniques = searchScope === 'all' ? allTechniques : familyTechniques;
@@ -451,7 +434,30 @@ export default function ProductReasoningAtlas() {
   async function handleCopyPrompt() {
     if (!selectedTechnique) return;
     const boost = promptEngineeringBoosts[selectedTechnique.categoryId];
-    const copyText = `${selectedTechnique.prompt}
+    const copyText = `Role:
+You are a senior product strategist and product discovery lead. You reason rigorously, separate evidence from assumptions, and optimize for actionable product decisions.
+
+Product objective:
+Use the "${selectedTechnique.name}" technique to help with this PM objective: ${selectedTechnique.use}.
+
+Input context to use:
+- Product / feature:
+- Target users / segment:
+- Current journey or workflow:
+- Available metrics:
+- User evidence / verbatims:
+- Business constraints:
+- Technical / legal / operational constraints:
+- Decision deadline:
+
+Technique to apply:
+${selectedTechnique.name}
+
+Technique principle:
+${selectedTechnique.principle}
+
+Prompt kernel:
+${selectedTechnique.prompt}
 
 Context-quality-gate:
 ${contextQualityGate}
@@ -459,24 +465,51 @@ ${contextQualityGate}
 Prompt engineering boost:
 ${boost}
 
+Reasoning protocol:
+1. Restate the objective in product-management language.
+2. Identify the decision this analysis should enable.
+3. Apply the technique step by step, making intermediate reasoning visible.
+4. Distinguish user value, business value, feasibility, and risk.
+5. Challenge your own recommendation with a brief red-team pass.
+
 Output requirements:
+- Use a structured table where options are compared.
 - Separate facts, assumptions, inferences, and recommendations.
-- Rank options by impact, confidence, effort, and risk.
-- End with the fastest validation test or next decision.`;
+- Rank options by impact, confidence, effort, risk, and evidence strength.
+- Include the missing context that would change the recommendation.
+- End with: recommended next action, fastest validation test, success metric, owner, expected learning, and kill criteria.
+
+Quality bar:
+- Do not invent evidence. If evidence is missing, say so.
+- Prefer precise trade-offs over generic best practices.
+- Make the answer directly usable by a PM in a roadmap, discovery, or decision memo.`;
     try {
       await navigator.clipboard.writeText(copyText);
       setCopyState('Copied');
-      window.setTimeout(() => setCopyState('Copy prompt'), 1400);
+      window.setTimeout(() => setCopyState('Copy full prompt'), 1400);
     } catch {
       setCopyState('Copy failed');
-      window.setTimeout(() => setCopyState('Copy prompt'), 1600);
+      window.setTimeout(() => setCopyState('Copy full prompt'), 1600);
     }
   }
 
   async function handleCopyComboPrompt() {
     const [goal, steps, prompt] = activeCombo;
-    const copyText = `Objective:
+    const copyText = `Role:
+You are a senior product strategist facilitating a structured product decision. Your job is to run a reasoning chain, not provide a generic answer.
+
+Objective:
 ${goal}
+
+Input context to use:
+- Product / feature:
+- Target users / segment:
+- Current metrics:
+- Funnel / journey:
+- User evidence:
+- Constraints:
+- Team capacity:
+- Time horizon:
 
 Reasoning chain to apply:
 ${steps.map((step, index) => `${index + 1}. ${step}`).join('\n')}
@@ -487,19 +520,84 @@ ${contextQualityGate}
 Task:
 ${prompt}
 
+Reasoning protocol:
+1. Explain why this chain is appropriate for the objective.
+2. Run each reasoning step in order.
+3. Preserve intermediate conclusions before moving to the next step.
+4. Highlight contradictions, weak evidence, and decision risks.
+5. Synthesize the chain into a final product recommendation.
+
 Output requirements:
-- Explain why this chain is appropriate for the objective.
-- Run each step in order and keep intermediate conclusions visible.
 - Separate facts, assumptions, inferences, and recommendations.
-- End with the decision, fastest validation test, owner, metric, and risk.`;
+- Rank options by impact, confidence, effort, risk, and learning value.
+- End with the decision, fastest validation test, owner, metric, risk, and kill criteria.
+
+Quality bar:
+- Do not collapse the chain into one generic answer.
+- Do not invent data. Mark unsupported claims as assumptions.
+- Prefer decision-ready specificity over framework explanation.`;
 
     try {
       await navigator.clipboard.writeText(copyText);
       setComboCopyState('Copied');
-      window.setTimeout(() => setComboCopyState('Copy chain prompt'), 1400);
+      window.setTimeout(() => setComboCopyState('Copy full chain prompt'), 1400);
     } catch {
       setComboCopyState('Copy failed');
-      window.setTimeout(() => setComboCopyState('Copy chain prompt'), 1600);
+      window.setTimeout(() => setComboCopyState('Copy full chain prompt'), 1600);
+    }
+  }
+
+  async function handleCopyNativePrompt() {
+    const [name, why, example] = activeNative;
+    const copyText = `Role:
+You are an expert product strategy sparring partner using an LLM-native reasoning mode. Your output must be useful for a real product decision.
+
+LLM-native technique:
+${name}
+
+Why this technique is useful:
+${why}
+
+Input context to use:
+- Product / feature:
+- User segment:
+- Market / competitors:
+- Constraints:
+- Current decision:
+- Evidence available:
+- Stakeholders involved:
+
+Prompt to run:
+${example}
+
+Context-quality-gate:
+${contextQualityGate}
+
+Execution protocol:
+1. State what the LLM-native mode is simulating or transforming.
+2. Run the interaction pattern explicitly.
+3. Extract useful signals from speculative or weak signals.
+4. Translate the output into product actions.
+5. Add a red-team critique of the result.
+
+Output requirements:
+- Explain which stakeholder, constraint, or reasoning mode is being simulated.
+- Make assumptions explicit.
+- Separate useful signals from speculative output.
+- End with actions a product manager can actually take, ranked by impact, confidence, effort, and risk.
+
+Quality bar:
+- Do not treat simulated users or stakeholders as real evidence.
+- Label simulation outputs clearly.
+- Convert the result into decision-ready next steps.`;
+
+    try {
+      await navigator.clipboard.writeText(copyText);
+      setNativeCopyState('Copied');
+      window.setTimeout(() => setNativeCopyState('Copy native prompt'), 1400);
+    } catch {
+      setNativeCopyState('Copy failed');
+      window.setTimeout(() => setNativeCopyState('Copy native prompt'), 1600);
     }
   }
 
@@ -548,6 +646,15 @@ Output requirements:
               Open recommended technique
             </a>
             <a href="#templates">Use master prompt</a>
+          </div>
+          <div className="how-use-strip" aria-label="How to use this atlas">
+            {howToUseSteps.map(([verb, text], index) => (
+              <div key={verb}>
+                <span>{index + 1}</span>
+                <strong>{verb}</strong>
+                <p>{text}</p>
+              </div>
+            ))}
           </div>
           <div className="atlas-hero-metrics" aria-label="Atlas metrics">
             <div><strong>12</strong><span>families</span></div>
@@ -655,7 +762,15 @@ Output requirements:
       <section className="atlas-section" id="library">
         <div className="atlas-section-heading">
           <span>Technique Library</span>
-          <h2>Browse the complete reasoning library by PM job.</h2>
+          <h2>Choose one technique, then copy a complete prompt.</h2>
+        </div>
+
+        <div className="library-help">
+          <strong>What to do here</strong>
+          <p>
+            This is not a reading table. Use the left rail to choose a reasoning family, click a technique card,
+            then copy the full prompt from the right panel and paste it into your LLM with your product context.
+          </p>
         </div>
 
         <div className="atlas-controls" aria-label="Technique explorer controls">
@@ -725,9 +840,13 @@ Output requirements:
           <article className="atlas-category-panel">
             <div className="panel-head">
               <div>
-                <span className="panel-accent">{query ? 'Search' : active.accent}</span>
+                <span className="panel-accent">{query ? 'Search results' : 'Technique cards'}</span>
                 <h3>{query ? 'Filtered Techniques' : active.title}</h3>
-                <p>{query ? `Results matching "${searchQuery.trim()}".` : active.lens}</p>
+                <p>
+                  {query
+                    ? `Results matching "${searchQuery.trim()}". Select one card to inspect and copy the prompt.`
+                    : `${active.lens} Select a card to see when to use it, why it works, and the copy-ready prompt.`}
+                </p>
               </div>
               <strong>{visibleTechniques.length} techniques</strong>
             </div>
@@ -744,6 +863,7 @@ Output requirements:
                     <span>{technique.categoryTitle}</span>
                     <strong>{technique.name}</strong>
                     <small>{technique.use}</small>
+                    <em>Inspect prompt</em>
                   </button>
                 ))}
                 {!visibleTechniques.length && (
@@ -756,7 +876,7 @@ Output requirements:
 
               {selectedTechnique && (
                 <aside className="prompt-lab" aria-label="Selected technique detail">
-                  <span className="lab-kicker">{selectedTechnique.categoryTitle}</span>
+                  <span className="lab-kicker">Selected prompt · {selectedTechnique.categoryTitle}</span>
                   <h4>{selectedTechnique.name}</h4>
                   <dl>
                     <div>
@@ -783,12 +903,13 @@ Output requirements:
                       and whether clarification is needed before producing the final answer.
                     </p>
                   </div>
+                  <p className="copy-hint">
+                    Copy includes the prompt kernel, context-quality-gate, prompt engineering boost, and output requirements.
+                  </p>
                   <button type="button" onClick={handleCopyPrompt}>{copyState}</button>
                 </aside>
               )}
             </div>
-
-            {!query && <TechniqueTable techniques={active.techniques} />}
           </article>
         </div>
       </section>
@@ -796,16 +917,37 @@ Output requirements:
       <section className="atlas-section atlas-native">
         <div className="atlas-section-heading">
           <span>LLM-Native Power Moves</span>
-          <h2>Techniques that exploit language models beyond classic PM frameworks.</h2>
+          <h2>Pick a native LLM move and run it as an interaction pattern.</h2>
         </div>
-        <div className="native-grid">
-          {nativeTechniques.map(([name, why, example]) => (
-            <article key={name} className="native-card">
-              <h3>{name}</h3>
-              <p>{why}</p>
-              <code>{example}</code>
-            </article>
-          ))}
+        <div className="native-lab">
+          <div className="native-grid" aria-label="LLM-native interaction patterns">
+            {nativeTechniques.map(([name, why], index) => (
+              <button
+                aria-pressed={index === activeNativeIndex}
+                className={`native-card ${index === activeNativeIndex ? 'is-active' : ''}`}
+                key={name}
+                onClick={() => setActiveNativeIndex(index)}
+                type="button"
+              >
+                <span>{String(index + 1).padStart(2, '0')}</span>
+                <h3>{name}</h3>
+                <p>{why}</p>
+                <em>Open pattern</em>
+              </button>
+            ))}
+          </div>
+
+          <aside className="native-detail" aria-label="Selected LLM-native pattern">
+            <span>Selected interaction pattern</span>
+            <h3>{activeNative[0]}</h3>
+            <p>{activeNative[1]}</p>
+            <code>{activeNative[2]}</code>
+            <div className="native-motion-note">
+              <strong>How to use it</strong>
+              <p>Run this when a normal answer would be too linear. It forces the LLM to simulate, attack, compress, chain, or switch reasoning modes.</p>
+            </div>
+            <button type="button" onClick={handleCopyNativePrompt}>{nativeCopyState}</button>
+          </aside>
         </div>
       </section>
 
