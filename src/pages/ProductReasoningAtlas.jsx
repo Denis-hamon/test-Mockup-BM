@@ -406,10 +406,13 @@ export default function ProductReasoningAtlas() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchScope, setSearchScope] = useState('family');
   const [activeSituationId, setActiveSituationId] = useState(pmSituations[0].id);
+  const [activeComboIndex, setActiveComboIndex] = useState(0);
   const [selectedKey, setSelectedKey] = useState('ideation::Fill the gap');
   const [copyState, setCopyState] = useState('Copy prompt');
+  const [comboCopyState, setComboCopyState] = useState('Copy chain prompt');
   const active = categories.find((category) => category.id === activeCategory) || categories[0];
   const activeSituation = pmSituations.find((situation) => situation.id === activeSituationId) || pmSituations[0];
+  const activeCombo = combos[activeComboIndex] || combos[0];
   const query = searchQuery.trim().toLowerCase();
   const familyTechniques = active.techniques.map((technique) => normalizeTechnique(active, technique));
   const searchableTechniques = searchScope === 'all' ? allTechniques : familyTechniques;
@@ -470,12 +473,53 @@ Output requirements:
     }
   }
 
+  async function handleCopyComboPrompt() {
+    const [goal, steps, prompt] = activeCombo;
+    const copyText = `Objective:
+${goal}
+
+Reasoning chain to apply:
+${steps.map((step, index) => `${index + 1}. ${step}`).join('\n')}
+
+Context-quality-gate:
+${contextQualityGate}
+
+Task:
+${prompt}
+
+Output requirements:
+- Explain why this chain is appropriate for the objective.
+- Run each step in order and keep intermediate conclusions visible.
+- Separate facts, assumptions, inferences, and recommendations.
+- End with the decision, fastest validation test, owner, metric, and risk.`;
+
+    try {
+      await navigator.clipboard.writeText(copyText);
+      setComboCopyState('Copied');
+      window.setTimeout(() => setComboCopyState('Copy chain prompt'), 1400);
+    } catch {
+      setComboCopyState('Copy failed');
+      window.setTimeout(() => setComboCopyState('Copy chain prompt'), 1600);
+    }
+  }
+
   function focusTechnique(technique) {
     setActiveCategory(technique.categoryId);
     setSearchQuery('');
     setSearchScope('family');
     setSelectedKey(techniqueKey(technique));
     document.getElementById('library')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function selectSituation(situation) {
+    setActiveSituationId(situation.id);
+    const firstTechnique = situation.techniques.map(findTechniqueByName).find(Boolean);
+    if (firstTechnique) {
+      setActiveCategory(firstTechnique.categoryId);
+      setSearchQuery('');
+      setSearchScope('family');
+      setSelectedKey(techniqueKey(firstTechnique));
+    }
   }
 
   return (
@@ -490,15 +534,20 @@ Output requirements:
         </nav>
 
         <div className="atlas-hero-content">
-          <div className="atlas-kicker">Scientific operating system for AI-augmented product management</div>
-          <h1>LLM Reasoning Atlas for Product Managers</h1>
+          <div className="atlas-kicker">Interactive decision system for AI-augmented product management</div>
+          <h1>Pick the right LLM reasoning pattern before you prompt.</h1>
           <p>
-            A structured map of reasoning engines that turn LLMs from idea generators into product strategy,
-            discovery, prioritization, experimentation, and decision-quality instrument.
+            Start with the product decision you need to make. The atlas recommends a reasoning chain, checks context
+            quality, and gives you a copy-ready prompt with the right prompt-engineering pattern.
           </p>
           <div className="atlas-hero-actions">
-            <a href="#library">Explore techniques</a>
-            <a href="#templates">Use the master prompt</a>
+            <a href="#library" onClick={(event) => {
+              event.preventDefault();
+              if (recommendedTechniques[0]) focusTechnique(recommendedTechniques[0]);
+            }}>
+              Open recommended technique
+            </a>
+            <a href="#templates">Use master prompt</a>
           </div>
           <div className="atlas-hero-metrics" aria-label="Atlas metrics">
             <div><strong>12</strong><span>families</span></div>
@@ -508,22 +557,41 @@ Output requirements:
           </div>
         </div>
 
-        <aside className="atlas-core-model" aria-label="Prompt architecture">
-          <span className="core-label">Decision Protocol</span>
-          <div className="hero-prompt-card">
-            <span>PM question</span>
-            <p>Which reasoning engine should I apply before asking an LLM for an answer?</p>
+        <aside className="hero-workbench" aria-label="Interactive reasoning selector">
+          <div className="hero-workbench-head">
+            <span>Reasoning cockpit</span>
+            <strong>What are you trying to decide?</strong>
           </div>
-          {layers.map(([name, description], index) => (
-            <div className="core-ring" key={name} style={{ '--ring': index }}>
-              <em>{String(index + 1).padStart(2, '0')}</em>
-              <strong>{name}</strong>
-              <span>{description}</span>
+          <div className="hero-situation-grid">
+            {pmSituations.map((situation) => (
+              <button
+                aria-pressed={situation.id === activeSituationId}
+                className={situation.id === activeSituationId ? 'is-active' : ''}
+                key={situation.id}
+                onClick={() => selectSituation(situation)}
+                type="button"
+              >
+                <strong>{situation.label}</strong>
+                <small>{situation.question}</small>
+              </button>
+            ))}
+          </div>
+          <div className="hero-recommendation">
+            <span>Recommended chain</span>
+            <h2>{activeSituation.output}</h2>
+            <div className="hero-chain">
+              {recommendedTechniques.slice(0, 5).map((technique, index) => (
+                <button key={techniqueKey(technique)} onClick={() => focusTechnique(technique)} type="button">
+                  <em>{index + 1}</em>
+                  <strong>{technique.name}</strong>
+                </button>
+              ))}
             </div>
-          ))}
-          <div className="hero-output-card">
-            <span>Output</span>
-            <strong>Sharper decisions, testable assumptions, and usable product artifacts.</strong>
+          </div>
+          <div className="hero-quality-gate">
+            <span>Built into copied prompts</span>
+            <strong>Context-quality-gate</strong>
+            <p>Audits missing inputs, assumptions, confidence and clarification questions before producing the answer.</p>
           </div>
         </aside>
       </section>
@@ -553,16 +621,7 @@ Output requirements:
                 aria-pressed={situation.id === activeSituationId}
                 className={situation.id === activeSituationId ? 'is-active' : ''}
                 key={situation.id}
-                onClick={() => {
-                  setActiveSituationId(situation.id);
-                  const firstTechnique = situation.techniques.map(findTechniqueByName).find(Boolean);
-                  if (firstTechnique) {
-                    setActiveCategory(firstTechnique.categoryId);
-                    setSearchQuery('');
-                    setSearchScope('family');
-                    setSelectedKey(techniqueKey(firstTechnique));
-                  }
-                }}
+                onClick={() => selectSituation(situation)}
                 type="button"
               >
                 <span>{String(index + 1).padStart(2, '0')}</span>
@@ -753,20 +812,56 @@ Output requirements:
       <section className="atlas-section" id="chains">
         <div className="atlas-section-heading">
           <span>High-Yield Combinations</span>
-          <h2>Use chains when one reasoning mode is not enough.</h2>
+          <h2>Use recipes when one reasoning mode is not enough.</h2>
         </div>
-        <div className="combo-stack">
-          {combos.map(([goal, steps, prompt]) => (
-            <article className="combo-card" key={goal}>
-              <h3>{goal}</h3>
-              <div className="combo-steps">
-                {steps.map((step, index) => (
-                  <span key={step}>{index + 1}. {step}</span>
-                ))}
+        <div className="combo-explorer">
+          <div className="combo-selector" aria-label="Combination recipes">
+            {combos.map(([goal, steps], index) => (
+              <button
+                aria-pressed={index === activeComboIndex}
+                className={index === activeComboIndex ? 'is-active' : ''}
+                key={goal}
+                onClick={() => setActiveComboIndex(index)}
+                type="button"
+              >
+                <span>{String(index + 1).padStart(2, '0')}</span>
+                <strong>{goal}</strong>
+                <small>{steps.length} reasoning steps</small>
+              </button>
+            ))}
+          </div>
+
+          <article className="combo-detail">
+            <div className="combo-detail-head">
+              <span>Selected recipe</span>
+              <h3>{activeCombo[0]}</h3>
+              <p>{activeCombo[2]}</p>
+            </div>
+
+            <div className="combo-stepper" aria-label="Reasoning sequence">
+              {activeCombo[1].map((step, index) => (
+                <div key={step}>
+                  <span>{index + 1}</span>
+                  <strong>{step}</strong>
+                </div>
+              ))}
+            </div>
+
+            <div className="combo-usage">
+              <div>
+                <span>Use when</span>
+                <p>The question has multiple unknowns, a direct answer would hide assumptions, or the output must become a roadmap, experiment, PRD, or decision memo.</p>
               </div>
-              <p>{prompt}</p>
-            </article>
-          ))}
+              <div>
+                <span>Expected output</span>
+                <p>Visible reasoning steps, explicit assumptions, ranked options, validation test, metric, owner, and risk.</p>
+              </div>
+            </div>
+
+            <button className="combo-copy" type="button" onClick={handleCopyComboPrompt}>
+              {comboCopyState}
+            </button>
+          </article>
         </div>
       </section>
 
