@@ -5,6 +5,7 @@ import BareMetalAvailabilityMockup from './pages/BareMetalAvailabilityMockup.jsx
 import BareMetalListingMockup from './pages/BareMetalListingMockup.jsx'
 import BareMetalListingMockupV2 from './pages/BareMetalListingMockupV2.jsx'
 import BareMetalConfiguratorMockup from './pages/BareMetalConfiguratorMockup.jsx'
+import ProductReasoningAtlas from './pages/ProductReasoningAtlas.jsx'
 import { LOCALE_MAP, DEFAULT_LOCALE } from './i18n/locale-map.js'
 import { setLocale } from './i18n/index.js'
 
@@ -56,6 +57,8 @@ if (!urlLocale || !LOCALE_MAP[urlLocale]) {
           ? BareMetalListingMockupV2
           : route === 'maquette-baremetal-config-adv1' || route === 'config-adv1'
             ? BareMetalConfiguratorMockup
+            : route === 'gpt-pm-techniques' || route === 'pm-reasoning-atlas'
+              ? ProductReasoningAtlas
         : App;
 
   ReactDOM.createRoot(document.getElementById('root')).render(

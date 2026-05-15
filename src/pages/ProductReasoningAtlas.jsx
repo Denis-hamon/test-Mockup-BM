@@ -1,0 +1,663 @@
+import React, { useEffect, useState } from 'react';
+import './ProductReasoningAtlas.css';
+
+const layers = [
+  ['Context', 'Market, users, metrics, constraints, product stage, and available data.'],
+  ['Reasoning Engine', 'The chosen method: gap analysis, JTBD, causality, inversion, red team, and more.'],
+  ['Critique', 'Risks, weak assumptions, objections, blind spots, and adversarial review.'],
+  ['Output Format', 'Roadmap, PRD, opportunity tree, backlog, RICE score, experiment plan, or strategy memo.'],
+];
+
+const categories = [
+  {
+    id: 'ideation',
+    title: 'Product Ideation',
+    lens: 'Find natural feature opportunities.',
+    accent: 'Gap',
+    techniques: [
+      ['Fill the gap', 'Identify the most obvious missing step in a journey.', 'Find the natural next feature.', 'Here is the current user journey. Identify the obvious gaps between intention, action, and outcome. Propose features that close those gaps.'],
+      ['Adjacent possible', 'Explore natural extensions of the product.', 'Product expansion.', 'Starting from this product, list the most credible adjacent extensions, ranked by user proximity and feasibility.'],
+      ['Feature from friction', 'Turn irritants into features.', 'Discovery and backlog.', 'Here are user frustrations. Convert them into product opportunities and candidate features.'],
+      ['Feature from workaround', 'Identify the hacks users rely on today.', 'PLG and B2B SaaS.', 'What workarounds might users be using today? Convert them into native product features.'],
+      ['Feature from repeated question', 'Convert frequent questions into product or UX improvements.', 'Support-driven product.', 'Here are support tickets. Infer the features or improvements that would reduce these requests.'],
+      ['Feature inversion', 'Imagine what would make the product unusable, then invert it.', 'Radical innovation.', 'List product decisions that would make this product unusable, then invert them into opportunities.'],
+      ['10x simplification', 'Search for a version that is ten times simpler.', 'Activation and onboarding.', 'How can we reduce this 8-step journey to 1 or 2 steps without losing the core value?'],
+      ['Invisible feature', 'Solve a problem without adding interface.', 'UX, automation, and AI products.', 'How could we solve this problem without adding a button, screen, or setting?'],
+    ],
+  },
+  {
+    id: 'discovery',
+    title: 'User Discovery',
+    lens: 'Understand demand, struggle, and switching.',
+    accent: 'Human',
+    techniques: [
+      ['JTBD decomposition', 'Break down the functional, emotional, and social job.', 'Discovery and positioning.', 'Analyze this segment with Jobs-to-be-Done: functional job, emotional job, social job, triggers, anxieties, and alternatives.'],
+      ['Customer struggle mining', 'Extract moments of user struggle.', 'Qualitative discovery.', 'From these verbatims, extract struggles, contexts, expectations, and demand signals.'],
+      ['Switching forces', 'Understand why users move from one solution to another.', 'Migration and acquisition.', 'Analyze the forces pushing users to switch, the forces holding them back, anxieties, and existing habits.'],
+      ['Moment of truth mapping', 'Identify decisive moments in the journey.', 'Activation and retention.', 'Map the moments where users unconsciously decide to continue or abandon.'],
+      ['Persona stress test', 'Test whether personas are actionable.', 'Segmentation.', 'Evaluate these personas. Which are too generic? Propose a segmentation that better supports product decisions.'],
+      ['Synthetic interview simulator', 'Simulate realistic customer interviews.', 'Discovery preparation.', 'Act as 5 different users from this segment and answer these interview questions as they would.'],
+      ['Objection mining', 'Identify reasons for non-adoption.', 'Conversion and sales enablement.', 'List the explicit and implicit objections that prevent adoption of this product.'],
+      ['Unmet need extraction', 'Extract unmet needs from raw data.', 'Discovery.', 'Transform these verbatims into unmet needs, ranked by intensity and frequency.'],
+    ],
+  },
+  {
+    id: 'strategy',
+    title: 'Product Strategy',
+    lens: 'Decide where to play and how to win.',
+    accent: 'Vector',
+    techniques: [
+      ['First-principles reasoning', 'Start again from the fundamental need.', 'Product vision.', 'Ignore existing solutions. What is the fundamental need, and what solution would we design from zero?'],
+      ['Market wedge reasoning', 'Find a narrow but powerful entry point.', 'Launch strategy.', 'Identify the initial wedge: precise segment, acute problem, promise, channel, and expansion path.'],
+      ['Beachhead strategy', 'Choose the first dominant segment.', 'GTM and early product.', 'Among these segments, which is the best beachhead market? Evaluate pain, urgency, accessibility, and expansion.'],
+      ['Strategic narrative building', 'Build the strategic story of the product.', 'Alignment, pitch, and fundraising.', 'Formulate the strategic narrative: old world, change, tension, new category, and product role.'],
+      ['Category design', 'Create or reposition a category.', 'Positioning.', 'Does this product belong to an existing category or should it create one? Propose 3 frames.'],
+      ['Moat reasoning', 'Identify compounding defenses.', 'Long-term strategy.', 'What defensible advantages could emerge: data, workflow, network, integrations, brand, or switching costs?'],
+      ['Strategic trade-off mapping', 'Clarify what you choose not to do.', 'Roadmap and focus.', 'List the implicit strategic trade-offs. What should we explicitly refuse?'],
+      ['North Star decomposition', 'Connect vision, metric, and behavior.', 'Product strategy.', 'Decompose this North Star Metric into input metrics, user behaviors, and product levers.'],
+    ],
+  },
+  {
+    id: 'prioritization',
+    title: 'Prioritization',
+    lens: 'Allocate scarce attention under uncertainty.',
+    accent: 'Rank',
+    techniques: [
+      ['RICE critique', 'Score Reach, Impact, Confidence, and Effort.', 'Backlog.', 'Score these initiatives with RICE, then critique the scores that are too uncertain.'],
+      ['ICE fast ranking', 'Fast ranking by Impact, Confidence, and Ease.', 'Early-stage prioritization.', 'Rank these ideas with ICE. Flag high-impact ideas with low confidence.'],
+      ['Cost of Delay', 'Prioritize by the cost of waiting.', 'Business roadmap.', 'Estimate the cost of delay for each initiative: lost revenue, churn, strategic risk, and delayed learning.'],
+      ['Expected value reasoning', 'Evaluate expected value as impact x probability.', 'Decision under uncertainty.', 'Calculate the expected value of these options and identify which justify a fast test.'],
+      ['Opportunity sizing', 'Size an opportunity.', 'Business case.', 'Estimate this opportunity: affected users, frequency, intensity, and business value.'],
+      ['Bottleneck prioritization', 'Prioritize the main funnel constraint.', 'Growth and activation.', 'Here is the funnel. Identify the priority bottleneck and initiatives that attack it directly.'],
+      ['One metric that matters', 'Force focus on one metric.', 'Sprint or quarter.', 'Which single metric should guide product decisions this quarter? Justify what is excluded.'],
+      ['Portfolio balance', 'Balance quick wins, bets, and maintenance.', 'Roadmap.', 'Classify the roadmap into core, growth, innovation, and tech debt. Where is the imbalance?'],
+    ],
+  },
+  {
+    id: 'experimentation',
+    title: 'Experimentation',
+    lens: 'Learn before building.',
+    accent: 'Test',
+    techniques: [
+      ['Assumption mapping', 'Identify critical assumptions.', 'Discovery and MVP.', 'List the assumptions behind this feature. Rank them by risk and uncertainty.'],
+      ['Riskiest assumption test', 'Test the most dangerous assumption first.', 'MVP.', 'Which assumption would invalidate the entire initiative? Propose the fastest test.'],
+      ['MVP laddering', 'Build a ladder of progressively stronger tests.', 'Validation.', 'Propose 5 MVP levels, from the lightest test to the complete product.'],
+      ['Smoke test design', 'Test interest before building.', 'Demand validation.', 'Design a smoke test to measure real demand before development.'],
+      ['Concierge MVP', 'Manually simulate product value.', 'B2B, AI, and marketplaces.', 'Design a concierge version of this feature with no initial development.'],
+      ['Wizard of Oz', 'Make automation appear real while work is manual.', 'AI products and automation.', 'How could we test this automation with a Wizard of Oz MVP?'],
+      ['Experiment pre-mortem', 'Imagine why an experiment will fail.', 'Experimentation.', 'Before launching this test, list possible reasons for failure and how to prevent them.'],
+      ['Learning goal framing', 'Optimize for learning, not only winning.', 'Discovery.', 'Reframe this experiment around what we must learn, with decision criteria.'],
+    ],
+  },
+  {
+    id: 'metrics',
+    title: 'Causal and Metric Analysis',
+    lens: 'Explain what actually moves the metric.',
+    accent: 'Causal',
+    techniques: [
+      ['Metric tree decomposition', 'Break a metric into levers.', 'Product analytics.', 'Decompose this metric into a causal tree: inputs, behaviors, segments, and product levers.'],
+      ['Causal loop mapping', 'Identify positive and negative feedback loops.', 'Marketplaces, networks, and engagement.', 'Map the causal loops that amplify or slow this product growth.'],
+      ['Funnel diagnosis', 'Diagnose where and why users drop.', 'Activation and conversion.', 'Analyze this funnel and propose likely drop-off causes at each step.'],
+      ['Cohort reasoning', 'Think in cohorts rather than averages.', 'Retention.', 'Which cohorts should we compare to understand this retention drop?'],
+      ['Counterfactual analysis', 'Compare with what would have happened without the change.', 'Impact measurement.', 'What counterfactual should we use to estimate the real impact of this feature?'],
+      ['Leading vs lagging indicators', 'Separate early signals from late outcomes.', 'Steering.', 'Identify the leading indicators that predict this North Star Metric.'],
+      ['Metric abuse detection', 'Detect metrics that can be gamed.', 'Governance.', 'How could this metric be optimized in a toxic or misleading way?'],
+      ['Segmented diagnosis', 'Avoid global conclusions.', 'Analytics.', 'Segment this problem by user type, maturity, channel, usage, and frequency.'],
+    ],
+  },
+  {
+    id: 'ux',
+    title: 'Product Design and UX',
+    lens: 'Reduce effort and increase perceived value.',
+    accent: 'Flow',
+    techniques: [
+      ['User journey compression', 'Reduce journey steps.', 'UX and activation.', 'Compress this journey to the minimum actions required to reach value.'],
+      ['Cognitive load audit', 'Identify mental overload.', 'UX.', 'Analyze this experience through cognitive load: decisions, ambiguities, memory, and effort.'],
+      ['Progressive disclosure', 'Reveal complexity gradually.', 'SaaS and onboarding.', 'Which information should be visible immediately, hidden, or revealed later?'],
+      ['Default design reasoning', 'Optimize default choices.', 'Adoption and activation.', 'Which defaults maximize user success without reducing user control?'],
+      ['Empty state reasoning', 'Turn empty states into activation.', 'Onboarding.', 'Rewrite empty states to guide users toward first value.'],
+      ['Error recovery design', 'Improve error cases.', 'Critical UX.', 'List possible errors and design the best recovery paths.'],
+      ['Time-to-value reduction', 'Reduce time before perceived value.', 'Activation.', 'How can we bring time-to-value below 2 minutes?'],
+      ['Habit loop design', 'Create trigger, action, reward, and investment.', 'Engagement.', 'Describe the potential habit loop of this product and its risks.'],
+    ],
+  },
+  {
+    id: 'competition',
+    title: 'Differentiation and Competition',
+    lens: 'Avoid copycat strategy.',
+    accent: 'Edge',
+    techniques: [
+      ['Competitive teardown', 'Decompose competitors.', 'Positioning.', 'Analyze these competitors: promise, target, UX, pricing, moat, and weaknesses.'],
+      ['Contrarian positioning', 'Find an angle opposite to the market.', 'Differentiation.', 'Which dominant market beliefs can we credibly challenge?'],
+      ['Underserved segment mining', 'Find neglected segments.', 'Expansion.', 'Which segments are poorly served by existing solutions, and why?'],
+      ['Over-served segment analysis', 'Identify users who want something simpler.', 'Low-end disruption.', 'Which users pay for too much complexity? What simpler version could win?'],
+      ['Feature parity trap detection', 'Avoid copying competitors by default.', 'Roadmap.', 'Which features in this roadmap are only competitive parity?'],
+      ['Substitute analysis', 'Identify non-obvious alternatives.', 'Discovery and strategy.', 'Beyond direct competitors, which alternatives do users really use?'],
+      ['Positioning matrix', 'Map differentiation axes.', 'Product marketing.', 'Propose 5 relevant positioning matrices for this market.'],
+      ['Category entry point analysis', 'Find buying situations.', 'Growth and brand.', 'In which precise moments does the user think about searching for a solution like this?'],
+    ],
+  },
+  {
+    id: 'delivery',
+    title: 'Roadmap and Delivery',
+    lens: 'Turn intent into shippable outcomes.',
+    accent: 'Ship',
+    techniques: [
+      ['Outcome-based roadmap', 'Roadmap by outcomes, not features.', 'Quarterly roadmap.', 'Transform this feature-based roadmap into an outcome-based roadmap.'],
+      ['Now / Next / Later reasoning', 'Simple time-based prioritization.', 'Roadmap communication.', 'Classify these initiatives into Now, Next, Later with explicit criteria.'],
+      ['Dependency mapping', 'Identify product, tech, data, and legal dependencies.', 'Delivery.', 'Map the critical dependencies of this initiative.'],
+      ['Scope slicing', 'Slice an initiative into deliverable increments.', 'Agile delivery.', 'Slice this feature into independent increments, each delivering measurable value.'],
+      ['PRD stress test', 'Test PRD clarity.', 'Specification.', 'Review this PRD as an engineering lead, designer, and sales lead. Where are the ambiguities?'],
+      ['Acceptance criteria generation', 'Formalize expected behavior.', 'Delivery.', 'Write acceptance criteria for this user story, including edge cases and errors.'],
+      ['Edge-case expansion', 'Explore boundary cases.', 'Product quality.', 'List functional, UX, data, security, and permission edge cases.'],
+      ['Launch readiness review', 'Check launch preparation.', 'Release management.', 'Create a launch readiness checklist for this feature.'],
+    ],
+  },
+  {
+    id: 'monetization',
+    title: 'Monetization and Business Model',
+    lens: 'Connect value created to value captured.',
+    accent: 'Value',
+    techniques: [
+      ['Willingness-to-pay reasoning', 'Connect perceived value and price.', 'Pricing.', 'Which signals indicate strong willingness to pay for this segment?'],
+      ['Value metric discovery', 'Find the pricing unit.', 'SaaS pricing.', 'Which value metric best reflects value created: seats, usage, volume, or outcome?'],
+      ['Packaging matrix', 'Structure Free, Pro, and Enterprise plans.', 'Pricing.', 'Propose a 3-tier packaging model with segmentation and expansion logic.'],
+      ['Monetization friction audit', 'Detect purchase blockers.', 'Conversion.', 'Analyze the frictions that prevent users from becoming paid customers.'],
+      ['Expansion revenue reasoning', 'Identify upsell levers.', 'B2B SaaS.', 'Which usage moments indicate an expansion or upsell opportunity?'],
+      ['Free-to-paid bridge', 'Create a natural path to paid.', 'PLG.', 'Design the bridge between free usage and paid conversion without degrading trust.'],
+      ['ROI framing', 'Express economic value.', 'B2B.', 'Translate this value proposition into quantifiable ROI for a B2B buyer.'],
+      ['Pricing risk simulation', 'Simulate reactions to pricing.', 'Pricing strategy.', 'Simulate how different segments would react to these pricing options.'],
+    ],
+  },
+  {
+    id: 'gtm',
+    title: 'Go-to-Market and Adoption',
+    lens: 'Make the value legible and adopted.',
+    accent: 'Adopt',
+    techniques: [
+      ['Message-market fit', 'Test clarity of the promise.', 'Positioning.', 'Evaluate this value proposition: is it specific, urgent, differentiated, and credible?'],
+      ['Landing page reasoning', 'Structure a page around objections.', 'Acquisition.', 'Design a landing page that answers objections in the right order.'],
+      ['Sales narrative mapping', 'Align sales pitch and product.', 'B2B.', 'Transform this feature into a sales narrative: pain, impact, proof, demo, and objection.'],
+      ['Adoption path design', 'Design the internal adoption path.', 'Enterprise.', 'For a B2B sale, map users, buyers, blockers, and champions.'],
+      ['Launch tiering', 'Choose soft launch, beta, or GA.', 'Release.', 'Which launch type fits this feature: closed beta, public beta, or GA?'],
+      ['Enablement generation', 'Produce sales and support docs.', 'GTM.', 'Create enablement assets: pitch, FAQ, objections, demo script, and release note.'],
+      ['Activation campaign reasoning', 'Trigger usage after launch.', 'Adoption.', 'Propose an activation campaign around this feature for existing users.'],
+      ['Retention messaging', 'Use communication to reinforce usage.', 'Lifecycle.', 'Which messages would increase retention without being intrusive?'],
+    ],
+  },
+  {
+    id: 'risk',
+    title: 'Risk, Critique, and Decision Quality',
+    lens: 'Attack weak thinking before reality does.',
+    accent: 'Risk',
+    techniques: [
+      ['Pre-mortem', 'Imagine failure before acting.', 'Roadmap and launch.', 'We launched this initiative and it failed. Give the 10 most likely causes.'],
+      ['Red team', 'Attack an idea like an opponent.', 'Product decision.', 'Critique this strategy as a competitor, CFO, skeptical user, and engineer.'],
+      ['Second-order effects', 'Look for indirect effects.', 'Pricing, engagement, and marketplaces.', 'What second-order effects could this decision create?'],
+      ['Inversion', 'Find how to cause failure.', 'Decision quality.', 'How could we maximize churn with this decision? Then invert the answers.'],
+      ['Bias audit', 'Detect cognitive and organizational bias.', 'Governance.', 'Which biases could affect our judgment here: confirmation, survivorship, HIPPO, or sunk cost?'],
+      ['Decision memo', 'Formalize a reversible or irreversible decision.', 'Leadership.', 'Write a decision memo: context, options, criteria, recommendation, risks, and decision.'],
+      ['Disconfirming evidence search', 'Search for what contradicts the idea.', 'Validation.', 'Which evidence would try to invalidate this hypothesis?'],
+      ['Kill criteria definition', 'Define when to stop.', 'Experimentation and roadmap.', 'Define the objective criteria that will make us stop this initiative.'],
+    ],
+  },
+];
+
+const nativeTechniques = [
+  ['Multi-agent simulation', 'GPT can simulate multiple stakeholders.', 'Make a PM, designer, engineer, sales lead, CFO, and expert user debate this roadmap.'],
+  ['Adversarial refinement', 'Generate, attack, then improve.', 'Propose 10 ideas, critique them harshly, then rebuild the best 3.'],
+  ['Context distillation', 'Turn raw data into useful signals.', 'Here are 100 verbatims. Extract actionable patterns for the roadmap.'],
+  ['Option generation under constraints', 'Use constraints to force creativity.', 'Propose 20 solutions with no new interface, no ML, and delivery in under 2 weeks.'],
+  ['Synthetic edge-case generation', 'Imagine difficult boundary cases.', 'List unexpected user behaviors that could break this feature.'],
+  ['Prompt chaining', 'Sequence specialized reasoning steps.', 'Discovery -> assumptions -> experiments -> roadmap -> PRD.'],
+  ['Assumption ledger', 'Maintain a product assumption register.', 'Create a table of assumptions, evidence, confidence level, and next test.'],
+  ['Decision sparring partner', 'Use GPT as a structured opponent.', 'I think we should prioritize X. Find the reasons why this is a bad decision.'],
+  ['Narrative compression', 'Turn product complexity into a clear message.', 'Explain this strategy in 1 sentence, 1 paragraph, then 1 executive slide.'],
+  ['Model switching', 'Apply several mental models to one problem.', 'Analyze this problem with JTBD, systems thinking, RICE, pre-mortem, and pricing lens.'],
+];
+
+const combos = [
+  ['Find an obvious next feature', ['Journey mapping', 'Fill the gap', 'Friction mining', 'Opportunity sizing', 'Riskiest assumption test', 'Scope slicing'], 'Identify the clearest gaps, convert them into opportunities, estimate impact, then propose 3 candidate features with MVP, success metric, and main risk.'],
+  ['Create a quarterly roadmap', ['North Star decomposition', 'Metric tree', 'Bottleneck analysis', 'Opportunity sizing', 'RICE / Cost of Delay', 'Outcome-based roadmap'], 'Build an outcome-oriented quarterly roadmap from the North Star, current metrics, and team constraints.'],
+  ['Challenge a feature idea', ['Assumption mapping', 'Red team', 'Pre-mortem', 'Disconfirming evidence', 'MVP laddering'], 'Identify critical assumptions, failure modes, invalidating evidence, and the fastest test before engineering investment.'],
+  ['Find a differentiation strategy', ['Competitive teardown', 'Substitute analysis', 'Contrarian positioning', 'Underserved segment mining', 'Strategic narrative'], 'Find underserved segments and contestable market beliefs, then propose differentiated positionings with narrative.'],
+  ['Improve activation and retention', ['Funnel diagnosis', 'Moment of truth mapping', 'Time-to-value reduction', 'Habit loop design', 'Experiment design'], 'Identify drop-off moments, propose product improvements, and design experiments ranked by learning speed.'],
+];
+
+const taxonomy = [
+  ['Feature ideas', 'Fill the gap, friction mining, workaround mining, adjacent possible'],
+  ['Understand users', 'JTBD, switching forces, struggle mining, synthetic interviews'],
+  ['Prioritize', 'RICE, ICE, Cost of Delay, expected value, bottleneck analysis'],
+  ['Validate', 'Assumption mapping, riskiest assumption test, smoke test, concierge MVP'],
+  ['Improve metrics', 'Metric tree, funnel diagnosis, cohort reasoning, causal loop mapping'],
+  ['Build strategy', 'First principles, wedge strategy, category design, moat reasoning'],
+  ['Differentiate', 'Competitive teardown, contrarian positioning, underserved segment mining'],
+  ['Launch', 'Message-market fit, launch tiering, adoption path, enablement generation'],
+  ['Reduce risk', 'Pre-mortem, red team, inversion, kill criteria'],
+  ['Specify', 'PRD stress test, edge-case expansion, acceptance criteria, scope slicing'],
+];
+
+const mentalFamilies = [
+  ['Gap reasoning', 'What is naturally missing?'],
+  ['Friction reasoning', 'What blocks, slows, or irritates?'],
+  ['Causal reasoning', 'What really influences the metric?'],
+  ['Strategic reasoning', 'Where to play, how to win, what to refuse?'],
+  ['Experimental reasoning', 'Which assumption should be tested before building?'],
+  ['Adversarial reasoning', 'Why could this idea be false?'],
+  ['Narrative reasoning', 'How do we make value obvious to the market?'],
+];
+
+const topTechniques = [
+  ['01', 'Fill the gap', 'Finds natural features'],
+  ['02', 'JTBD', 'Clarifies the real need'],
+  ['03', 'Friction mining', 'Turns pain into opportunity'],
+  ['04', 'Assumption mapping', 'Avoids building on ambiguity'],
+  ['05', 'Riskiest assumption test', 'Reduces risk fast'],
+  ['06', 'Metric tree', 'Connects product and business impact'],
+  ['07', 'Funnel diagnosis', 'Improves activation and conversion'],
+  ['08', 'Pre-mortem', 'Anticipates failure'],
+  ['09', 'Red team', 'Improves decision quality'],
+  ['10', 'Cost of Delay', 'Prioritizes with business logic'],
+  ['11', 'Opportunity sizing', 'Avoids tiny optimizations'],
+  ['12', 'Scope slicing', 'Ships faster'],
+  ['13', 'First principles', 'Creates non-mimetic solutions'],
+  ['14', 'Contrarian positioning', 'Creates real differentiation'],
+  ['15', 'Wedge strategy', 'Finds the right entry point'],
+  ['16', 'Time-to-value reduction', 'Improves activation'],
+  ['17', 'Switching forces', 'Explains real adoption'],
+  ['18', 'Moat reasoning', 'Thinks long-term advantage'],
+  ['19', 'Message-market fit', 'Makes value legible'],
+  ['20', 'Kill criteria', 'Prevents unproductive persistence'],
+];
+
+const allTechniques = categories.flatMap((category) =>
+  category.techniques.map(([name, principle, use, prompt]) => ({
+    categoryId: category.id,
+    categoryTitle: category.title,
+    name,
+    principle,
+    use,
+    prompt,
+  }))
+);
+
+function techniqueKey(technique) {
+  return `${technique.categoryId}::${technique.name}`;
+}
+
+function normalizeTechnique(category, technique) {
+  const [name, principle, use, prompt] = technique;
+  return {
+    categoryId: category.id,
+    categoryTitle: category.title,
+    name,
+    principle,
+    use,
+    prompt,
+  };
+}
+
+function TechniqueTable({ techniques }) {
+  return (
+    <div className="atlas-table-wrap">
+      <table className="atlas-table">
+        <thead>
+          <tr>
+            <th>Technique</th>
+            <th>Principle</th>
+            <th>PM Use</th>
+            <th>Prompt Kernel</th>
+          </tr>
+        </thead>
+        <tbody>
+          {techniques.map(([name, principle, use, prompt]) => (
+            <tr key={name}>
+              <td>{name}</td>
+              <td>{principle}</td>
+              <td>{use}</td>
+              <td>{prompt}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default function ProductReasoningAtlas() {
+  const [activeCategory, setActiveCategory] = useState(categories[0].id);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedKey, setSelectedKey] = useState('ideation::Fill the gap');
+  const [copyState, setCopyState] = useState('Copy prompt');
+  const active = categories.find((category) => category.id === activeCategory) || categories[0];
+  const query = searchQuery.trim().toLowerCase();
+  const visibleTechniques = query
+    ? allTechniques.filter((technique) =>
+        [technique.name, technique.principle, technique.use, technique.prompt, technique.categoryTitle]
+          .join(' ')
+          .toLowerCase()
+          .includes(query)
+      )
+    : active.techniques.map((technique) => normalizeTechnique(active, technique));
+  const selectedTechnique =
+    visibleTechniques.find((technique) => techniqueKey(technique) === selectedKey) || visibleTechniques[0];
+
+  useEffect(() => {
+    document.body.classList.add('no-scanlines', 'atlas-body');
+    const previousTitle = document.title;
+    const previousLang = document.documentElement.lang;
+    document.title = 'GPT Reasoning Techniques for Product Management';
+    document.documentElement.lang = 'en';
+    return () => {
+      document.body.classList.remove('no-scanlines', 'atlas-body');
+      document.title = previousTitle;
+      document.documentElement.lang = previousLang;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!visibleTechniques.length) return;
+    if (!visibleTechniques.some((technique) => techniqueKey(technique) === selectedKey)) {
+      setSelectedKey(techniqueKey(visibleTechniques[0]));
+    }
+  }, [selectedKey, visibleTechniques]);
+
+  async function handleCopyPrompt() {
+    if (!selectedTechnique) return;
+    try {
+      await navigator.clipboard.writeText(selectedTechnique.prompt);
+      setCopyState('Copied');
+      window.setTimeout(() => setCopyState('Copy prompt'), 1400);
+    } catch {
+      setCopyState('Copy failed');
+      window.setTimeout(() => setCopyState('Copy prompt'), 1600);
+    }
+  }
+
+  return (
+    <main className="atlas-page">
+      <section className="atlas-hero">
+        <div className="atlas-grid-bg" aria-hidden="true" />
+        <nav className="atlas-nav" aria-label="Page sections">
+          <span className="atlas-mark">PM/RX</span>
+          <a href="#library">Library</a>
+          <a href="#chains">Chains</a>
+          <a href="#templates">Templates</a>
+        </nav>
+
+        <div className="atlas-hero-content">
+          <div className="atlas-kicker">Scientific operating system for AI-augmented product management</div>
+          <h1>GPT Reasoning Techniques Atlas for Product Managers</h1>
+          <p>
+            A structured map of reasoning engines that turn GPT from an idea generator into a product strategy,
+            discovery, prioritization, experimentation, and decision-quality instrument.
+          </p>
+          <div className="atlas-hero-metrics" aria-label="Atlas metrics">
+            <div><strong>12</strong><span>families</span></div>
+            <div><strong>96</strong><span>core techniques</span></div>
+            <div><strong>10</strong><span>GPT-native modes</span></div>
+            <div><strong>5</strong><span>high-yield chains</span></div>
+          </div>
+        </div>
+
+        <aside className="atlas-core-model" aria-label="Prompt architecture">
+          <span className="core-label">Prompt Architecture</span>
+          {layers.map(([name, description], index) => (
+            <div className="core-ring" key={name} style={{ '--ring': index }}>
+              <strong>{name}</strong>
+              <span>{description}</span>
+            </div>
+          ))}
+        </aside>
+      </section>
+
+      <section className="atlas-section atlas-principle">
+        <div className="atlas-section-heading">
+          <span>General Principle</span>
+          <h2>The value comes from choosing the reasoning engine.</h2>
+        </div>
+        <p>
+          A strong PM prompt combines context, a reasoning engine, critique, and a precise output format. The
+          highest leverage move is not asking GPT for ideas. It is forcing it to apply a specific thinking pattern
+          to a product problem.
+        </p>
+      </section>
+
+      <section className="atlas-section" id="library">
+        <div className="atlas-section-heading">
+          <span>Technique Library</span>
+          <h2>Browse the complete reasoning library by PM job.</h2>
+        </div>
+
+        <div className="atlas-controls" aria-label="Technique explorer controls">
+          <label>
+            <span>Search the atlas</span>
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Try: pricing, funnel, red team, roadmap, activation..."
+            />
+          </label>
+          <div className="atlas-control-stat">
+            <strong>{visibleTechniques.length}</strong>
+            <span>{query ? 'matching techniques' : `${active.title} techniques`}</span>
+          </div>
+          <button type="button" onClick={() => setSearchQuery('')} disabled={!searchQuery}>
+            Reset
+          </button>
+        </div>
+
+        <div className="atlas-category-layout">
+          <div className="atlas-category-rail" aria-label="Technique categories">
+            {categories.map((category, index) => (
+              <button
+                className={category.id === activeCategory ? 'is-active' : ''}
+                key={category.id}
+                onClick={() => {
+                  setActiveCategory(category.id);
+                  setSearchQuery('');
+                }}
+                type="button"
+              >
+                <span>{String(index + 1).padStart(2, '0')}</span>
+                {category.title}
+              </button>
+            ))}
+          </div>
+
+          <article className="atlas-category-panel">
+            <div className="panel-head">
+              <div>
+                <span className="panel-accent">{query ? 'Search' : active.accent}</span>
+                <h3>{query ? 'Filtered Techniques' : active.title}</h3>
+                <p>{query ? `Results matching "${searchQuery.trim()}".` : active.lens}</p>
+              </div>
+              <strong>{visibleTechniques.length} techniques</strong>
+            </div>
+
+            <div className="technique-workbench">
+              <div className="technique-card-grid" aria-label="Selectable techniques">
+                {visibleTechniques.map((technique) => (
+                  <button
+                    className={techniqueKey(technique) === selectedKey ? 'is-selected' : ''}
+                    key={techniqueKey(technique)}
+                    onClick={() => setSelectedKey(techniqueKey(technique))}
+                    type="button"
+                  >
+                    <span>{technique.categoryTitle}</span>
+                    <strong>{technique.name}</strong>
+                    <small>{technique.use}</small>
+                  </button>
+                ))}
+                {!visibleTechniques.length && (
+                  <div className="empty-result">
+                    <strong>No technique found.</strong>
+                    <span>Try a broader term such as strategy, risk, funnel, pricing, or roadmap.</span>
+                  </div>
+                )}
+              </div>
+
+              {selectedTechnique && (
+                <aside className="prompt-lab" aria-label="Selected technique detail">
+                  <span className="lab-kicker">{selectedTechnique.categoryTitle}</span>
+                  <h4>{selectedTechnique.name}</h4>
+                  <dl>
+                    <div>
+                      <dt>Principle</dt>
+                      <dd>{selectedTechnique.principle}</dd>
+                    </div>
+                    <div>
+                      <dt>Best used for</dt>
+                      <dd>{selectedTechnique.use}</dd>
+                    </div>
+                  </dl>
+                  <div className="prompt-box">
+                    <span>Prompt kernel</span>
+                    <p>{selectedTechnique.prompt}</p>
+                  </div>
+                  <button type="button" onClick={handleCopyPrompt}>{copyState}</button>
+                </aside>
+              )}
+            </div>
+
+            {!query && <TechniqueTable techniques={active.techniques} />}
+          </article>
+        </div>
+      </section>
+
+      <section className="atlas-section atlas-native">
+        <div className="atlas-section-heading">
+          <span>GPT-Native Power Moves</span>
+          <h2>Techniques that exploit language models beyond classic PM frameworks.</h2>
+        </div>
+        <div className="native-grid">
+          {nativeTechniques.map(([name, why, example]) => (
+            <article key={name} className="native-card">
+              <h3>{name}</h3>
+              <p>{why}</p>
+              <code>{example}</code>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="atlas-section" id="chains">
+        <div className="atlas-section-heading">
+          <span>High-Yield Combinations</span>
+          <h2>Use chains when one reasoning mode is not enough.</h2>
+        </div>
+        <div className="combo-stack">
+          {combos.map(([goal, steps, prompt]) => (
+            <article className="combo-card" key={goal}>
+              <h3>{goal}</h3>
+              <div className="combo-steps">
+                {steps.map((step, index) => (
+                  <span key={step}>{index + 1}. {step}</span>
+                ))}
+              </div>
+              <p>{prompt}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="atlas-section atlas-matrices">
+        <div className="matrix-card">
+          <div className="atlas-section-heading">
+            <span>Synthetic Taxonomy</span>
+            <h2>Pick techniques by PM objective.</h2>
+          </div>
+          {taxonomy.map(([objective, methods]) => (
+            <div className="matrix-row" key={objective}>
+              <strong>{objective}</strong>
+              <span>{methods}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="matrix-card">
+          <div className="atlas-section-heading">
+            <span>Mental Catalogue</span>
+            <h2>Seven reasoning families for augmented PMs.</h2>
+          </div>
+          {mentalFamilies.map(([family, question]) => (
+            <div className="matrix-row compact" key={family}>
+              <strong>{family}</strong>
+              <span>{question}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="atlas-section atlas-top20">
+        <div className="atlas-section-heading">
+          <span>Priority Stack</span>
+          <h2>The 20 techniques to master first.</h2>
+        </div>
+        <div className="top-grid">
+          {topTechniques.map(([rank, name, reason]) => (
+            <article key={rank}>
+              <span>{rank}</span>
+              <strong>{name}</strong>
+              <p>{reason}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="atlas-section atlas-templates" id="templates">
+        <div className="template-card">
+          <div>
+            <span>Master Prompt Format</span>
+            <h2>Reusable operating template</h2>
+          </div>
+          <pre>{`Context:
+[Product, target, market, metrics, constraints, available data]
+
+Objective:
+[Discover an opportunity / prioritize / improve a metric / launch / challenge]
+
+Reasoning technique to apply:
+[Fill the gap / JTBD / Red team / Metric tree / Pre-mortem / etc.]
+
+Constraints:
+[Time, team, tech, business model, segment, quality, regulation]
+
+Expected deliverable:
+[Table, roadmap, PRD, experiment plan, decision memo, backlog]
+
+Requirements:
+- Make assumptions explicit.
+- Separate facts, inferences, and recommendations.
+- Rank options by impact, confidence, and effort.
+- Give risks and the fastest validation test.`}</pre>
+        </div>
+
+        <div className="template-card fill-gap">
+          <div>
+            <span>Applied Example</span>
+            <h2>Fill the Gap method</h2>
+          </div>
+          <pre>{`You are a senior product strategist.
+
+Here is the current journey:
+[paste journey]
+
+Here are the metrics:
+[paste funnel, activation, retention]
+
+Here are user verbatims:
+[paste feedback]
+
+Apply the Fill the Gap method:
+1. Identify breaks between user intention, available action, and expected outcome.
+2. Rank gaps by frequency, pain intensity, business impact, and feasibility.
+3. Propose 10 candidate features.
+4. For each feature, provide problem solved, target user, main assumption, MVP, success metric, and main risk.
+5. End with the 3 most obvious features to test now.`}</pre>
+        </div>
+      </section>
+    </main>
+  );
+}
