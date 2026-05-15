@@ -768,27 +768,17 @@ Quality bar:
             </a>
             <a href="#templates">Use master prompt</a>
           </div>
-          <div className="how-use-strip" aria-label="How to use this atlas">
-            {howToUseSteps.map(([verb, text], index) => (
-              <div key={verb}>
-                <span>{index + 1}</span>
-                <strong>{verb}</strong>
-                <p>{text}</p>
-              </div>
-            ))}
-          </div>
-          <div className="atlas-hero-metrics" aria-label="Atlas metrics">
+          <div className="atlas-hero-summary" aria-label="Atlas summary">
             <div><strong>12</strong><span>families</span></div>
-            <div><strong>{allTechniques.length}</strong><span>core techniques</span></div>
-            <div><strong>10</strong><span>LLM-native modes</span></div>
-            <div><strong>5</strong><span>high-yield chains</span></div>
+            <div><strong>{allTechniques.length}</strong><span>techniques</span></div>
+            <div><strong>1</strong><span>decision path</span></div>
           </div>
         </div>
 
         <aside className="hero-workbench" aria-label="Interactive reasoning selector">
           <div className="hero-workbench-head">
-            <span>Reasoning cockpit</span>
-            <strong>What are you trying to decide?</strong>
+            <span>Start here</span>
+            <strong>Choose the decision, then open the matching chain.</strong>
           </div>
           <div className="hero-situation-grid">
             {pmSituations.map((situation) => (
@@ -836,67 +826,24 @@ Quality bar:
         </p>
       </section>
 
-      <section className="atlas-section atlas-guided" aria-label="Guided PM workflow selector">
-        <div className="atlas-section-heading">
-          <span>Guided Path</span>
-          <h2>Start from your product situation, not from the framework list.</h2>
-        </div>
-
-        <div className="situation-shell">
-          <div className="situation-picker" role="list" aria-label="Product management situations">
-            {pmSituations.map((situation, index) => (
-              <button
-                aria-pressed={situation.id === activeSituationId}
-                className={situation.id === activeSituationId ? 'is-active' : ''}
-                key={situation.id}
-                onClick={() => selectSituation(situation)}
-                type="button"
-              >
-                <span>{String(index + 1).padStart(2, '0')}</span>
-                <strong>{situation.label}</strong>
-                <small>{situation.question}</small>
-              </button>
-            ))}
-          </div>
-
-          <article className="situation-detail">
-            <span className="detail-label">Recommended workflow</span>
-            <h3>{activeSituation.label}</h3>
-            <p>{activeSituation.output}</p>
-            <div className="recommended-chain">
-              {recommendedTechniques.map((technique, index) => (
-                <button key={techniqueKey(technique)} onClick={() => focusTechnique(technique)} type="button">
-                  <span>{index + 1}</span>
-                  <strong>{technique.name}</strong>
-                  <small>{technique.categoryTitle}</small>
-                </button>
-              ))}
-            </div>
-            <div className="pattern-note">
-              <span>Prompt engineering pattern</span>
-              <p>{activeSituation.promptPattern}</p>
-            </div>
-          </article>
-        </div>
-      </section>
-
       <section className="atlas-section" id="library">
         <div className="atlas-section-heading">
           <span>Technique Library</span>
-          <h2>Choose one technique, then copy a complete prompt.</h2>
+          <h2>Pick a family, then inspect one card.</h2>
         </div>
 
         <div className="library-help">
-          <strong>What to do here</strong>
+          <strong>Use this flow</strong>
           <p>
-            This is not a reading table. Use the left rail to choose a reasoning family, click a technique card,
-            then copy the full prompt from the right panel and paste it into your LLM with your product context.
+            1. Choose a family.
+            2. Click a technique card.
+            3. Copy the prompt and paste your product context into the LLM.
           </p>
         </div>
 
         <div className="atlas-controls" aria-label="Technique explorer controls">
           <label>
-            <span>Search the atlas</span>
+            <span>Search</span>
             <input
               type="search"
               value={searchQuery}
@@ -913,7 +860,7 @@ Quality bar:
                 onClick={() => setSearchScope('family')}
                 type="button"
               >
-                Family
+                Family only
               </button>
               <button
                 aria-pressed={searchScope === 'all'}
@@ -921,7 +868,7 @@ Quality bar:
                 onClick={() => setSearchScope('all')}
                 type="button"
               >
-                All atlas
+                All techniques
               </button>
             </div>
           </div>
@@ -962,11 +909,11 @@ Quality bar:
             <div className="panel-head">
               <div>
                 <span className="panel-accent">{query ? 'Search results' : 'Technique cards'}</span>
-                <h3>{query ? 'Filtered Techniques' : active.title}</h3>
+                <h3>{query ? 'Filtered techniques' : active.title}</h3>
                 <p>
                   {query
-                    ? `Results matching "${searchQuery.trim()}". Select one card to inspect and copy the prompt.`
-                    : `${active.lens} Select a card to see when to use it, why it works, and the copy-ready prompt.`}
+                    ? `Matching "${searchQuery.trim()}".`
+                    : `${active.lens} Click a card to inspect the technique and copy the prompt.`}
                 </p>
               </div>
               <strong>{visibleTechniques.length} techniques</strong>
@@ -1002,19 +949,19 @@ Quality bar:
                   {selectedProfile && (
                     <div className="technique-fiche">
                       <div>
-                        <span>Origin / lineage</span>
+                        <span>Origin</span>
                         <p>{selectedProfile.origin}</p>
                       </div>
                       <div>
-                        <span>Why use it</span>
+                        <span>Why it helps</span>
                         <p>{selectedProfile.benefit}</p>
                       </div>
                       <div>
-                        <span>Ideal inputs</span>
+                        <span>Best inputs</span>
                         <p>{selectedProfile.inputs.join(', ')}</p>
                       </div>
                       <div>
-                        <span>Expected deliverable</span>
+                        <span>Output</span>
                         <p>{selectedProfile.deliverable}</p>
                       </div>
                     </div>
@@ -1033,20 +980,23 @@ Quality bar:
                     <span>Prompt kernel</span>
                     <p>{selectedTechnique.prompt}</p>
                   </div>
-                  <div className="prompt-boost">
-                    <span>Prompt engineering boost</span>
-                    <p>{promptEngineeringBoosts[selectedTechnique.categoryId]}</p>
-                  </div>
-                  <div className="context-gate">
-                    <span>Context-quality-gate</span>
-                    <p>
-                      First audit what context is available, what is missing, which assumptions are required,
-                      and whether clarification is needed before producing the final answer.
+                  <details className="prompt-expand">
+                    <summary>See the full prompt instructions</summary>
+                    <div className="prompt-boost">
+                      <span>Prompt engineering boost</span>
+                      <p>{promptEngineeringBoosts[selectedTechnique.categoryId]}</p>
+                    </div>
+                    <div className="context-gate">
+                      <span>Context-quality-gate</span>
+                      <p>
+                        First audit what context is available, what is missing, which assumptions are required,
+                        and whether clarification is needed before producing the final answer.
+                      </p>
+                    </div>
+                    <p className="copy-hint">
+                      Copy includes the prompt kernel, context-quality-gate, prompt engineering boost, and output requirements.
                     </p>
-                  </div>
-                  <p className="copy-hint">
-                    Copy includes the prompt kernel, context-quality-gate, prompt engineering boost, and output requirements.
-                  </p>
+                  </details>
                   <button type="button" onClick={handleCopyPrompt}>{copyState}</button>
                 </aside>
               )}
@@ -1058,7 +1008,7 @@ Quality bar:
       <section className="atlas-section atlas-native">
         <div className="atlas-section-heading">
           <span>LLM-Native Power Moves</span>
-          <h2>Pick a native LLM move and run it as an interaction pattern.</h2>
+          <h2>Use these when the LLM should simulate, compress, chain, or critique.</h2>
         </div>
         <div className="native-lab">
           <div className="native-grid" aria-label="LLM-native interaction patterns">
@@ -1095,7 +1045,7 @@ Quality bar:
       <section className="atlas-section" id="chains">
         <div className="atlas-section-heading">
           <span>High-Yield Combinations</span>
-          <h2>Use recipes when one reasoning mode is not enough.</h2>
+          <h2>Use these recipes when one reasoning mode is not enough.</h2>
         </div>
         <div className="combo-explorer">
           <div className="combo-selector" aria-label="Combination recipes">

@@ -280,77 +280,33 @@
   background: var(--cds-gray-80);
 }
 
-.how-use-strip {
+.atlas-hero-summary {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1px;
-  width: min(100%, 920px);
-  margin-top: 34px;
-  background: var(--cds-gray-70);
-  position: relative;
-  z-index: 1;
-  animation: atlas-rise 720ms 190ms ease both;
-}
-
-.how-use-strip div {
-  min-height: 118px;
-  padding: 14px;
-  background: rgba(38, 38, 38, 0.92);
-  transition: background 160ms ease, transform 160ms ease;
-}
-
-.how-use-strip div:hover {
-  background: var(--cds-gray-80);
-  transform: translateY(-2px);
-}
-
-.how-use-strip span {
-  color: #78a9ff;
-  font: 600 12px/1.2 'IBM Plex Mono', monospace;
-}
-
-.how-use-strip strong {
-  display: block;
-  margin-top: 12px;
-  color: var(--cds-white);
-  font-size: 18px;
-  font-weight: 500;
-}
-
-.how-use-strip p {
-  margin: 8px 0 0;
-  color: var(--cds-gray-30);
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.atlas-hero-metrics {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1px;
-  margin-top: 40px;
-  max-width: 860px;
+  width: min(100%, 780px);
+  margin-top: 28px;
   background: var(--cds-gray-70);
   position: relative;
   z-index: 1;
   animation: atlas-rise 760ms 240ms ease both;
 }
 
-.atlas-hero-metrics div {
-  min-height: 118px;
+.atlas-hero-summary div {
+  min-height: 96px;
   padding: 16px;
   background: var(--cds-gray-90);
 }
 
-.atlas-hero-metrics strong {
+.atlas-hero-summary strong {
   display: block;
   color: var(--cds-white);
-  font-size: 44px;
+  font-size: 36px;
   font-weight: 300;
   line-height: 1;
 }
 
-.atlas-hero-metrics span {
+.atlas-hero-summary span {
   display: block;
   margin-top: 14px;
   color: var(--cds-gray-30);
@@ -371,9 +327,9 @@
 
 .hero-workbench {
   align-self: stretch;
-  min-height: 640px;
+  min-height: 0;
   display: grid;
-  grid-template-rows: auto auto 1fr auto;
+  grid-template-rows: auto auto auto auto;
   gap: 1px;
   padding: clamp(20px, 3vw, 40px);
   color: var(--cds-white);
@@ -401,7 +357,7 @@
 }
 
 .hero-workbench-head {
-  padding-bottom: 18px;
+  padding-bottom: 14px;
   border-bottom: 1px solid var(--cds-gray-70);
 }
 
@@ -432,7 +388,7 @@
 }
 
 .hero-situation-grid button {
-  min-height: 104px;
+  min-height: 92px;
   padding: 14px;
   border: 0;
   color: var(--cds-gray-20);
@@ -471,8 +427,8 @@
 }
 
 .hero-recommendation {
-  padding: 20px;
-  background: var(--cds-white);
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.96);
   color: var(--cds-gray-100);
 }
 
@@ -482,24 +438,24 @@
 
 .hero-recommendation h2 {
   max-width: 720px;
-  margin: 12px 0 0;
+  margin: 10px 0 0;
   color: var(--cds-gray-100);
-  font-size: clamp(24px, 2.5vw, 40px);
+  font-size: clamp(22px, 2.2vw, 34px);
   font-weight: 300;
-  line-height: 1.16;
+  line-height: 1.18;
   letter-spacing: -0.025em;
 }
 
 .hero-chain {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1px;
   margin-top: 22px;
   background: var(--cds-border);
 }
 
 .hero-chain button {
-  min-height: 118px;
+  min-height: 108px;
   padding: 12px;
   border: 0;
   color: var(--cds-gray-100);
@@ -530,7 +486,7 @@
 }
 
 .hero-quality-gate {
-  padding: 18px;
+  padding: 16px;
   background: #001d6c;
 }
 
@@ -538,15 +494,15 @@
   display: block;
   margin-top: 8px;
   color: var(--cds-white);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 500;
 }
 
 .hero-quality-gate p {
   margin: 8px 0 0;
   color: #d0e2ff;
-  font-size: 14px;
-  line-height: 1.55;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .hero-prompt-card,
@@ -863,7 +819,7 @@
 .library-help strong,
 .library-help p {
   margin: 0;
-  padding: 18px;
+  padding: 16px 18px;
   background: var(--cds-gray-10);
 }
 
@@ -875,8 +831,8 @@
 
 .library-help p {
   color: var(--cds-gray-70);
-  font-size: 16px;
-  line-height: 1.58;
+  font-size: 15px;
+  line-height: 1.6;
 }
 
 .atlas-controls label,
@@ -1081,7 +1037,7 @@
 .panel-head p {
   margin: 14px 0 0;
   color: var(--cds-gray-70);
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 300;
 }
 
@@ -1097,7 +1053,7 @@
 
 .technique-workbench {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 0.42fr);
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.38fr);
   gap: 1px;
   background: var(--cds-border);
 }
@@ -1206,16 +1162,16 @@
   position: sticky;
   top: 0;
   align-self: start;
-  padding: 24px;
+  padding: 20px;
   background: var(--cds-gray-100);
   color: var(--cds-white);
   box-shadow: inset 4px 0 0 var(--cds-blue);
 }
 
 .prompt-lab h4 {
-  margin: 14px 0 22px;
+  margin: 12px 0 16px;
   color: var(--cds-white);
-  font-size: clamp(34px, 3.6vw, 56px);
+  font-size: clamp(30px, 3.2vw, 48px);
   font-weight: 300;
   line-height: 1.05;
   letter-spacing: -0.035em;
@@ -1236,7 +1192,7 @@
 }
 
 .technique-fiche div {
-  padding: 14px;
+  padding: 12px 14px;
   background: #001d6c;
 }
 
@@ -1251,12 +1207,12 @@
 .technique-fiche p {
   margin: 8px 0 0;
   color: var(--cds-white);
-  font-size: 14px;
-  line-height: 1.58;
+  font-size: 13px;
+  line-height: 1.52;
 }
 
 .prompt-lab dl div {
-  padding: 14px;
+  padding: 12px 14px;
   background: var(--cds-gray-90);
 }
 
@@ -1270,15 +1226,15 @@
 .prompt-lab dd {
   margin: 8px 0 0;
   color: var(--cds-gray-20);
-  font-size: 14px;
-  line-height: 1.62;
+  font-size: 13px;
+  line-height: 1.55;
 }
 
 .prompt-box,
 .prompt-boost,
 .context-gate {
   margin-top: 1px;
-  padding: 18px;
+  padding: 16px;
   color: var(--cds-gray-100);
   background: var(--cds-white);
 }
@@ -1293,8 +1249,8 @@
 .prompt-boost p,
 .context-gate p {
   margin: 10px 0 0;
-  font-size: 15px;
-  line-height: 1.7;
+  font-size: 14px;
+  line-height: 1.62;
 }
 
 .prompt-boost,
@@ -1317,6 +1273,40 @@
   color: var(--cds-gray-30);
   font-size: 13px;
   line-height: 1.5;
+}
+
+.prompt-expand {
+  margin-top: 1px;
+  background: var(--cds-gray-90);
+}
+
+.prompt-expand summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 12px 14px;
+  color: var(--cds-white);
+  background: var(--cds-gray-80);
+  font: 600 13px/1.3 'IBM Plex Mono', monospace;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: background 120ms ease;
+}
+
+.prompt-expand summary::-webkit-details-marker {
+  display: none;
+}
+
+.prompt-expand summary:hover {
+  background: var(--cds-gray-70);
+}
+
+.prompt-expand[open] summary {
+  background: var(--cds-blue);
+}
+
+.prompt-expand > div,
+.prompt-expand > p {
+  margin-top: 1px;
 }
 
 .prompt-lab > button {
@@ -1925,7 +1915,6 @@
 @media (max-width: 1180px) {
   .atlas-hero,
   .atlas-principle,
-  .situation-shell,
   .atlas-category-layout,
   .atlas-matrices,
   .atlas-templates,
@@ -1949,10 +1938,10 @@
   }
 
   .native-grid,
-  .recommended-chain,
   .hero-chain,
   .combo-stepper,
-  .top-grid {
+  .top-grid,
+  .atlas-hero-summary {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
@@ -1984,12 +1973,12 @@
   .atlas-category-rail,
   .atlas-controls,
   .technique-card-grid,
-  .recommended-chain,
   .hero-situation-grid,
   .hero-chain,
   .combo-stepper,
   .native-grid,
-  .top-grid {
+  .top-grid,
+  .atlas-hero-summary {
     grid-template-columns: 1fr;
   }
 
